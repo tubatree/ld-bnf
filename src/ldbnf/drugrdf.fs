@@ -148,13 +148,6 @@ module DrugRdf =
               [dataProperty !!"rdfs:label" l
                a Uri.FundingIdentifierEntity])
 
-    static member from (x:PatientGroup) =
-      [Some(one !!"nicebnf:hasPatientGroup" (Uri.fromgrp x.Group) [dataProperty !!"rdfs:label" (x.Group^^xsd.string)
-                                                                   a Uri.PatientGroupEntity])
-       Some(dataProperty !!"rdfs:label" (x.Dosage^^xsd.string))
-       Some(dataProperty !!"nicebnf:hasDitaContent" ((string x.dosageXml )^^xsd.xmlliteral))
-       Some(a Uri.DosageEntity)]
-
     static member fromti (Bnf.Drug.Title (Paragraph(s,_))) =
       Some(dataProperty !!"nicebnf:hasTitle" (s^^xsd.string))
 
@@ -177,20 +170,24 @@ module DrugRdf =
 
     //ungroup the patient groups adding a route if available
     static member from (RouteOfAdministration(r,pgs)) =
-      let patientGrp pg = blank !!"nicebnf:hasDosage"
-                            ([Some(one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group) [ dataProperty !!"rdfs:label" (pg.Group^^xsd.string)
-                                                                                            a Uri.PatientGroupEntity])
-                              Some(dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string))
-                              Some(dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral))
-                              Some(a Uri.DosageEntity)
-                              r >>= Graph.from] |> List.choose id)
+      let patientGrp pg =
+        blank !!"nicebnf:hasDosage"
+         ([one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
+             [dataProperty !!"rdfs:label" (pg.Group^^xsd.string)
+              a Uri.PatientGroupEntity] |> Some
+           dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string) |> Some
+           dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral) |> Some
+           a Uri.DosageEntity |> Some
+           r >>= Graph.from] |> List.choose id)
       pgs |> Seq.map patientGrp
 
     static member from (x:TheraputicIndication) =
       match x with
-        | TheraputicIndication (s,p) -> Some(one !!"nicebnf:hasIndication" (Uri.from x) [a Uri.IndicationEntity
-                                                                                         dataProperty !!"rdfs:label" (s^^xsd.string)
-                                                                                         dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)])
+        | TheraputicIndication (s,p) ->
+           Some(one !!"nicebnf:hasIndication" (Uri.from x)
+             [a Uri.IndicationEntity
+              dataProperty !!"rdfs:label" (s^^xsd.string)
+              dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)])
 
     static member fromidg (IndicationsAndDose(tis,roas)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
@@ -255,14 +252,24 @@ module DrugRdf =
     static member frompts (PreTreatmentScreening s) = [(Graph.from s)]
     static member fromtc (TreatmentCessation s) = [(Graph.from s)]
     static member fromdac (DrugAction s) = [(Graph.from s)]
+    static member fromsea (SideEffectAdvice (sp,s)) = Graph.frompair (sp,s)
+    static member fromod (SideEffectsOverdosageInformation (sp,s)) = Graph.frompair (sp,s)
+    static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromciri (ContraindicationsRenalImpairment (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member frompadi (PrescribingAndDispensingInformation (sp,s)) = Graph.frompair (sp,s)
+    static member fromulu (UnlicencedUse (sp,s)) = Graph.frompair (sp,s)
+    static member fromcac (ConceptionAndContraception (sp,s)) = Graph.frompair (sp,s)
+    static member fromisi (ImportantSafetyInformation(t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromdfa (DirectionsForAdministration (sp,s))= Graph.frompair (sp,s)
+    static member frominter (Interaction(sp,s)) = Graph.frompair(sp,s)
+    static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
+    static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
+    static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
 
     static member fromse (x:SideEffect) =
       let l = match x with | SideEffect s -> ((string s).ToLower())^^xsd.string
       one !!"nicebnf:hasSideEffect" (Uri.fromse x) [dataProperty !!"rdfs:label" l
                                                     a !!"nicebnf:SideEffect" ]
-
-    static member fromsea (SideEffectAdvice (sp,s)) = Graph.frompair (sp,s)
-    static member fromod (SideEffectsOverdosageInformation (sp,s)) = Graph.frompair (sp,s)
 
     static member fromfre (x:FrequencyGroup) =
         let gf (f,p,ses) =
@@ -275,9 +282,6 @@ module DrugRdf =
           | GeneralFrequency (f,p,ses) -> gf(f,p,ses) |> subject x
           | FrequencyWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
           | FrequencyWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
-
-    static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member fromciri (ContraindicationsRenalImpairment (t,sp,s)) = Graph.fromthree (t,sp,s)
 
     static member fromcon (x:ContraindicationsGroup) =
       let sp t = [a Uri.SpecificityEntity
@@ -307,12 +311,6 @@ module DrugRdf =
                       a Uri.SpecificityEntity])
                       :: gen(p,cs) |> subject x
 
-    static member frompadi (PrescribingAndDispensingInformation (sp,s)) = Graph.frompair (sp,s)
-    static member fromulu (UnlicencedUse (sp,s)) = Graph.frompair (sp,s)
-    static member fromcac (ConceptionAndContraception (sp,s)) = Graph.frompair (sp,s)
-    static member fromisi (ImportantSafetyInformation(t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member fromdfa (DirectionsForAdministration (sp,s))= Graph.frompair (sp,s)
-
     static member fromfd (x:FundingDecision) =
       match x with
         | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subject x
@@ -324,23 +322,11 @@ module DrugRdf =
                     fi >>= Graph.from] |> List.choose id
            s |> subject x
 
-    static member frominter (Interaction(sp,s)) = Graph.frompair(sp,s)
-    static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
-    static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
-    static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
-
     static member frommon (x:MonitoringRequirement) =
       match x with
         | PatientMonitoringProgrammes (sp,s) -> Graph.frompair (sp,s) |> subject x
         | TheraputicDrugMonitoring (sp,s) -> Graph.frompair (sp,s) |> subject x
         | MonitoringOfPatientParameters (sp,s) -> Graph.frompair (sp,s) |> subject x
-
-
-    static member bob (GeneralInformation (sd,sp)) =
-      let s = [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString())) |> Some
-               sp >>= (Graph.fromsp >> Some)]
-      s |> List.choose id
-
 
     static member fromsec sid (x:MonographSection) =
 
