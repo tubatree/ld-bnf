@@ -163,10 +163,7 @@ module DrugRdf =
                sp >>= (Graph.fromsp >> Some)]
       s |> List.choose id
 
-    static member fromda (DoseAdjustment (sp,sd)) =
-      let s = [Some(dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString())))
-               sp >>= (Graph.fromsp >> Some)]
-      s |> List.choose id
+    static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
 
     //ungroup the patient groups adding a route if available
     static member from (RouteOfAdministration(r,pgs)) =
