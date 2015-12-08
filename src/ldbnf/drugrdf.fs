@@ -226,7 +226,8 @@ module DrugRdf =
       [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(b.ToString()))]
 
     static member frommfl (MedicinalFormLink(l)) =
-      [one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url)) [dataProperty !!"rdfs:label" (l.Title^^xsd.string)]]
+      [one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url))
+         [dataProperty !!"rdfs:label" (l.Title^^xsd.string)]]
 
     static member fromcsc (AllergyAndCrossSensitivityContraindications s) =
         [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
@@ -248,11 +249,8 @@ module DrugRdf =
     static member fromexc (ExceptionToLegalCategory (sp,s)) = Graph.frompair (sp,s)
     static member fromden (DentalPractitionersFormulary (sp,s)) = Graph.frompair (sp,s)
     static member fromadp (AdviceForDentalPractitioners (sp,s)) = Graph.frompair (sp,s)
-
     static member fromlsfp (LessSuitableForPrescribing (sp,s)) = Graph.frompair (sp,s)
-
     static member fromhas (HandlingAndStorage (sp,s)) = Graph.frompair (sp,s)
-
     static member fromelt (EffectOnLaboratoryTest s) = [(Graph.from s)]
     static member frompts (PreTreatmentScreening s) = [(Graph.from s)]
     static member fromtc (TreatmentCessation s) = [(Graph.from s)]
@@ -264,7 +262,6 @@ module DrugRdf =
                                                     a !!"nicebnf:SideEffect" ]
 
     static member fromsea (SideEffectAdvice (sp,s)) = Graph.frompair (sp,s)
-
     static member fromod (SideEffectsOverdosageInformation (sp,s)) = Graph.frompair (sp,s)
 
     static member fromfre (x:FrequencyGroup) =
@@ -328,11 +325,8 @@ module DrugRdf =
            s |> subject x
 
     static member frominter (Interaction(sp,s)) = Graph.frompair(sp,s)
-
     static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
-
     static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
-
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
 
     static member frommon (x:MonitoringRequirement) =
