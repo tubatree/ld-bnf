@@ -26,6 +26,7 @@ module RdfUris =
   open Bnf.BorderlineSubstance
   open Bnf.Interaction
   open Bnf.MedicalDeviceType
+  open Bnf.WoundManagement
   open Assertion
   open rdf
   open Shared
@@ -42,6 +43,8 @@ module RdfUris =
     static member fromsec (x:Drug) (Id i) = !!(Uri.bnfsite + "drug/" + string x.id + "#" + i)
     static member fromsecdc (x:DrugClass) (Id i) = !!(Uri.bnfsite + "drugclass/" + string x.id + "#" + i)
     static member fromseccmpi (x:CMPI) (Id i) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string x.id + "#" + i)
+    static member from (x:WoundManagement) = !!(Uri.bnfsite + "WoundManagement/" + string x.id )
+    
 
     static member from (x:MedicinalForm) = !!(Uri.bnfsite + "medicinalform/" + string x.id )
     static member from (x:MedicinalProduct) = !!(Uri.bnfsite + "medicinalproduct/" + string x.ampid)
@@ -89,3 +92,4 @@ module RdfUris =
     static member SpecificityEntity = !!(Uri.nicebnfClass + "Specificity")
     static member MedicalDeviceTypeEntity = !!(Uri.nicebnfClass + "MedicalDeviceType")
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnfClass + "ClinicalMedicalDeviceInformationGroup")
+    static member WoundManagementEntity = !!(Uri.nicebnfClass + "WoundManagement")

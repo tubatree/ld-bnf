@@ -30,6 +30,7 @@ module WoundManagement =
   type ProductGroup = | ProductGroup of Title * Description option * Product list
 
   type WoundManagement = {
+    id: Id;
     title: Title;
     general: General option;
     dressingChoices: WoundType list;
@@ -41,6 +42,7 @@ module WoundManagement =
 module WoundManagementParser =
   open WoundManagement
   open prelude
+  open Shared
 
   let inline withoc n x =
     let oc =  ( ^a : (member Outputclass : string) x)
@@ -127,4 +129,4 @@ module WoundManagementParser =
                 |> Array.choose (withoc "productGroups")
                 |> Array.collect ProductGroup.list
                 |> Array.toList
-      {title=t;general=gen;dressingChoices=dcs;links=ls;productGroups=pgs}
+      {id=Id(x.Id);title=t;general=gen;dressingChoices=dcs;links=ls;productGroups=pgs}
