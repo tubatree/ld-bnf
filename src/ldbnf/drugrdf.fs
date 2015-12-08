@@ -23,6 +23,8 @@ module DrugRdf =
   let getvtmid (Vtmid i) = Some(string i)
   let tosys (Sys s) = s
 
+  let subject x l = dataProperty !!"nicebnf:hasSubject" ((toString x)^^xsd.string) :: l
+
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "cnt",!!"http://www.w3.org/2011/content#"
@@ -173,10 +175,6 @@ module DrugRdf =
                sp >>= (Graph.fromsp >> Some)]
       s |> List.choose id
 
-    //static member general n i (gis:seq<GeneralInformation>) =
-    //  let s = a !!("nicebnf:" + n) :: (gis |> Seq.map Graph.fromgi |> Seq.toList)
-    //  one !!("nicebnf:has" + n) i s
-
     //ungroup the patient groups adding a route if available
     static member from (RouteOfAdministration(r,pgs)) =
       let patientGrp pg = blank !!"nicebnf:hasDosage"
@@ -212,14 +210,14 @@ module DrugRdf =
       [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
 
     static member frompca (p:PatientAndCarerAdvice) =
-      let pca n x = dataProperty !!"nicebnf:hasSubject" (n^^xsd.string) :: Graph.fromthree x
+      let pca t = Graph.fromthree >> (subject t)
       match p with
-        | PatientResources (t,sp,s) -> (t,sp,s) |> pca "PatientResources"
-        | AdviceAroundMissedDoses (t,sp,s) -> (t,sp,s) |> pca "AdviceAroundMissedDoses"
-        | GeneralPatientAdvice (t,sp,s) -> (t,sp,s) |> pca "GeneralPatientAdvice"
-        | AdviceAroundDrivingAndOtherTasks (t,sp,s) -> (t,sp,s) |> pca "AdviceAroundDrivingAndOtherTasks"
-        | PatientAdviceInPregnancy  (t,sp,s) -> (t,sp,s) |> pca "PatientAdviceInPregnancy"
-        | PatientAdviceInConceptionAndContraception (t,sp,s) -> (t,sp,s) |> pca "PatientAdviceInConceptionAndContraception"
+        | PatientResources (t,sp,s) -> (t,sp,s) |> pca p
+        | AdviceAroundMissedDoses (t,sp,s) -> (t,sp,s) |> pca p
+        | GeneralPatientAdvice (t,sp,s) -> (t,sp,s) |> pca p
+        | AdviceAroundDrivingAndOtherTasks (t,sp,s) -> (t,sp,s) |> pca p
+        | PatientAdviceInPregnancy  (t,sp,s) -> (t,sp,s) |> pca p
+        | PatientAdviceInConceptionAndContraception (t,sp,s) -> (t,sp,s) |> pca p
 
     static member fromlvs (LicensingVariationStatement(p)) =
         [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
@@ -277,14 +275,9 @@ module DrugRdf =
             one !!"nicebnf:hasFrequency" (Uri.fromfre f) fq
             dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (ses |> Seq.map Graph.fromse |> Seq.toList)
         match x with
-          | GeneralFrequency (f,p,ses) ->
-            dataProperty !!"nicebnf:hasSubject" ("GeneralSideEffects"^^xsd.string) :: (gf(f,p,ses))
-          | FrequencyWithRoutes (f,sp,p,ses) ->
-            let s = (sp |> Graph.fromsp) :: gf(f,p,ses)
-            dataProperty !!"nicebnf:hasSubject" ("SideEffectsWithRoutes"^^xsd.string) :: s
-          | FrequencyWithIndications (f,sp,p,ses) ->
-            let s = (sp |> Graph.fromsp) :: gf(f,p,ses)
-            dataProperty !!"nicebnf:hasSubject" ("SideEffectsWithIndications"^^xsd.string) :: s
+          | GeneralFrequency (f,p,ses) -> gf(f,p,ses) |> subject x
+          | FrequencyWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
+          | FrequencyWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
 
     static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromciri (ContraindicationsRenalImpairment (t,sp,s)) = Graph.fromthree (t,sp,s)
@@ -295,32 +288,27 @@ module DrugRdf =
       let con (Contraindication x) = dataProperty !!"nicebnf:hasContraindication" (xsd.string(x.ToString()))
       let gen (p,cs) = (dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))) :: (cs |> List.map con)
       match x with
-        | GeneralContraindications (p,cs) -> dataProperty !!"nicebnf:hasSubject" ("GeneralContraindications"^^xsd.string)
-                                               ::  (gen(p,cs))
-        | ContraindicationWithRoutes (t,p,cs) -> dataProperty !!"nicebnf:hasSubject" ("ContraindicationWithRoutes"^^xsd.string)
-                                                    :: ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
-                                                    :: gen(p,cs))
-        | ContraindicationWithIndications (t,p,cs) -> dataProperty !!"nicebnf:hasSubject" ("ContraindicationWithIndications"^^xsd.string)
-                                                        :: ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
-                                                        :: gen(p,cs))
+        | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subject x
+        | ContraindicationWithRoutes (t,p,cs) -> ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
+                                                    :: gen(p,cs)) |> subject x
+        | ContraindicationWithIndications (t,p,cs) -> ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
+                                                        :: gen(p,cs)) |> subject x
 
     static member fromcg (x:CautionsGroup) =
       let cau (Caution x) = dataProperty !!"nicebnf:hasCaution" (xsd.string(x.ToString()))
       let gen (p,cs) = (dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))) :: (cs |> List.map cau)
       match x with
-        | GeneralCautions (p,cs) -> dataProperty !!"nicebnf:hasSubject" ("GeneralCautions"^^xsd.string) :: (gen(p,cs))
+        | GeneralCautions (p,cs) -> (gen(p,cs)) |> subject x
         | CautionsWithRoutes (t,p,cs) ->
-                dataProperty !!"nicebnf:hasSubject" ("CautionsWithRoutes"^^xsd.string)
-                :: (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
+                  (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
                      [dataProperty !!"rdfs:label" (xsd.string(t.ToString()))
                       a Uri.SpecificityEntity])
-                      :: gen(p,cs)
+                      :: gen(p,cs) |> subject x
         | CautionsWithIndications (t,p,cs) ->
-                dataProperty !!"nicebnf:hasSubject" ("CautionsWithIndications"^^xsd.string)
-                 :: (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
+                  (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
                     [ dataProperty !!"rdfs:label" (xsd.string(t.ToString()))
                       a Uri.SpecificityEntity])
-                      :: gen(p,cs)
+                      :: gen(p,cs) |> subject x
 
     static member frompadi (PrescribingAndDispensingInformation (sp,s)) = Graph.frompair (sp,s)
     static member fromulu (UnlicencedUse (sp,s)) = Graph.frompair (sp,s)
@@ -330,14 +318,14 @@ module DrugRdf =
 
     static member fromfd (x:FundingDecision) =
       match x with
-        | NonNHS(sp,s) -> dataProperty !!"nicebnf:hasSubject" ("NonNHS"^^xsd.string) :: (Graph.frompair (sp,s))
-        | SmcDecisions(sp,s) -> dataProperty !!"nicebnf:hasSubject" ("SmcDecisions"^^xsd.string) :: (Graph.frompair(sp,s))
+        | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subject x
+        | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subject x
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
            let s = [sp >>= (Graph.fromsp >> Some)
                     Some(Graph.from s)
                     t >>= Graph.fromti
                     fi >>= Graph.from] |> List.choose id
-           dataProperty !!"nicebnf:hasSubject" ("NiceTechnologyAppraisals"^^xsd.string) :: s
+           s |> subject x
 
     static member frominter (Interaction(sp,s)) = Graph.frompair(sp,s)
 
@@ -349,9 +337,9 @@ module DrugRdf =
 
     static member frommon (x:MonitoringRequirement) =
       match x with
-        | PatientMonitoringProgrammes (sp,s) -> dataProperty !!"nicebnf:hasSubject" ("PatientMonitoringProgrammes"^^xsd.string) :: (Graph.frompair (sp,s))
-        | TheraputicDrugMonitoring (sp,s) -> dataProperty !!"nicebnf:hasSubject" ("TheraputicDrugMonitoring"^^xsd.string) :: (Graph.frompair (sp,s))
-        | MonitoringOfPatientParameters (sp,s) -> dataProperty !!"nicebnf:hasSubject" ("MonitoringOfPatientParameters"^^xsd.string) :: (Graph.frompair (sp,s))
+        | PatientMonitoringProgrammes (sp,s) -> Graph.frompair (sp,s) |> subject x
+        | TheraputicDrugMonitoring (sp,s) -> Graph.frompair (sp,s) |> subject x
+        | MonitoringOfPatientParameters (sp,s) -> Graph.frompair (sp,s) |> subject x
 
 
     static member bob (GeneralInformation (sd,sp)) =
