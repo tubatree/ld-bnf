@@ -20,27 +20,13 @@ module prelude =
         | Some i -> i :: l
         | None -> l
 
-    type ListBuilder<'a> () =
-        member this.Bind(m, f) = 
-            m |> List.collect f
-
-        member this.Zero() = 
-            printfn "Zero"
-            []
-
+    type OptionlistBuilder<'a> () =
+        member this.Bind(m, f) = m |> List.collect f
+        member this.Zero() = []
         member this.Yield(x:'a option) = match x with | Some x -> [x] | None -> []
-
-        member this.Yield(x:'a) = 
-            printfn "Yield an unwrapped %A as a list" x
-            [x]
-
-        member this.Combine (a,b) = 
-            printfn "combining %A and %A" a b 
-            List.concat [a;b]
-
-        member this.Delay(f) = 
-            printfn "Delay"
-            f()
+        member this.Yield(x:'a) = [x]
+        member this.Combine (a,b) = List.concat [a;b]
+        member this.Delay(f) = f()
 
     open Microsoft.FSharp.Reflection
 
