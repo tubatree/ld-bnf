@@ -31,6 +31,8 @@ module RdfUris =
   open rdf
   open Shared
 
+  let optionlist = new OptionlistBuilder<Predicate * Object>()
+
   type Uri with
     static member nicebnf = "http://ld.nice.org.uk/ns/bnf#"
     static member nicebnfClass = "http://ld.nice.org.uk/ns/bnf/"

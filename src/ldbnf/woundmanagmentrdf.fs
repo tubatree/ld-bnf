@@ -12,14 +12,25 @@ module WoundManagementRdf =
   open Rdf
   open RdfUris
 
+  let stuff = [
+    yield 1
+    yield 2
+    if(true) then yield 3
+    ]
+
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "cnt",!!"http://www.w3.org/2011/content#"
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                                   "bnfsite",!!Uri.bnfsite]
     static member from (x:WoundManagement) =
-      let s = [a Uri.WoundManagementEntity
-               dataProperty !!"nicebnf:hasTitle" ((string x.title)^^xsd.string)]
+      let s = optionlist {
+               yield a Uri.WoundManagementEntity
+               yield x.general >>= (string >> xsd.string >> (dataProperty !!"bnfsite:hasGeneral") >> Some)
+               yield dataProperty !!"nicebnf:hasTitle" ((string x.title)^^xsd.string)
+              }
+
       let dr r = resource (Uri.from x) r
+
       [dr s]
       |> Assert.graph Graph.setupGraph
