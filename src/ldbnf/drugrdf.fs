@@ -339,26 +339,21 @@ module DrugRdf =
          | x::xs -> x a::applyTo a xs
 
       //take the list, add hasSubject and type
-      let add f x (sub,uri) =
+      let add' p f x (sub,uri) =
         let s = f x
         let n = x.GetType().Name
         let s' = [a !!("nicebnf:" + n)
                   one !!"nicebnf:hasSubject" uri
                     [a !!("nicebnf:" + sub)]]
-        blank !!("nicebnf:has" + n) (s @ s')
+        blank !!(p n) (s @ s')
+
+      let add f x (sub,uri) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri)
+      let addps f x (sub,uri) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,uri)
 
       let inline sec n i stf =
         let fs = stf |> List.collect id
         fs |> applyTo (n,i)
 
-
-      let addps f x (sub,uri) =
-        let s = f x
-        let n = x.GetType().Name
-        let s' = [a !!("nicebnf:" + n)
-                  one !!"nicebnf:hasSubject" uri
-                      [a !!("nicebnf:" + sub)]]
-        blank !!("nicebnf:hasPrescribingInformationSection") (s @ s')
 
       let inline statements a g x = x |> Seq.map (a g) |> Seq.toList
 
