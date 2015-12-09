@@ -222,6 +222,9 @@ module DrugRdf =
     static member fromlvs (LicensingVariationStatement(p)) =
         [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
 
+    static member fromavs (AdditionalFormsStatement(p)) =
+        [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
+
     static member fromhtml (b:drugProvider.Body) =
       [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(b.ToString()))]
 
@@ -380,9 +383,8 @@ module DrugRdf =
         | IndicationsAndDoseGroup (i,g,gss) -> sec "IndicationAndDosageInformation" (sid i) [statements add Graph.fromidg g
                                                                                              statements add Graph.fromidgs gss]
         | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" (sid i) [statements add Graph.frompca pcas]
-        | MedicinalForms (i,lvs,html,_) -> sec "MedicinalFormInformation" (sid i) [statement Graph.fromlvs lvs
-                                                                                   statement Graph.fromhtml html]
-                                                                                       //statements Graph.frommfl mfls]
+        | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" (sid i) [statement Graph.fromlvs lvs
+                                                                                  statement Graph.fromavs avs]
         | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivityWarning" (sid i) [ statement Graph.fromcsc csc
                                                                                                        statement Graph.fromcscs cscs]
         | ExceptionsToLegalCategory (i,es) -> sec "ExceptionsToLegalCategory" (sid i) [statements addps Graph.fromexc es]

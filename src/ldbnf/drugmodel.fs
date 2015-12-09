@@ -78,6 +78,8 @@ module Drug =
 
     type LicensingVariationStatement = | LicensingVariationStatement of drugProvider.P
 
+    type AdditionalFormsStatement = | AdditionalFormsStatement of drugProvider.P
+
     //thinking maybe alias this type?
     type PatientAndCarerAdvice =
       | PatientResources of Title option * Specificity option * drugProvider.Sectiondiv
@@ -203,7 +205,7 @@ module Drug =
         | HepaticImpairment of Id * GeneralInformation seq * DoseAdjustment seq * AdditionalMonitoringInHepaticImpairment seq
         | RenalImpairment of Id * GeneralInformation seq * AdditionalMonitoringInRenalImpairment seq * DoseAdjustment seq
         | PatientAndCarerAdvices of Id * PatientAndCarerAdvice seq
-        | MedicinalForms of Id * Option<LicensingVariationStatement> * Option<drugProvider.Body> * MedicinalForm seq
+        | MedicinalForms of Id * LicensingVariationStatement option * AdditionalFormsStatement option * MedicinalForm seq
         | AllergyAndCrossSensitivity of Id * Option<AllergyAndCrossSensitivityContraindications> * Option<AllergyAndCrossSensitivityCrossSensitivity>
         | ExceptionsToLegalCategory of Id * ExceptionToLegalCategory seq
         | ProfessionSpecificInformation of Id * DentalPractitionersFormulary seq * AdviceForDentalPractitioners seq
@@ -373,17 +375,20 @@ module DrugParser =
 
     let (>>=) a b = Option.bind b a
 
-    let lvs (b:drugProvider.Body) =
-      b.Sections
-      |> Array.filter (hasOutputclasso "licensingVariationStatement")
-      |> Array.collect (fun s -> s.Ps)
-      |> Array.map LicensingVariationStatement
-      |> Array.tryPick Some
+    let statements (b:drugProvider.Body option) =
+      match b with
+        | Some b ->
+            match b.Ps with
+                | [||] -> None,None
+                | [|lvs|] -> LicensingVariationStatement lvs |> Some, None
+                | [|lvs;afs|] -> LicensingVariationStatement lvs |> Some, AdditionalFormsStatement afs |> Some
+                | _ -> failwith "licensingVariationStatement too many paragaraphs"
+        | None -> None,None
 
     let medicinalForms (x:drugProvider.Topic) =
-      let lvs = x.Body >>= lvs
+      let lvs,avs = statements x.Body
       let links = x.Xrefs |> Array.map MedicinalForm.from
-      MedicinalForms(Id(x.Id),lvs,x.Body,links)
+      MedicinalForms(Id(x.Id),lvs,avs,links)
 
     let inline optn t f x = Some (t (f x))
 
