@@ -88,7 +88,7 @@ module DrugRdf =
       cl :: ifs
 
     static member fromil (i:InteractionLink) =
-      one !!"nicebnf:hasInteraction" (Uri.from i) [a Uri.InteractionEntity]
+      one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionEntity]
 
     static member fromcd (x:ConstituentDrug) =
       one !!"nicebnf:hasConstituentDrug" (Uri.from x )

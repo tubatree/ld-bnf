@@ -12,12 +12,6 @@ module WoundManagementRdf =
   open Rdf
   open RdfUris
 
-  let stuff = [
-    yield 1
-    yield 2
-    if(true) then yield 3
-    ]
-
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "cnt",!!"http://www.w3.org/2011/content#"
