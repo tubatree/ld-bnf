@@ -274,7 +274,7 @@ module DrugRdf =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x) [dataProperty !!"rdfs:label" l
                                                     a !!"nicebnf:SideEffect" ]
 
-    static member fromfre (x:FrequencyGroup) =
+    static member fromfre (x:SideEffectsGroup) =
         let gf (f,p,ses) =
           let fq = [a !!"nicebnf:Frequency"
                     dataProperty !!"rdfs:label" (f.label^^xsd.string)]
@@ -282,9 +282,9 @@ module DrugRdf =
             one !!"nicebnf:hasFrequency" (Uri.fromfre f) fq
             dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (ses |> Seq.map Graph.fromse |> Seq.toList)
         match x with
-          | GeneralFrequency (f,p,ses) -> gf(f,p,ses) |> subject x
-          | FrequencyWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
-          | FrequencyWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
+          | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subject x
+          | SideEffectsWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
+          | SideEffectsWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
 
     static member fromcon (x:ContraindicationsGroup) =
       let sp t = [a Uri.SpecificityEntity
