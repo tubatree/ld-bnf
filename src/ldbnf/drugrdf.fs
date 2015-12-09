@@ -393,7 +393,7 @@ module DrugRdf =
                                                                                   statements addps Graph.fromciri ciri]
         | Cautions (i,cgs,ias) -> sec "Cautions" (sid i) [statements add Graph.fromcg cgs
                                                           statements addps Graph.fromia ias]
-        | PrescribingAndDispensingInformations (i,padi) -> sec "PrescribingAndDispensingInformation" (sid i) [statements add Graph.frompadi padi]
+        | PrescribingAndDispensingInformations (i,padi) -> sec "PrescribingAndDispensingInformation" (sid i) [statements addps Graph.frompadi padi]
         | UnlicencedUses (i,ulus) -> sec "UnlicencedUsageInformation" (sid i) [statements addps Graph.fromulu ulus]
         | ConceptionAndContraceptions (i,cacs) -> sec "ConceptionAndContraceptionWarning" (sid i) [statements addps Graph.fromcac cacs]
         | ImportantSafetyInformations (i,isis) -> sec "ImportantSafetyInformation" (sid i) [statements addps Graph.fromisi isis]
