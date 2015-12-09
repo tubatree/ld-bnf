@@ -290,32 +290,22 @@ module DrugRdf =
           | SideEffectsWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
 
     static member fromcon (x:ContraindicationsGroup) =
-      let sp t = [a Uri.SpecificityEntity
-                  dataProperty !!"rdfs:label" ((string t)^^xsd.string)]
       let con (Contraindication x) = dataProperty !!"nicebnf:hasContraindication" (xsd.string(x.ToString()))
       let gen (p,cs) = (dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))) :: (cs |> List.map con)
       match x with
         | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subject x
-        | ContraindicationWithRoutes (t,p,cs) -> ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
-                                                    :: gen(p,cs)) |> subject x
-        | ContraindicationWithIndications (t,p,cs) -> ((one !!"nicebnf:hasSpecificity" (Uri.froms t) (sp t))
-                                                        :: gen(p,cs)) |> subject x
+        | ContraindicationWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
+        | ContraindicationWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
 
     static member fromcg (x:CautionsGroup) =
       let cau (Caution x) = dataProperty !!"nicebnf:hasCaution" (xsd.string(x.ToString()))
       let gen (p,cs) = (dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))) :: (cs |> List.map cau)
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subject x
-        | CautionsWithRoutes (t,p,cs) ->
-                  (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
-                     [dataProperty !!"rdfs:label" (xsd.string(t.ToString()))
-                      a Uri.SpecificityEntity])
-                      :: gen(p,cs) |> subject x
-        | CautionsWithIndications (t,p,cs) ->
-                  (one !!"nicebnf:hasSpecificity" (Uri.froms(t.ToString()))
-                    [ dataProperty !!"rdfs:label" (xsd.string(t.ToString()))
-                      a Uri.SpecificityEntity])
-                      :: gen(p,cs) |> subject x
+        | CautionsWithRoutes (s,p,cs) ->
+                      Graph.fromsp s :: gen(p,cs) |> subject x
+        | CautionsWithIndications (s,p,cs) ->
+                      Graph.fromsp s :: gen(p,cs) |> subject x
 
     static member fromfd (x:FundingDecision) =
       match x with

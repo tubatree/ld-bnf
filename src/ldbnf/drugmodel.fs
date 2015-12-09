@@ -155,8 +155,8 @@ module Drug =
 
     type ContraindicationsGroup =
       | GeneralContraindications of drugProvider.P * Contraindication list
-      | ContraindicationWithRoutes of string * drugProvider.P * Contraindication list
-      | ContraindicationWithIndications of string * drugProvider.P * Contraindication list
+      | ContraindicationWithRoutes of Specificity * drugProvider.P * Contraindication list
+      | ContraindicationWithIndications of Specificity * drugProvider.P * Contraindication list
 
     type ImportantAdvice = | ImportantAdvice of Title option * Specificity option * drugProvider.Sectiondiv
 
@@ -166,8 +166,8 @@ module Drug =
 
     type CautionsGroup =
       | GeneralCautions of drugProvider.P * Caution list
-      | CautionsWithRoutes of string * drugProvider.P * Caution list
-      | CautionsWithIndications of string * drugProvider.P * Caution list
+      | CautionsWithRoutes of Specificity * drugProvider.P * Caution list
+      | CautionsWithIndications of Specificity * drugProvider.P * Caution list
 
     type PrescribingAndDispensingInformation =
       | PrescribingAndDispensingInformation of Option<Specificity> * drugProvider.Sectiondiv
@@ -668,9 +668,9 @@ module DrugParser =
         let ac (x:drugProvider.Sectiondiv) =
           match x with
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
-                ContraindicationWithRoutes(s.Ps.[0].Value.Value, s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+                ContraindicationWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-                ContraindicationWithIndications(s.Ps.[0].Value.Value, s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+                ContraindicationWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
         [|x.Ps |> Array.map gen
           x.Sectiondivs |> Array.filter (hasOutputclasso "additionalContraindications") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
 
@@ -683,9 +683,9 @@ module DrugParser =
         let ac (x:drugProvider.Sectiondiv) =
           match x with
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
-                CautionsWithRoutes(s.Ps.[0].Value.Value, s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+                CautionsWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-                CautionsWithIndications(s.Ps.[0].Value.Value, s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+                CautionsWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
 
         [|x.Ps |> Array.map gen
           x.Sectiondivs |> Array.filter (hasOutputclasso "additionalCautions") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
