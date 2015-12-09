@@ -234,12 +234,17 @@ module MedicinalFormRdf =
                  | Some x -> Graph.fromcals x
                  | None -> []
 
+      let cmpis = x.cmpis |> List.map Graph.fromclinicalmpi
+
       let mps = x.medicinalProducts |> List.map Graph.from
       let dr r = resource (Uri.from x) r
       [dr s
        dr mps
-       dr cals]
+       dr cals
+       dr cmpis]
        |> Assert.graph og
+
+    static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
       let s = [Some(dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral))

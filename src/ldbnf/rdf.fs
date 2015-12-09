@@ -41,6 +41,7 @@ module RdfUris =
     static member from (x:Drug) = !!(Uri.bnfsite + "drug/" + string x.id )
     static member from (x:DrugClass) = !!(Uri.bnfsite + "drugclass/" + string x.id )
     static member from (x:CMPI) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string x.id )
+    static member fromcmpi (ClinicalMedicinalProductInformation(i)) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string i)
     static member from (x:BorderlineSubstance) = !!(Uri.bnfsite + "borderlineSubstance/" + string x.id )
     static member fromsec (x:Drug) (Id i) = !!(Uri.bnfsite + "drug/" + string x.id + "#" + i)
     static member fromsecdc (x:DrugClass) (Id i) = !!(Uri.bnfsite + "drugclass/" + string x.id + "#" + i)

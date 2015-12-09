@@ -70,6 +70,8 @@ module MedicinalForm =
 
   type Pack = | Pack of Option<PackInfo> * Option<NhsIndicativeInfo> * Option<DrugTariffInfo>
 
+  type ClinicalMedicinalProductInformation = | ClinicalMedicinalProductInformation of Id
+
   type MedicinalProduct = {
     title:MedicinalProductTitle;
     ampid:Ampid;
@@ -84,6 +86,7 @@ module MedicinalForm =
     electrolytes : Electrolytes option;
     cautionaryAdvisoryLabels : CautionaryAdvisoryLabels option;
     medicinalProducts : MedicinalProduct list;
+    cmpis : ClinicalMedicinalProductInformation list;
   }
 
 module MedicinalFormParser =
@@ -204,6 +207,10 @@ module MedicinalFormParser =
               | None -> failwith "MedicinalProduct must have an Ampid"
       {title = t; ampid = a; strengthOfActiveIngredient = str; packs = ps; controlledDrugs = con;}
 
+  type ClinicalMedicinalProductInformation with
+    static member list (x:drugProvider.Section) =
+      x.Xrefs |> Array.map (fun xref -> xref.Href |> Id |> ClinicalMedicinalProductInformation)
+
   type MedicinalForm with
     static member parse (x:drugProvider.Topic) =
       let sections (x:drugProvider.Topic) =
@@ -230,4 +237,8 @@ module MedicinalFormParser =
                |> Array.choose (withoco "electrolytes")
                |> Array.map (Electrolytes >> Some)
                |> Array.tryPick id
-      {id = Id(x.Id); title = t; excipients=ex; electrolytes=el; cautionaryAdvisoryLabels = cals; medicinalProducts = mps}
+      let cmpis = x |> sections
+               |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
+               |> Array.collect ClinicalMedicinalProductInformation.list
+               |> Array.toList
+      {id = Id(x.Id); title = t; excipients=ex; electrolytes=el; cautionaryAdvisoryLabels = cals; medicinalProducts = mps; cmpis = cmpis;}
