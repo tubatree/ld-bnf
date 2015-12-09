@@ -164,13 +164,6 @@ module DrugRdf =
                  i |> List.choose Graph.from] |> List.collect id
       one !!"nicebnf:hasSpecificity" (Uri.froms s) sp
 
-    static member fromgi (GeneralInformation (sd,sp)) =
-      let s = [Some(dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString())))
-               sp >>= (Graph.fromsp >> Some)]
-      s |> List.choose id
-
-    static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
-
     //ungroup the patient groups adding a route if available
     static member from (RouteOfAdministration(r,pgs)) =
       let patientGrp pg =
@@ -204,10 +197,7 @@ module DrugRdf =
        | DoseEquivalence s -> s |> dp "DoseEquivalence"
        | DoseAdjustments s -> s |> dp "DoseAdjustments"
        | ExtremesOfBodyWeight s -> s |> dp "ExtremesOfBodyWeight"
-       | Potency s -> s |> dp "Potency"
-
-    static member fromamri (AdditionalMonitoringInRenalImpairment s) =
-      [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
+       | Potency s -> s |> dp "Potency" 
 
     static member frompca (p:PatientAndCarerAdvice) =
       let pca t = Graph.fromthree >> (subject t)
@@ -224,9 +214,6 @@ module DrugRdf =
 
     static member fromavs (AdditionalFormsStatement(p)) =
         [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
-
-    static member fromhtml (b:drugProvider.Body) =
-      [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(b.ToString()))]
 
     static member frommfl (MedicinalForm(l)) =
       one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url))
@@ -248,6 +235,13 @@ module DrugRdf =
     static member fromthree (t,sp,s) =
       let st = [t >>= Graph.fromti] |> List.choose id
       st @ (Graph.frompair (sp,s))
+
+    static member fromgi (GeneralInformation (sd,sp)) =
+      let s = [Some(dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString())))
+               sp >>= (Graph.fromsp >> Some)]
+      s |> List.choose id
+
+    static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
 
     static member fromexc (ExceptionToLegalCategory (sp,s)) = Graph.frompair (sp,s)
     static member fromden (DentalPractitionersFormulary (sp,s)) = Graph.frompair (sp,s)
@@ -271,6 +265,8 @@ module DrugRdf =
     static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
     static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
+    static member fromamri (AdditionalMonitoringInRenalImpairment s) =
+      [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
 
     static member fromse (x:SideEffect) =
       let l = match x with | SideEffect s -> ((string s).ToLower())^^xsd.string
@@ -352,31 +348,31 @@ module DrugRdf =
 
       //let inline statementsps g x = x |> Seq.map (addps g) |> Seq.toList
 
-      let inline statement g x =
+      let inline statement a g x =
         match x with
-        | Some(x) -> [x |> add g]
+        | Some(x) -> [x |> a g]
         | None -> []
 
       match x with
-        | Pregnancy (i,gs,das,amps) -> sec "PregnancyWarning" (sid i) [statements add Graph.fromgi gs
-                                                                       statements add Graph.fromda das
+        | Pregnancy (i,gs,das,amps) -> sec "PregnancyWarning" (sid i) [statements addps Graph.fromgi gs
+                                                                       statements addps Graph.fromda das
                                                                        statements addps Graph.fromamp amps]
-        | BreastFeeding (i,gs,ambfs,das) -> sec "BreastFeedingWarning" (sid i) [statements add Graph.fromgi gs
+        | BreastFeeding (i,gs,ambfs,das) -> sec "BreastFeedingWarning" (sid i) [statements addps Graph.fromgi gs
                                                                                 statements addps Graph.fromambf ambfs
-                                                                                statements add Graph.fromda das]
-        | HepaticImpairment (i,gs,das,amhis) -> sec "HepaticImpairmentWarning" (sid i) [statements add Graph.fromgi gs
-                                                                                        statements add Graph.fromda das
+                                                                                statements addps Graph.fromda das]
+        | HepaticImpairment (i,gs,das,amhis) -> sec "HepaticImpairmentWarning" (sid i) [statements addps Graph.fromgi gs
+                                                                                        statements addps Graph.fromda das
                                                                                         statements addps Graph.fromamhi amhis]
-        | RenalImpairment (i,gs,amri,das) -> sec "RenalImpairmentWarning" (sid i) [statements add Graph.fromgi gs
-                                                                                   statements add Graph.fromamri amri
-                                                                                   statements add Graph.fromda das]
+        | RenalImpairment (i,gs,amri,das) -> sec "RenalImpairmentWarning" (sid i) [statements addps Graph.fromgi gs
+                                                                                   statements addps Graph.fromamri amri
+                                                                                   statements addps Graph.fromda das]
         | IndicationsAndDoseGroup (i,g,gss) -> sec "IndicationAndDosageInformation" (sid i) [statements add Graph.fromidg g
-                                                                                             statements add Graph.fromidgs gss]
-        | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" (sid i) [statements add Graph.frompca pcas]
-        | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" (sid i) [statement Graph.fromlvs lvs
-                                                                                  statement Graph.fromavs avs]
-        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivityWarning" (sid i) [ statement Graph.fromcsc csc
-                                                                                                       statement Graph.fromcscs cscs]
+                                                                                             statements addps Graph.fromidgs gss]
+        | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" (sid i) [statements addps Graph.frompca pcas]
+        | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" (sid i) [statement addps Graph.fromlvs lvs
+                                                                                  statement addps Graph.fromavs avs]
+        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivityWarning" (sid i) [ statement addps Graph.fromcsc csc
+                                                                                                       statement addps Graph.fromcscs cscs]
         | ExceptionsToLegalCategory (i,es) -> sec "ExceptionsToLegalCategory" (sid i) [statements addps Graph.fromexc es]
         | ProfessionSpecificInformation (i,dps,adps) -> sec "ProfessionSpecificInformation" (sid i) [statements addps Graph.fromden dps
                                                                                                      statements addps Graph.fromadp adps]
@@ -401,4 +397,4 @@ module DrugRdf =
         | DirectionsForAdministrations (i,dfas) -> sec "DirectionsForAdministration" (sid i) [statements addps Graph.fromdfa dfas]
         | NationalFunding (i,fds) -> sec "NationalFunding" (sid i) [statements add Graph.fromfd fds]
         | Interactions (i,is) -> sec "Interactions" (sid i) [statements addps Graph.frominter is]
-        | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" (sid i) [statements add Graph.frommon mons]
+        | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" (sid i) [statements addps Graph.frommon mons]
