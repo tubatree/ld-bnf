@@ -40,7 +40,7 @@ module Drug =
 
     type Vtmid = | Vtmid of int64
 
-    type MedicinalFormLink = | MedicinalFormLink of Link
+    type MedicinalForm = | MedicinalForm of Link
 
     type TheraputicIndication = | TheraputicIndication of string * drugProvider.P
 
@@ -203,7 +203,7 @@ module Drug =
         | HepaticImpairment of Id * GeneralInformation seq * DoseAdjustment seq * AdditionalMonitoringInHepaticImpairment seq
         | RenalImpairment of Id * GeneralInformation seq * AdditionalMonitoringInRenalImpairment seq * DoseAdjustment seq
         | PatientAndCarerAdvices of Id * PatientAndCarerAdvice seq
-        | MedicinalForms of Id * Option<LicensingVariationStatement> * Option<drugProvider.Body> * MedicinalFormLink seq
+        | MedicinalForms of Id * Option<LicensingVariationStatement> * Option<drugProvider.Body> * MedicinalForm seq
         | AllergyAndCrossSensitivity of Id * Option<AllergyAndCrossSensitivityContraindications> * Option<AllergyAndCrossSensitivityCrossSensitivity>
         | ExceptionsToLegalCategory of Id * ExceptionToLegalCategory seq
         | ProfessionSpecificInformation of Id * DentalPractitionersFormulary seq * AdviceForDentalPractitioners seq
@@ -316,8 +316,8 @@ module DrugParser =
     type ConstituentDrug with
         static member from (x:drugProvider.Xref)= ConstituentDrug {Url = x.Href.Replace(".xml", ""); Title = x.Value |? ""}
 
-    type MedicinalFormLink with
-        static member from (x:drugProvider.Xref) = MedicinalFormLink {Url = x.Href.Replace(".xml", ""); Title = x.Value |? ""}
+    type MedicinalForm with
+        static member from (x:drugProvider.Xref) = MedicinalForm {Url = x.Href.Replace(".xml", ""); Title = x.Value |? ""}
 
     type PatientGroup with
       static member from (x:drugProvider.Li) =
@@ -382,7 +382,7 @@ module DrugParser =
 
     let medicinalForms (x:drugProvider.Topic) =
       let lvs = x.Body >>= lvs
-      let links = x.Xrefs |> Array.map MedicinalFormLink.from
+      let links = x.Xrefs |> Array.map MedicinalForm.from
       MedicinalForms(Id(x.Id),lvs,x.Body,links)
 
     let inline optn t f x = Some (t (f x))
