@@ -329,8 +329,11 @@ module DrugRdf =
 
       //take the list, add hasSubject and type
       let add' p f x (sub,uri) =
+        let name o = match o.GetType().BaseType.Name, o.GetType().Name with
+                      | "Object", n -> n
+                      | n, _ -> n
         let s = f x
-        let n = x.GetType().BaseType.Name
+        let n = name x
         let s' = [a !!("nicebnf:" + n)
                   one !!"nicebnf:hasSubject" uri
                     [a !!("nicebnf:" + sub)]]
