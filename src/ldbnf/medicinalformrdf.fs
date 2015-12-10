@@ -32,6 +32,7 @@ module InteractionRdf =
                                   objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
                                   importance i
                                   dataProperty !!"nicebnf:hasDitaContent" ((string i.message)^^xsd.xmlliteral)
+                                  dataProperty !!"rdfs:label" ((string i.message.XElement.Value)^^xsd.string)
                                   dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
 
       let dr r = resource (Uri.fromil id) r
