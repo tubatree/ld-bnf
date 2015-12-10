@@ -51,13 +51,15 @@ namespace splitter
 
             var lookup = doc.XPathSelectElements("//topic[@id]")
                 .Select(e => new {id = e.Attribute("id").Value, type = GetTopicType(e)})
-                .ToDictionary(i => i.id);
+                .ToDictionary(i => i.id, i => i.type);
 
             foreach (var xref in doc.XPathSelectElements("//xref").ToList())
             {
                 var href = xref.Attribute("href");
-                if (href != null && lookup.ContainsKey(href.Value))
-                    xref.SetAttributeValue("rel",lookup[href.Value]);
+                if (href == null) continue;
+                var id = href.Value.Replace(".xml", "").Replace("#","");
+                if (lookup.ContainsKey(id))
+                    xref.SetAttributeValue("rel",lookup[id]);
             }
 
             var fragments = ProcessWithId(doc.Root);
