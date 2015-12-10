@@ -75,6 +75,8 @@ module RdfUris =
     static member from (TheraputicUse (s,_)) = !!(Uri.nicebnfClass + "TheraputicUse#" + (NameUtils.niceCamelName s))
     static member from (DomainOfEffect (s,_,_)) = !!(Uri.nicebnfClass + "DomainOfEffect#" + (NameUtils.niceCamelName (s.Value.Trim())))
     static member fromse (SideEffect s) = !!(Uri.nicebnfClass + "SideEffect#" + (NameUtils.niceCamelName s.String.Value))
+    static member fromcau (Caution s) = !!(Uri.nicebnfClass + "Caution#" + (NameUtils.niceCamelName s.String.Value))
+    static member fromcon (Contraindication s) = !!(Uri.nicebnfClass + "Contraindication#" + (NameUtils.niceCamelName s.String.Value))
     static member fromfre (f:Frequency) = !!(Uri.nicebnfClass + "Frequency#" + (NameUtils.niceCamelName f.frequencyid))
 
     static member DrugEntity = !!(Uri.nicebnf + "Drug")
@@ -100,3 +102,6 @@ module RdfUris =
     static member FundingIdentifierEntity = !!(Uri.nicebnfClass + "FundingIdentifier")
     static member PatientGroupEntity = !!(Uri.nicebnfClass + "PatientGroup")
     static member SpecificityEntity = !!(Uri.nicebnfClass + "Specificity")
+    static member SideEffectEntity = !!(Uri.nicebnfClass + "SideEffect")
+    static member ContraindicationEntity = !!(Uri.nicebnfClass + "Contraindication")
+    static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
