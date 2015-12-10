@@ -74,9 +74,9 @@ module BorderlineSubstanceRdf =
 
 
     static member frompackinfo (PackInfo(ps,uom,acbs)) =
-      [ps |> dpo "PackSize"
-       uom |> dpo "UnitOfMeasure"
-       acbs |> dpo "Acbs"] |> List.choose id
+        [ ps |> dpo "PackSize"
+          uom |> dpo "UnitOfMeasure"
+          acbs |> dpo "Acbs"] |> List.choose id
 
     static member fromnhsindicativeinfo (NhsIndicativeInfo(nhsi,pt,nhsip)) =
       [nhsi |> dpo "NhsIndicative"
@@ -84,9 +84,9 @@ module BorderlineSubstanceRdf =
        nhsip |> dpo "NhsIndicativePrice"] |> List.choose id
 
     static member frompricetarrif (PackSizePriceTariff(pi,nhs)) =
-      let s = [pi >>= (Graph.frompackinfo >> Some)
-               nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id |> List.collect id
-      blank !!"nicebnf:hasPack" s
+        let s = [ pi >>= (Graph.frompackinfo >> Some)
+                  nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id |> List.collect id
+        blank !!"nicebnf:hasPack" s
 
     static member fromprep (BorderlineSubstancePrep(t,pts)) =
       let s = match t with
@@ -97,7 +97,7 @@ module BorderlineSubstanceRdf =
       let ts = pts |> List.map Graph.frompricetarrif
       blank !!"nicebnf:hasBorderlineSubstancePrep" (s @ ts)
 
-      static member fromdetail (x:Detail) =
+    static member fromdetail (x:Detail) =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
       let inline dpx n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.xmlliteral)
       match x with
