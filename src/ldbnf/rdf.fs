@@ -91,7 +91,7 @@ module RdfUris =
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnf + "ClinicalMedicalDeviceInformationGroup")
     static member WoundManagementEntity = !!(Uri.nicebnf + "WoundManagement")
     static member InteractionEntity = !!(Uri.nicebnf + "Interaction")
-    static member InteractionDetailEntity = !!(Uri.nicebnf + "InteractionDetail")
+    static member InteractionListEntity = !!(Uri.nicebnf + "InteractionList")
     static member DosageEntity = !!(Uri.nicebnf + "Dosage")
 
     static member ClassificationEntity = !!(Uri.nicebnfClass + "Classification")

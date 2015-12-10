@@ -17,7 +17,7 @@ module InteractionRdf =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
-      let s = [ a Uri.InteractionEntity
+      let s = [ a Uri.InteractionListEntity
                 t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
 
       let iwuri = Uri.fromiw id
@@ -28,7 +28,7 @@ module InteractionRdf =
           | NotSet -> dataProperty !!"nicebnf:hasImportance" ("NotSet"^^xsd.string)
 
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
-                                 [a Uri.InteractionDetailEntity
+                                 [a Uri.InteractionEntity
                                   objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
                                   importance i
                                   dataProperty !!"nicebnf:hasDitaContent" ((string i.message)^^xsd.xmlliteral)
