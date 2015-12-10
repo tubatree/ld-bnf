@@ -98,7 +98,7 @@ module DrugRdf =
     static member fromcd (x:ConstituentDrug) =
       one !!"nicebnf:hasConstituentDrug" (Uri.from x )
        [a Uri.ConstituentDrugEntity
-        dataProperty !!"rdfs:label" ((string x)^^xsd.string)]
+        dataProperty !!"rdfs:label" ((x.ToString().Trim().ToLower())^^xsd.string)]
 
     static member fromtu ((x:TheraputicUse), ?name0:string) =
       let name = defaultArg name0 "nicebnf:hasTherapeuticUse"
