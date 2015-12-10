@@ -9,7 +9,7 @@ module TreatmentSummary =
 
   type Title = | Title of string
   type TargetAudience = | TargetAudience of string
-  type Link = {uri:string;label:string}
+  type Link = {id:Id;label:string;rel:string;}
   type Content = | Content of tsProvider.Section * TargetAudience option
   type BodySystem = | BodySystem of string
 
@@ -68,8 +68,9 @@ module TreatmentSummaryParser =
 
   type Link with
     static member from (x:XElement) = 
-     let uri = x.Attribute(XName.Get "href").Value
-     {uri = uri; label = x.Value}
+     let href = x.Attribute(XName.Get "href").Value
+     let rel = x.Attribute(XName.Get "rel").Value
+     {id = Id(href); label = x.Value; rel = rel}
  
   type Summary with
     static member from (x:tsProvider.Topic) =

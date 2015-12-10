@@ -45,8 +45,8 @@ module MedicalDeviceTypeRdf =
 
     static member fromdd uri (DeviceDescription(id,sd)) =
       one !!"bnfsite:hasDeviceDescription" (uri id)
-        [dataProperty !!"cnt:ContentAsXml" ((string sd)^^xsd.xmlliteral)]
+        [dataProperty !!"nicebnf:hasDitaContent" ((string sd)^^xsd.xmlliteral)]
 
     static member fromcs uri (ComplicanceStandards(id,sd)) =
       one !!"bnfsite:hasComplicanceStandards" (uri id)
-        [dataProperty !!"cnt:ContentAsXml" ((string sd)^^xsd.xmlliteral)]
+        [dataProperty !!"nicebnf:hasDitaContent" ((string sd)^^xsd.xmlliteral)]

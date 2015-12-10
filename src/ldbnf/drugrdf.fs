@@ -27,7 +27,6 @@ module DrugRdf =
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                                  "cnt",!!"http://www.w3.org/2011/content#"
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                                   "bnfsite",!!Uri.bnfsite]
 

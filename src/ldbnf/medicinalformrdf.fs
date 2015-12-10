@@ -15,7 +15,6 @@ module InteractionRdf =
   type Graph with
     static member from (InteractionList(id,t,il)) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "cnt",!!"http://www.w3.org/2011/content#"
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
       let s = [ a Uri.InteractionEntity
@@ -32,7 +31,7 @@ module InteractionRdf =
                                  [a Uri.InteractionDetailEntity
                                   objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
                                   importance i
-                                  dataProperty !!"cnt:ContentAsXml" ((string i.message)^^xsd.xmlliteral)
+                                  dataProperty !!"nicebnf:hasDitaContent" ((string i.message)^^xsd.xmlliteral)
                                   dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
 
       let dr r = resource (Uri.fromil id) r
@@ -55,7 +54,6 @@ module BorderlineSubstanceRdf =
   type Graph with
     static member from (x:BorderlineSubstance) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "cnt",!!"http://www.w3.org/2011/content#"
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
 
@@ -132,7 +130,6 @@ module DrugClassificationRdf =
   type Graph with
     static member from (DrugClassifications cs) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "cnt",!!"http://www.w3.org/2011/content#"
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
 
@@ -156,7 +153,6 @@ module TreatmentSummaryRdf =
   type Graph with
     static member from (x:TreatmentSummary) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "cnt",!!"http://www.w3.org/2011/content#"
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
 
@@ -190,7 +186,8 @@ module TreatmentSummaryRdf =
       blank !!"nicebnf:hasContent" s
 
     static member from (x:Link) =
-      dataProperty !!"nicebnf:hasLink" (x.uri^^xsd.string) //this needs to be a uri at some point
+      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+
     static member from (x:Summary) =
       let ls = x.links |> Seq.map Graph.from |> Seq.toList
       let cs = x.content |> List.map Graph.fromcontent
@@ -221,7 +218,6 @@ module MedicinalFormRdf =
   type Graph with
     static member from (x:MedicinalForm) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "cnt",!!"http://www.w3.org/2011/content#"
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
 

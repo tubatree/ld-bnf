@@ -4,7 +4,7 @@ open FSharp.Data
 module Shared =
   type Id =
     | Id of string
-    override __.ToString () = match __ with | Id x -> x.Replace(".xml","")
+    override __.ToString () = match __ with | Id x -> x.Replace(".xml","").Replace("#","")
 
   type Doi =
     | Doi of string
