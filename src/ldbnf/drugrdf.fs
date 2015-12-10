@@ -174,7 +174,7 @@ module DrugRdf =
            dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string) |> Some
            dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral) |> Some
            a Uri.DosageEntity |> Some
-           r >>= Graph.from] |> List.choose id)
+           r >>= (Graph.fromsp >> Some)] |> List.choose id)
       pgs |> Seq.map patientGrp
 
     static member from (x:TheraputicIndication) =

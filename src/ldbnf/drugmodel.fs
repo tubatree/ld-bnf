@@ -49,7 +49,9 @@ module Drug =
     type Route = | Route of string
     type Indication = | Indication of string
 
-    type RouteOfAdministration = | RouteOfAdministration of Option<Route> * PatientGroup seq 
+    type Specificity = | Specificity of Paragraph * Route list * Indication list
+
+    type RouteOfAdministration = | RouteOfAdministration of Specificity option * PatientGroup seq 
 
     type IndicationsAndDose = | IndicationsAndDose  of TheraputicIndication seq * RouteOfAdministration seq
 
@@ -59,8 +61,6 @@ module Drug =
       | DoseAdjustments of drugProvider.Section
       | ExtremesOfBodyWeight of drugProvider.Section
       | Potency of drugProvider.Section
-
-    type Specificity = | Specificity of Paragraph * Route list * Indication list
 
     type GeneralInformation = | GeneralInformation of drugProvider.Sectiondiv * Option<Specificity>
 
@@ -312,6 +312,20 @@ module DrugParser =
     type Indication with
       static member from (x:drugProvider.Ph) = Indication(x.String.Value)
 
+    type Specificity with
+      static member from (x:drugProvider.P) =
+        let rs = x.Phs |> Array.filter (hasOutputclass "route") |> Array.map Route.from |> Array.toList
+        let is = x.Phs |> Array.filter (hasOutputclass "indication") |> Array.map Indication.from |> Array.toList
+        Specificity(Paragraph.from x,rs,is)
+      static member from (x:string) =
+        Specificity(Paragraph(x,None),[],[])
+
+    let extractSpecificity (x:drugProvider.Sectiondiv) =
+      x.Ps |> Array.filter (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
+
+    let addSpecificity x =
+      extractSpecificity x, x
+
     type InteractionLink with
         static member from (x:drugProvider.Xref) = InteractionLink {Url = x.Href.Replace(".xml", "") ; Title = x.Value |? ""}
 
@@ -345,13 +359,13 @@ module DrugParser =
     type IndicationsAndDose with
       static member from (x:drugProvider.Section) =
          let theraputicIndications = x.Sectiondivs.[0] |> ( Paragraphs.fromsd >> TheraputicIndication.from )
-         let routes = x |> (Paragraphs.froms >> Route.from >> Seq.toArray) |> Array.map Some
+         let specificities = x.Ps |> Array.map (Specificity.from >> Some)
          let groups = x.Uls |> Array.map (fun u -> u.Lis |> Seq.choose PatientGroup.from)
          //if there are no routes then return something else
          let routesOfAdministration =
-            match routes with
+            match specificities with
             | [||] -> [|RouteOfAdministration(None,groups.[0]) |]
-            | _ -> Array.zip routes groups |> Array.map RouteOfAdministration
+            | _ -> Array.zip specificities groups |> Array.map RouteOfAdministration
          IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration)
 
     type IndicationsAndDoseSection with
@@ -397,20 +411,6 @@ module DrugParser =
         match y with
           | Some(y) -> Some (t (y))
           | None -> None
-
-    type Specificity with
-      static member from (x:drugProvider.P) =
-        let rs = x.Phs |> Array.filter (hasOutputclass "route") |> Array.map Route.from |> Array.toList
-        let is = x.Phs |> Array.filter (hasOutputclass "indication") |> Array.map Indication.from |> Array.toList
-        Specificity(Paragraph.from x,rs,is)
-      static member from (x:string) =
-        Specificity(Paragraph(x,None),[],[])
-
-    let extractSpecificity (x:drugProvider.Sectiondiv) =
-      x.Ps |> Array.filter (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
-
-    let addSpecificity x =
-      extractSpecificity x, x
 
     type Title with
       static member from (x:drugProvider.P) =
