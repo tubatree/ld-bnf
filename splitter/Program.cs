@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace splitter
 {
@@ -47,6 +48,17 @@ namespace splitter
             }
 
             var doc = XDocument.Load(filename);
+
+            var lookup = doc.XPathSelectElements("//topic[@id]")
+                .Select(e => new {id = e.Attribute("id").Value, type = GetTopicType(e)})
+                .ToDictionary(i => i.id);
+
+            foreach (var xref in doc.XPathSelectElements("//xref").ToList())
+            {
+                var href = xref.Attribute("href");
+                if (href != null && lookup.ContainsKey(href.Value))
+                    xref.SetAttributeValue("rel",lookup[href.Value]);
+            }
 
             var fragments = ProcessWithId(doc.Root);
 
