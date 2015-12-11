@@ -196,7 +196,7 @@ module Drug =
       | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv
       | SmcDecisions of Specificity option * drugProvider.Sectiondiv
 
-    type Interaction = | Interaction of Specificity option * drugProvider.Sectiondiv
+    type InteractionStatement = | InteractionStatement of Specificity option * drugProvider.Sectiondiv
 
     type MonographSection =
         | IndicationsAndDoseGroup of Id * IndicationsAndDose seq * IndicationsAndDoseSection seq
@@ -225,7 +225,7 @@ module Drug =
         | ImportantSafetyInformations of Id * ImportantSafetyInformation seq
         | DirectionsForAdministrations of Id * DirectionsForAdministration seq
         | NationalFunding of Id * FundingDecision seq
-        | Interactions of Id * Interaction seq
+        | InteractionStatements of Id * InteractionStatement seq
 
     type Synonyms = | Synonyms of string
 
@@ -794,12 +794,12 @@ module DrugParser =
                          | Some b -> b.Sections |> Array.collect FundingDecision.fromfd
                          | None -> [||]
         NationalFunding(Id(x.Id),fds)
-      static member interactions (x:drugProvider.Topic) =
+      static member interactionStatements (x:drugProvider.Topic) =
         let fs = x |> firstsection (withclass "general")
         let is = match fs with
-                 | Some s -> s.Sectiondivs |> Array.map (addSpecificity >> Interaction)
+                 | Some s -> s.Sectiondivs |> Array.map (addSpecificity >> InteractionStatement)
                  | None -> [||]
-        Interactions(Id(x.Id),is)
+        InteractionStatements(Id(x.Id),is)
 
     type MonographSection with
       static member section x =
@@ -830,7 +830,7 @@ module DrugParser =
         | HasOutputClass "importantSafetyInformation" _ -> Some(MonographSection.importantSafetyInformation x)
         | HasOutputClass "directionsForAdministration" _ -> Some(MonographSection.directionsForAdministration x)
         | HasOutputClass "nationalFunding" _ -> Some(MonographSection.nationalFunding x)
-        | HasOutputClass "interactions" _ -> Some(MonographSection.interactions x)
+        | HasOutputClass "interactions" _ -> Some(MonographSection.interactionStatements x)
         | _ -> None
 
     type CMPI with

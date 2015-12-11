@@ -96,7 +96,7 @@ module DrugRdf =
       cl :: ifs
 
     static member fromil (i:InteractionLink) =
-      one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionEntity]
+      one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionListEntity]
 
     static member fromcd (x:ConstituentDrug) =
       one !!"nicebnf:hasConstituentDrug" (Uri.from x )
@@ -263,7 +263,7 @@ module DrugRdf =
     static member fromcac (ConceptionAndContraception (sp,s)) = Graph.frompair (sp,s)
     static member fromisi (ImportantSafetyInformation(t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromdfa (DirectionsForAdministration (sp,s))= Graph.frompair (sp,s)
-    static member frominter (Interaction(sp,s)) = Graph.frompair(sp,s)
+    static member frominter (InteractionStatement(sp,s)) = Graph.frompair(sp,s)
     static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
     static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
@@ -415,5 +415,5 @@ module DrugRdf =
         | ImportantSafetyInformations (i,isis) -> sec "ImportantSafetyInformation" (sid i) [statements addps Graph.fromisi isis]
         | DirectionsForAdministrations (i,dfas) -> sec "DirectionsForAdministration" (sid i) [statements addps Graph.fromdfa dfas]
         | NationalFunding (i,fds) -> sec "NationalFunding" (sid i) [statements add Graph.fromfd fds]
-        | Interactions (i,is) -> sec "Interactions" (sid i) [statements addps Graph.frominter is]
+        | InteractionStatements (i,is) -> sec "Interactions" (sid i) [statements addps Graph.frominter is]
         | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" (sid i) [statements addps Graph.frommon mons]
