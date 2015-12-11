@@ -17,7 +17,7 @@ module InteractionRdf =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
-      let s = [ a Uri.InteractionEntity
+      let s = [ a Uri.InteractionListEntity
                 t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
 
       let iwuri = Uri.fromiw id
@@ -28,10 +28,11 @@ module InteractionRdf =
           | NotSet -> dataProperty !!"nicebnf:hasImportance" ("NotSet"^^xsd.string)
 
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
-                                 [a Uri.InteractionDetailEntity
+                                 [a Uri.InteractionEntity
                                   objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
                                   importance i
                                   dataProperty !!"nicebnf:hasDitaContent" ((string i.message)^^xsd.xmlliteral)
+                                  dataProperty !!"rdfs:label" ((string i.message.XElement.Value)^^xsd.string)
                                   dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
 
       let dr r = resource (Uri.fromil id) r
@@ -56,10 +57,12 @@ module BorderlineSubstanceRdf =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
+      let l t = match t with | Title t -> t.XElement.Value.ToString()
 
       let s = [ a Uri.BorderlineSubstanceEntity |> Some
-                x.title |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label")) |> Some
-                x.category |> (string >> xsd.string >> (dataProperty !!"nicebnf:hasCategory")) |> Some
+                x.title |> (l >> xsd.string >> (dataProperty !!"rdfs:label")) |> Some
+                x.title |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")) |> Some
+                x.category |> (string >> Uri.frombsc >> (objectProperty !!"nicebnf:hasCategory")) |> Some
                 x.intro >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasIntroductoryNote") >> Some)] |> List.choose id
 
       let ds = x.details |> List.map Graph.fromdetails
@@ -71,9 +74,9 @@ module BorderlineSubstanceRdf =
 
 
     static member frompackinfo (PackInfo(ps,uom,acbs)) =
-      [ps |> dpo "PackSize"
-       uom |> dpo "UnitOfMeasure"
-       acbs |> dpo "Acbs"] |> List.choose id
+        [ ps |> dpo "PackSize"
+          uom |> dpo "UnitOfMeasure"
+          acbs |> dpo "Acbs"] |> List.choose id
 
     static member fromnhsindicativeinfo (NhsIndicativeInfo(nhsi,pt,nhsip)) =
       [nhsi |> dpo "NhsIndicative"
@@ -81,21 +84,22 @@ module BorderlineSubstanceRdf =
        nhsip |> dpo "NhsIndicativePrice"] |> List.choose id
 
     static member frompricetarrif (PackSizePriceTariff(pi,nhs)) =
-      let s = [pi >>= (Graph.frompackinfo >> Some)
-               nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id |> List.collect id
-      blank !!"nicebnf:hasPackSizePriceTariff" s
+        let s = [ pi >>= (Graph.frompackinfo >> Some)
+                  nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id |> List.collect id
+        blank !!"nicebnf:hasPack" s
 
     static member fromprep (BorderlineSubstancePrep(t,pts)) =
       let s = match t with
               | Some (PreparationTitle(p,m)) ->
-                 [p |> (string >> xsd.xmlliteral >> (dataProperty !!"bnfsite:hasTitle")) |> Some
-                  m >>= (string >> xsd.string >> (dataProperty !!"bnfsite:hasManufacturer") >> Some)] |> List.choose id
+                 [p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")) |> Some
+                  m >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasManufacturer") >> Some)] |> List.choose id
               | None -> []
       let ts = pts |> List.map Graph.frompricetarrif
       blank !!"nicebnf:hasBorderlineSubstancePrep" (s @ ts)
 
     static member fromdetail (x:Detail) =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
+      let inline dpx n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.xmlliteral)
       match x with
         | Formulation s -> s |> dp "Formulation"
         | EnergyKj e -> e |> dp "EnergyKj"
@@ -108,7 +112,7 @@ module BorderlineSubstanceRdf =
         | FatConstituents f -> f |> dp "FatConstituents"
         | FibreGrams f -> f |> dp "FibreGrams"
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
-        | Acbs a -> a |> dp "Acbs"
+        | Acbs a -> a |> dpx "Acbs"
         | Presentation p -> p |> dp "Presentation"
 
     static member fromdetails (Details(ds,bsps)) =
