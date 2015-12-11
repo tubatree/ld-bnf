@@ -16,12 +16,12 @@ module WoundManagementRdf =
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                                   "bnfsite",!!Uri.bnfsite]
-    static member fromTitle (Title t) = dataProperty !!"nicebnf:hasTitle" (t^^xsd.string)
+    static member fromTitle (Title t) = dataProperty !!"rdfs:label" (t^^xsd.string)
 
     static member from (x:WoundManagement) =
       let s = optionlist {
                yield a Uri.WoundManagementEntity
-               yield x.general >>= (string >> xsd.string >> (dataProperty !!"bnfsite:hasGeneral") >> Some)
+               yield x.general >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasGeneral") >> Some)
                yield x.title |> Graph.fromTitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup
@@ -33,7 +33,7 @@ module WoundManagementRdf =
       |> Assert.graph Graph.setupGraph
 
     static member fromDescription (Description sd) =
-      dataProperty !!"bnfsite:hasDitaContent" (sd |> (string >> xsd.string))
+      dataProperty !!"nicebnf:hasDitaContent" (sd |> (string >> xsd.string))
 
     static member fromwml (x:WoundManagementLink) =
       objectProperty !!"nicebnf:hasWoundManagment" (Uri.totopic(x.rel,x.id))
