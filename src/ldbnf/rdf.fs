@@ -50,11 +50,11 @@ module RdfUris =
     static member fromsecdc (x:DrugClass) (Id i) = !!(Uri.bnfsite + "drugclass/" + string x.id + "#" + i)
     static member fromseccmpi (x:CMPI) (Id i) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string x.id + "#" + i)
     static member from (x:WoundManagement) = !!(Uri.bnfsite + "WoundManagement/" + string x.id )
-    
 
     static member from (x:MedicinalForm) = !!(Uri.bnfsite + "medicinalform/" + string x.id )
     static member from (x:MedicinalProduct) = !!(Uri.bnfsite + "medicinalproduct/" + string x.ampid)
-    static member fromampid (x) = !!(Uri.bnfsite + "medicinalproduct/" + string x)
+    static member from (x:Product) = !!(Uri.bnfsite + "woundmanagementproduct" + string x.ampid)
+
     static member from (x:TreatmentSummary) = match x with | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatmentsummary/" + string i)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medicaldevicetype/" + string x.id)
     static member fromcmdig (x:MedicalDeviceType) id = !!(Uri.bnfsite + "medicaldevicetype/" + string x.id + "#" + string id)

@@ -50,13 +50,11 @@ module WoundManagementRdf =
             yield! wes |> List.map Graph.fromExudate
           })
 
-    //some of this might be pointless when the apmid points to a product?
     static member fromProduct (x:Product) =
-      blank !!"nicebnf:hasProduct"
+      one !!"nicebnf:hasProduct" (Uri.from x)
        [x.manufacturer |> (xsd.string >> dataProperty !!"nicebnf:hasManufacturer")
         x.name |> (xsd.string >> dataProperty !!"nicebnf:hasName")
-        x.price |> (xsd.string >> dataProperty !!"nicebnf:hasPrice")
-        x.ampid |> (Uri.fromampid >> objectProperty !!"nicebnf:hasAmpid")]
+        x.price |> (xsd.string >> dataProperty !!"nicebnf:hasPrice")]
 
     static member fromProductGroup (ProductGroup(t,d,pl)) =
       blank !!"nicebnf:hasProductGroup"
