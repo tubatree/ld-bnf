@@ -71,7 +71,7 @@ module TreatmentSummaryParser =
      let href = x.Attribute(XName.Get "href").Value
      let format = x.Attribute(XName.Get "format").Value
      let rel = x.Attribute(XName.Get "rel")
-     if (rel <> null && format = "data") then
+     if (rel <> null && format = "dita") then
       {id = Id(href); label = x.Value; rel = rel.Value; format = format} |> Some
      else
       None
