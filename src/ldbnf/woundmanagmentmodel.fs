@@ -6,7 +6,9 @@ module WoundManagement =
 
   type wmProvider = XmlProvider<"superwoundmanagment.xml", Global=true, SampleIsList=true>
 
-  type Title = | Title of string
+  type Title =
+    | Title of string
+    override __.ToString () = match __ with | Title x -> x
 
   type General = | General of wmProvider.Section
 
@@ -36,7 +38,7 @@ module WoundManagement =
     dressingChoices: WoundType list;
     links: WoundManagementLink list;
     //products: Product list; //need to check if they exist in isolation
-    productGroups: ProductGroup list;
+    productGroups: ProductGroup list
   }
 
 module WoundManagementParser =
