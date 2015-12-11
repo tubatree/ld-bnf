@@ -10,10 +10,10 @@
         <p outputclass="typeOfWound">PINK (epitheliasing)</p>
         <sectiondiv outputclass="woundExudate">
           <p>Low exudate</p>
-          <xref format="dita" href="PHP101073.xml">Low adherence dressing</xref>
-          <xref format="dita" href="PHP101088.xml">Vapour-permeable films and membranes</xref>
-          <xref format="dita" href="PHP101096.xml">Soft polymer dressings</xref>
-          <xref format="dita" href="PHP101100.xml">Hydrocolloid dressings</xref>
+          <xref format="dita" rel="woundManagement" href="PHP101073.xml">Low adherence dressing</xref>
+          <xref format="dita" rel="woundManagement" href="PHP101088.xml">Vapour-permeable films and membranes</xref>
+          <xref format="dita" rel="woundManagement" href="PHP101096.xml">Soft polymer dressings</xref>
+          <xref format="dita" rel="woundManagement" href="PHP101100.xml">Hydrocolloid dressings</xref>
         </sectiondiv>
         <sectiondiv outputclass="woundExudate">
           <p>Moderate exudate</p>

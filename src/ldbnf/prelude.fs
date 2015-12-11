@@ -25,6 +25,7 @@ module prelude =
         member this.Zero() = []
         member this.Yield(x:'a option) = match x with | Some x -> [x] | None -> []
         member this.Yield(x:'a) = [x]
+        member this.YieldFrom(x:'a list) = x
         member this.Combine (a,b) = List.concat [a;b]
         member this.Delay(f) = f()
 

@@ -14,7 +14,7 @@ module WoundManagement =
 
   type Description = | Description of wmProvider.Sectiondiv
 
-  type WoundManagementLink = {uri:string;label:string;}
+  type WoundManagementLink = {id:Id;label:string;rel:string;}
 
   type WoundExudate = | WoundExudate of string * WoundManagementLink list
 
@@ -66,7 +66,7 @@ module WoundManagementParser =
 
   type WoundManagementLink with
     static member from (x:wmProvider.Xref) =
-      {uri=x.Href;label=x.Value}
+      {id=Id(x.Href);label=x.Value;rel=x.Rel |? ""}
 
   type WoundExudate with
     static member list (x:wmProvider.Sectiondiv[]) =
