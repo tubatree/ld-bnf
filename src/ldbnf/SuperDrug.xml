@@ -21,11 +21,7 @@
         <data name="domainOfEffect"> genito-urinary system  </data>
         <data name="domainOfEffect"> nervous system   </data>
       </data>
-      <p outputclass="synonyms">
-        <b>Superdrug</b>
-        <b>Ethinylestradiol</b>
-        <b>Etonogestrel</b>
-      </p>
+      <p outputclass="synonyms">Calcium and vitamin D</p>
     </body>
     <topic id="PHP42396" outputclass="drugAction" rev="1.39">
       <title>Drug action</title>

@@ -227,12 +227,15 @@ module Drug =
         | NationalFunding of Id * FundingDecision seq
         | Interactions of Id * Interaction seq
 
+    type Synonyms = | Synonyms of string
+
     type Drug = {id : Id;
                  name : DrugName;
                  interactionLinks : InteractionLink seq;
                  constituentDrugs : ConstituentDrug seq;
                  classifications : Classification seq;
                  vtmid : Option<Vtmid>;
+                 synonyms : Synonyms option;
                  sections : MonographSection seq;
                  primaryDomainOfEffect : Option<PrimaryDomainOfEffect>;
                  secondaryDomainsOfEffect : Option<SecondaryDomainsOfEffect>;}
@@ -865,10 +868,17 @@ module DrugParser =
 
         let vtmid = x.Body >>= (fun b ->  b.Datas |> Array.tryPick (Some >=> withname "vtmid" >=> Vtmid.from))
 
+        let syn (x:drugProvider.P) =
+          match x with
+           | HasOutputClasso "synonyms" p -> p.Value >>= (Synonyms >> Some)
+           | _ -> None
+
+        let synonyms = x.Body >>= (fun b -> b.Ps |> Array.tryPick syn)
+
         let sections =
           x.Topics |> Array.map MonographSection.section |> Array.choose id
 
         let primaryDomainOfEffect = x.Body >>= PrimaryDomainOfEffect.from
         let secondaryDomainsOfEffect = x.Body >>= SecondaryDomainsOfEffect.from
 
-        {id = Id(x.Id); name = name; interactionLinks = interactionLinks; constituentDrugs = constituentDrugs; classifications = classifications; vtmid = vtmid; sections = sections; primaryDomainOfEffect = primaryDomainOfEffect; secondaryDomainsOfEffect = secondaryDomainsOfEffect}
+        {id = Id(x.Id); name = name; interactionLinks = interactionLinks; constituentDrugs = constituentDrugs; classifications = classifications; vtmid = vtmid; sections = sections; primaryDomainOfEffect = primaryDomainOfEffect; secondaryDomainsOfEffect = secondaryDomainsOfEffect; synonyms = synonyms}

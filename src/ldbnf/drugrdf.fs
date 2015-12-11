@@ -59,6 +59,7 @@ module DrugRdf =
                 Some(dataProperty !!"nicebnf:hasTitle" ((getvald x.name)^^xsd.xmlliteral))
                 x.vtmid >>= getvtmid >>= (xsd.string >> dataProperty !!"nicebnf:hasVtmid" >> Some)
                 x.primaryDomainOfEffect >>= (Graph.frompdoe >> Some)
+                x.synonyms >>= (Graph.fromsyn >> Some)
                 ]
 
       let mfl = function
@@ -82,6 +83,8 @@ module DrugRdf =
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)
        dr mfls]
        |> Assert.graph Graph.setupGraph
+
+    static member fromsyn (Synonyms s) = dataProperty !!"nicebnf:hasSynonyms" (s^^xsd.string)
 
     static member fromdc (InheritsFromClass (c)) =
       one !!"nicebnf:inheritsFromClass" (Uri.fromdc c) [a Uri.DrugClassEntity]
