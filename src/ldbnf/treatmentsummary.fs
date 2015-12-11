@@ -69,12 +69,15 @@ module TreatmentSummaryParser =
   type Link with
     static member from (x:XElement) = 
      let href = x.Attribute(XName.Get "href").Value
-     let rel = x.Attribute(XName.Get "rel").Value
-     {id = Id(href); label = x.Value; rel = rel}
+     let rel = x.Attribute(XName.Get "rel")
+     if (rel <> null) then
+      {id = Id(href); label = x.Value; rel = rel.Value} |> Some
+     else
+      None
  
   type Summary with
     static member from (x:tsProvider.Topic) =
-      let ls = x.XElement.XPathSelectElements("//xref") |> Seq.map Link.from
+      let ls = x.XElement.XPathSelectElements("//xref") |> Seq.map Link.from |> Seq.choose id
       let t = Title(x.Title)
       let d = x.Body.Datas |> Array.choose (withname "doi") |> Array.tryPick Doi.from
       let bs = x.Body.Datas |> Array.choose (withname "bodySystem") |> Array.tryPick BodySystem.from
