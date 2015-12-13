@@ -194,7 +194,7 @@ module DrugRdf =
 
     static member fromidgs (x:IndicationsAndDoseSection) =
       let dp n s = [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))
-                    dataProperty !!"nicebnf:hasSubject" (n^^xsd.string)]
+                    (a !!("nicebnf:" + n))]
       match x with
        | Pharmacokinetics s -> s |> dp "Pharmacokinetics"
        | DoseEquivalence s -> s |> dp "DoseEquivalence"
@@ -203,7 +203,7 @@ module DrugRdf =
        | Potency s -> s |> dp "Potency" 
 
     static member frompca (p:PatientAndCarerAdvice) =
-      let pca t = Graph.fromthree >> (subject t)
+      let pca t = Graph.fromthree >> (subtype t)
       match p with
         | PatientResources (t,sp,s) -> (t,sp,s) |> pca p
         | AdviceAroundMissedDoses (t,sp,s) -> (t,sp,s) |> pca p
@@ -333,9 +333,9 @@ module DrugRdf =
 
     static member frommon (x:MonitoringRequirement) =
       match x with
-        | PatientMonitoringProgrammes (sp,s) -> Graph.frompair (sp,s) |> subject x
-        | TheraputicDrugMonitoring (sp,s) -> Graph.frompair (sp,s) |> subject x
-        | MonitoringOfPatientParameters (sp,s) -> Graph.frompair (sp,s) |> subject x
+        | PatientMonitoringProgrammes (sp,s) -> Graph.frompair (sp,s) |> subtype x
+        | TheraputicDrugMonitoring (sp,s) -> Graph.frompair (sp,s) |> subtype x
+        | MonitoringOfPatientParameters (sp,s) -> Graph.frompair (sp,s) |> subtype x
 
     static member fromsec sid (x:MonographSection) =
 
