@@ -24,6 +24,7 @@ module DrugRdf =
   let tosys (Sys s) = s
 
   let subject x l = dataProperty !!"nicebnf:hasSubject" ((toString x)^^xsd.string) :: l
+  let subtype x l = (a !!("nicebnf:" + (toString x))) :: l
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
@@ -299,36 +300,36 @@ module DrugRdf =
             one !!"nicebnf:hasFrequency" (Uri.fromfre f) fq
             dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (ses |> Seq.map Graph.fromse |> Seq.toList)
         match x with
-          | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subject x
-          | SideEffectsWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
-          | SideEffectsWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subject x
+          | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subtype x
+          | SideEffectsWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subtype x
+          | SideEffectsWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subtype x
 
     static member fromcog (x:ContraindicationsGroup) =
       let gen (p,cs) = [a !!"nicebnf:ContraindicationsGroup"
                         dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (cs |> Seq.map Graph.fromcon |> Seq.toList)
       match x with
-        | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subject x
-        | ContraindicationWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
-        | ContraindicationWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
+        | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subtype x
+        | ContraindicationWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
+        | ContraindicationWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
 
     static member fromcg (x:CautionsGroup) =
       let gen (p,cs) = [a !!"nicebnf:CautionsGroup"
                         dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (cs |> List.map Graph.fromcau)
       match x with
-        | GeneralCautions (p,cs) -> (gen(p,cs)) |> subject x
-        | CautionsWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
-        | CautionsWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subject x
+        | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x
+        | CautionsWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
+        | CautionsWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
 
     static member fromfd (x:FundingDecision) =
       match x with
-        | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subject x
-        | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subject x
+        | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subtype x
+        | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subtype x
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
-           let s = [sp >>= (Graph.fromsp >> Some)
-                    Some(Graph.from s)
-                    t >>= Graph.fromti
-                    fi >>= Graph.from] |> List.choose id
-           s |> subject x
+           let s = [ sp >>= (Graph.fromsp >> Some)
+                     Some(Graph.from s)
+                     t >>= Graph.fromti
+                     fi >>= Graph.from] |> List.choose id
+           s |> subtype x
 
     static member frommon (x:MonitoringRequirement) =
       match x with
