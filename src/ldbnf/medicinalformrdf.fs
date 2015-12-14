@@ -18,7 +18,7 @@ module InteractionRdf =
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
       let s = [ a Uri.InteractionListEntity
-                t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
+                t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))]
 
       let iwuri = Uri.fromiw id
 
