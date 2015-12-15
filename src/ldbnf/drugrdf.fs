@@ -164,8 +164,8 @@ module DrugRdf =
 
     static member fromsp (Specificity (Paragraph(s,_),r,i)) =
       let sp = optionlist {
-                yield! [dataProperty !!"rdfs:label" (s^^xsd.string)
-                        a Uri.SpecificityEntity]
+                yield dataProperty !!"rdfs:label" (s^^xsd.string)
+                yield a Uri.SpecificityEntity
                 yield! r |> List.choose Graph.from
                 yield! i |> List.choose Graph.from}
       one !!"nicebnf:hasSpecificity" (Uri.froms s) sp

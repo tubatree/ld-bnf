@@ -231,10 +231,11 @@ module MedicinalFormRdf =
                                   "bnfsite",!!Uri.bnfsite]
 
 
-      let s = [ a Uri.MedicinalFormEntity |> Some
-                x.title >>= (string >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
-                x.excipients >>= Graph.fromexc
-                x.electrolytes >>= Graph.fromele] |> List.choose id
+      let s = optionlist{
+                yield a Uri.MedicinalFormEntity
+                yield x.title >>= (string >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
+                yield x.excipients >>= Graph.fromexc
+                yield x.electrolytes >>= Graph.fromele}
 
       let cals = match x.cautionaryAdvisoryLabels with
                  | Some x -> Graph.fromcals x
@@ -253,13 +254,13 @@ module MedicinalFormRdf =
     static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
-      let s = [Some(dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral))
-               ln >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasLabelNumber") >> Some)]
-               |> List.choose id
-      Some(blank !!"nicebnf:hasCautionaryAdvisoryLabel" s)
+      blank !!"nicebnf:hasCautionaryAdvisoryLabel"
+               (optionlist {
+                 yield dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)
+                 yield ln >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasLabelNumber") >> Some)})
 
     static member fromcals (CautionaryAdvisoryLabels(_,cals)) =
-      cals |> Array.choose Graph.fromcal |> Array.toList
+      cals |> Array.map Graph.fromcal |> Array.toList
 
     static member dp n = xsd.string >> (dataProperty !!("nicebnf:has" + n))
 
@@ -285,38 +286,43 @@ module MedicinalFormRdf =
     static member frompt (PriceText x) = Graph.dp "PriceText" x |> Some
     static member fromnhsip (NhsIndicativePrice x) = Graph.dp "NhsIndicativePrice" (string x) |> Some
     static member fromnhsii (NhsIndicativeInfo(nhsi,pt,nhsip)) =
-      [nhsi >>= Graph.fromnhsi
-       pt >>= Graph.frompt
-       nhsip >>= Graph.fromnhsip] |> List.choose id
+      optionlist {
+        yield nhsi >>= Graph.fromnhsi
+        yield pt >>= Graph.frompt
+        yield nhsip >>= Graph.fromnhsip}
 
     static member fromps (PackSize d) = Graph.dp "PackSize" (string d) |> Some
     static member fromuom u = Graph.dp "UnitOfMeasure" (string u) |> Some
     static member fromlc lc = Graph.dp "LegalCategory" (string lc) |> Some
     static member frompackinfo (PackInfo(ps,uom,lc)) =
-      [ps >>= Graph.fromps
-       uom >>= Graph.fromuom
-       lc >>= Graph.fromlc] |> List.choose id
+      optionlist {
+       yield ps >>= Graph.fromps
+       yield uom >>= Graph.fromuom
+       yield lc >>= Graph.fromlc}
 
     static member fromdt (DrugTarrif s) = Graph.dp "DrugTarrif" s |> Some
     static member fromdtp (DrugTariffPrice dtp) = Graph.dp "DrugTariffPrice" (string dtp) |> Some
     static member fromdti (DrugTariffInfo(dt,pt,dtp)) =
-      [dt >>= Graph.fromdt
-       pt >>= Graph.frompt
-       dtp >>= Graph.fromdtp] |> List.choose id
+      optionlist {
+       yield dt >>= Graph.fromdt
+       yield pt >>= Graph.frompt
+       yield dtp >>= Graph.fromdtp}
 
     static member frompack(Pack(pi,nii,dti)) =
-      let s = [pi >>= (Graph.frompackinfo >> Some)
-               nii >>= (Graph.fromnhsii >> Some)
-               dti >>= (Graph.fromdti >> Some)
-               Some([ a !!"nicebnf:Pack" ])] |> List.choose id |> List.collect id
-      blank !!"nicebnf:hasPack" s
+      blank !!"nicebnf:hasPack"
+        (optionlist {
+          return! pi >>= (Graph.frompackinfo >> Some)
+          return! nii >>= (Graph.fromnhsii >> Some)
+          return! dti >>= (Graph.fromdti >> Some)
+          yield a !!"nicebnf:Pack"})
 
     static member from (x:MedicinalProduct) =
-      let sais = x.strengthOfActiveIngredient |> List.map Graph.fromsai
-      let cds = x.controlledDrugs |> List.map Graph.fromcd
-      let s = [Some(a Uri.MedicinalProductEntity)
-               Some(x.ampid |> string |> Graph.dp "Ampid")
-               x.title |> Graph.frommpt] @ sais @ cds
-               |> List.choose id
-      let ps = x.packs |> List.map Graph.frompack
-      one !!"nicebnf:hasMedicinalProduct" (Uri.from x) (s @ ps)
+      one !!"nicebnf:hasMedicinalProduct" (Uri.from x)
+        (optionlist {
+          yield a Uri.MedicinalProductEntity
+          yield x.ampid |> string |> Graph.dp "Ampid"
+          yield x.title |> Graph.frommpt
+          yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
+          yield! x.controlledDrugs |> List.choose Graph.fromcd
+          yield! x.packs |> List.map Graph.frompack
+        })
