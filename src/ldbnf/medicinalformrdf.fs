@@ -18,7 +18,7 @@ module InteractionRdf =
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
       let s = [ a Uri.InteractionListEntity
-                t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))]
+                t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
 
       let iwuri = Uri.fromiw id
 
@@ -59,11 +59,12 @@ module BorderlineSubstanceRdf =
                                   "bnfsite",!!Uri.bnfsite]
       let l t = match t with | Title t -> t.XElement.Value.ToString()
 
-      let s = [ a Uri.BorderlineSubstanceEntity |> Some
-                x.title |> (l >> xsd.string >> (dataProperty !!"rdfs:label")) |> Some
-                x.title |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")) |> Some
-                x.category |> (string >> Uri.frombsc >> (objectProperty !!"nicebnf:hasCategory")) |> Some
-                x.intro >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasIntroductoryNote") >> Some)] |> List.choose id
+      let s =  optionlist {
+                yield a Uri.BorderlineSubstanceEntity
+                yield x.title |> (l >> xsd.string >> (dataProperty !!"rdfs:label"))
+                yield x.title |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle"))
+                yield x.category |> (string >> Uri.frombsc >> (objectProperty !!"nicebnf:hasCategory"))
+                yield x.intro >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasIntroductoryNote") >> Some)}
 
       let ds = x.details |> List.map Graph.fromdetails
 
