@@ -32,9 +32,9 @@ module DrugRdf =
                                                   "bnfsite",!!Uri.bnfsite]
 
     static member from (x:CMPI) =
-      let s = [ Some(a Uri.CMPIEntity)
-                Some(dataProperty !!"rdfs:label" ((getlabelcmpi x.cmpiname)^^xsd.string))
-                Some(dataProperty !!"nicebnf:hasTitle" ((getvalcmpi x.cmpiname)^^xsd.xmlliteral))] |> List.choose id
+      let s = [ a Uri.CMPIEntity
+                dataProperty !!"rdfs:label" ((getlabelcmpi x.cmpiname)^^xsd.string)
+                dataProperty !!"nicebnf:hasTitle" ((getvalcmpi x.cmpiname)^^xsd.xmlliteral)]
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromseccmpi x)
       [dr s
@@ -42,9 +42,9 @@ module DrugRdf =
        |> Assert.graph Graph.setupGraph
 
     static member from (x:DrugClass) =
-      let s = [ Some(a Uri.DrugClassEntity)
-                Some(dataProperty !!"rdfs:label" ((getlabeldc x.dcname)^^xsd.string))
-                Some(dataProperty !!"nicebnf:hasTitle" ((getvaldc x.dcname)^^xsd.xmlliteral))] |> List.choose id
+      let s = [a Uri.DrugClassEntity)
+               dataProperty !!"rdfs:label" ((getlabeldc x.dcname)^^xsd.string)
+               dataProperty !!"nicebnf:hasTitle" ((getvaldc x.dcname)^^xsd.xmlliteral)]
 
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromsecdc x)
@@ -55,13 +55,14 @@ module DrugRdf =
 
     static member from (x:Drug) =
 
-      let s = [ Some(a Uri.DrugEntity)
-                Some(dataProperty !!"rdfs:label" ((getlabeld x.name)^^xsd.string))
-                Some(dataProperty !!"nicebnf:hasTitle" ((getvald x.name)^^xsd.xmlliteral))
-                x.vtmid >>= getvtmid >>= (xsd.string >> dataProperty !!"nicebnf:hasVtmid" >> Some)
-                x.primaryDomainOfEffect >>= (Graph.frompdoe >> Some)
-                x.synonyms >>= (Graph.fromsyn >> Some)
-                ]
+      let s = optionlist {
+                 yield a Uri.DrugEntity
+                 yield dataProperty !!"rdfs:label" ((getlabeld x.name)^^xsd.string)
+                 yield dataProperty !!"nicebnf:hasTitle" ((getvald x.name)^^xsd.xmlliteral)
+                 yield x.vtmid >>= getvtmid >>= (xsd.string >> dataProperty !!"nicebnf:hasVtmid" >> Some)
+                 yield x.primaryDomainOfEffect >>= (Graph.frompdoe >> Some)
+                 yield x.synonyms >>= (Graph.fromsyn >> Some)
+                }
 
       let mfl = function
                  | MedicinalForms (_,_,_,mfls) -> mfls |> Seq.map Graph.frommfl |> Seq.toList
