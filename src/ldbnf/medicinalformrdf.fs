@@ -75,25 +75,28 @@ module BorderlineSubstanceRdf =
 
 
     static member frompackinfo (PackInfo(ps,uom,acbs)) =
-        [ ps |> dpo "PackSize"
-          uom |> dpo "UnitOfMeasure"
-          acbs |> dpo "Acbs"] |> List.choose id
+      optionlist {
+        yield ps |> dpo "PackSize"
+        yield uom |> dpo "UnitOfMeasure"
+        yield acbs |> dpo "Acbs"}
 
     static member fromnhsindicativeinfo (NhsIndicativeInfo(nhsi,pt,nhsip)) =
-      [nhsi |> dpo "NhsIndicative"
-       pt |> dpo "PriceText"
-       nhsip |> dpo "NhsIndicativePrice"] |> List.choose id
+      optionlist {
+        yield nhsi |> dpo "NhsIndicative"
+        yield pt |> dpo "PriceText"
+        yield nhsip |> dpo "NhsIndicativePrice"}
 
     static member frompricetarrif (PackSizePriceTariff(pi,nhs)) =
-        let s = [ pi >>= (Graph.frompackinfo >> Some)
-                  nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id |> List.collect id
-        blank !!"nicebnf:hasPack" s
+      let s = [pi >>= (Graph.frompackinfo >> Some)
+               nhs >>= (Graph.fromnhsindicativeinfo >> Some)] |> List.choose id
+      blank !!"nicebnf:hasPack" (s |> List.collect id)
 
     static member fromprep (BorderlineSubstancePrep(t,pts)) =
       let s = match t with
               | Some (PreparationTitle(p,m)) ->
-                 [p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")) |> Some
-                  m >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasManufacturer") >> Some)] |> List.choose id
+                optionlist {
+                  yield p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle"))
+                  yield m >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasManufacturer") >> Some)}
               | None -> []
       let ts = pts |> List.map Graph.frompricetarrif
       blank !!"nicebnf:hasBorderlineSubstancePrep" (s @ ts)
@@ -178,7 +181,7 @@ module TreatmentSummaryRdf =
 
 
     static member fromti (Title s) =
-      dataProperty !!"nicebnf:rdfs:label" (s^^xsd.string)
+      dataProperty !!"rdfs:label" (s^^xsd.string)
     static member fromdoi (Shared.Doi s) =
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
     static member frombs (BodySystem s) =
@@ -186,20 +189,21 @@ module TreatmentSummaryRdf =
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
     static member fromcontent (Content(s,ta)) =
-      let s = [ta >>= (Graph.fromta >> Some)
-               Some(dataProperty !!"nicebnf:hasDitaContent" ((string s)^^xsd.xmlliteral))] |> List.choose id
-      blank !!"nicebnf:hasContent" s
+      blank !!"nicebnf:hasContent"
+       (optionlist {
+         yield ta >>= (Graph.fromta >> Some)
+         yield dataProperty !!"nicebnf:hasDitaContent" ((string s)^^xsd.xmlliteral)})
 
     static member from (x:Link) =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
     static member from (x:Summary) =
-      let ls = x.links |> Seq.map Graph.from |> Seq.toList
-      let cs = x.content |> List.map Graph.fromcontent
-      let s = [Graph.fromti x.title |> Some
-               x.doi >>= (Graph.fromdoi >> Some)
-               x.bodySystem >>= (Graph.frombs >> Some)] |> List.choose id
-      s @ ls @ cs
+      optionlist {
+        yield Graph.fromti x.title
+        yield x.doi >>= (Graph.fromdoi >> Some)
+        yield x.bodySystem >>= (Graph.frombs >> Some)
+        yield! x.links |> Seq.map Graph.from |> Seq.toList
+        yield! x.content |> List.map Graph.fromcontent}
 
     static member fromts (TreatmentSummary (_,x)) =
       match x with
@@ -226,7 +230,8 @@ module MedicinalFormRdf =
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
 
-      let s = [ Some(a Uri.MedicinalFormEntity)
+
+      let s = [ a Uri.MedicinalFormEntity |> Some
                 x.title >>= (string >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
                 x.excipients >>= Graph.fromexc
                 x.electrolytes >>= Graph.fromele] |> List.choose id
@@ -261,10 +266,10 @@ module MedicinalFormRdf =
     static member fromman (Manufacturer x) = Graph.dp "Manufacturer" x |> Some
     static member frombt (BlackTriangle x) = Graph.dp "BlackTriangle" x |> Some
     static member frommpt (MedicinalProductTitle(m,bt,t)) =
-      let tc = string >> xsd.string >> (dataProperty !!"nicebnf:hasDitaContent") >> Some
-      let s = [m >>= Graph.fromman
-               bt >>= Graph.frombt
-               tc t] |> List.choose id
+      let s = optionlist {
+               yield m >>= Graph.fromman
+               yield bt >>= Graph.frombt
+               yield t |> (string >> xsd.string >> (dataProperty !!"nicebnf:hasDitaContent"))}
       blank !!"nicebnf:hasMedicinalProductTitle" s |> Some
 
     static member fromexc (Excipients e) =

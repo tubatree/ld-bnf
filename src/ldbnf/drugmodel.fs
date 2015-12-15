@@ -132,14 +132,7 @@ module Drug =
     type SideEffectsOverdosageInformation =
       | SideEffectsOverdosageInformation of Option<Specificity> * drugProvider.Sectiondiv
 
-    type SideEffect =
-      | SideEffect of drugProvider.Ph
-      override __.ToString () =
-        match __ with
-          | SideEffect x -> match x.String with
-                            | Some (s) -> s
-                            | _ -> ""
-
+    type SideEffect = | SideEffect of drugProvider.Ph
 
     type Frequency = {
       frequencyid:string;

@@ -25,6 +25,11 @@ module DrugRdf =
 
   let subject x l = dataProperty !!"nicebnf:hasSubject" ((toString x)^^xsd.string) :: l
   let subtype x l = (a !!("nicebnf:" + (toString x))) :: l
+  let label (s:string) = s.Trim().ToLower()
+
+  let ph (ph:drugProvider.Ph) =
+    [dataProperty !!"rdfs:label"  (ph.XElement.Value |> (label >> xsd.string))
+     dataProperty !!"nicebnf:hasDitaContent" ((string ph).Trim()^^xsd.xmlliteral)]
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
@@ -75,10 +80,10 @@ module DrugRdf =
 
       let sdoe = match x.secondaryDomainsOfEffect with
                  | Some d -> Graph.fromsdoes d
-                 | None -> Seq.empty<(Predicate * Object)>
+                 | None -> []
 
       [dr s
-       dr (sdoe |> Seq.toList)
+       dr sdoe
        dr (x.classifications |> Seq.map Graph.fromcl |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
@@ -103,33 +108,29 @@ module DrugRdf =
     static member fromcd (x:ConstituentDrug) =
       one !!"nicebnf:hasConstituentDrug" (Uri.from x )
        [a Uri.ConstituentDrugEntity
-        dataProperty !!"rdfs:label" ((x.ToString().Trim().ToLower())^^xsd.string)]
+        dataProperty !!"rdfs:label" (x |> (string >> label >> xsd.string))]
 
     static member fromtu ((x:TheraputicUse), ?name0:string) =
       let name = defaultArg name0 "nicebnf:hasTherapeuticUse"
       let s = match x with | TheraputicUse(n,u) ->
-                               [Some(a Uri.TheraputicUseEntity)
-                                Some(dataProperty !!"rdfs:label" (n^^xsd.string))
-                                u >>= (Graph.fromtu >> Some)]
-      one !!name (Uri.from x) (s |> List.choose id)
+                              optionlist {
+                               yield a Uri.TheraputicUseEntity
+                               yield dataProperty !!"rdfs:label" (n^^xsd.string)
+                               yield u >>= (Graph.fromtu >> Some)}
+      one !!name (Uri.from x) s
 
     static member fromptu (PrimaryTheraputicUse t) =
-      match t with
-        | Some x -> Some(Graph.fromtu (x,"nicebnf:hasPrimaryTherapeuticUse"))
-        | None -> None
+      t >>= fun x -> Graph.fromtu (x,"nicebnf:hasPrimaryTherapeuticUse") |> Some
 
     static member fromstu (SecondaryTheraputicUses t) =
-      match t with
-        | Some x -> Some(Graph.fromtu (x,"nicebnf:hasSecondaryTherapeuticUses"))
-        | None -> None
+      t >>= fun x -> Graph.fromtu (x,"nicebnf:hasSecondaryTherapeuticUses") |> Some
 
     static member fromdoe (DomainOfEffect (n,p,s)) =
-      let fettle (s:string) = s.Trim().ToLower()
-      let s = [ Some(a Uri.DomainOfEffectEntity)
-                n >>= (fettle >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
-                p >>= Graph.fromptu
-                s >>= Graph.fromstu]
-      s |> List.choose id
+      optionlist {
+        yield a Uri.DomainOfEffectEntity
+        yield n >>= (label >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
+        yield p >>= Graph.fromptu
+        yield s >>= Graph.fromstu}
 
     static member hasdoe p (d:DomainOfEffect) =
       one !!("nicebnf:has" + p) (Uri.from d) (Graph.fromdoe d)
@@ -138,7 +139,7 @@ module DrugRdf =
       d |> (Graph.hasdoe "PrimaryDomainOfEffect")
 
     static member fromsdoes (SecondaryDomainsOfEffect ds) =
-      ds |> Seq.map (Graph.hasdoe "SecondaryDomainOfEffect")
+      ds |> Seq.map (Graph.hasdoe "SecondaryDomainOfEffect") |> Seq.toList
 
     static member from (x:Route) =
       let l = match x with | Route r -> r^^xsd.string
@@ -162,23 +163,25 @@ module DrugRdf =
       Some(dataProperty !!"nicebnf:hasTitle" (s^^xsd.string))
 
     static member fromsp (Specificity (Paragraph(s,_),r,i)) =
-      let sp = [ [ dataProperty !!"rdfs:label" (s^^xsd.string)
-                   a Uri.SpecificityEntity]
-                 r |> List.choose Graph.from
-                 i |> List.choose Graph.from] |> List.collect id
+      let sp = optionlist {
+                yield! [dataProperty !!"rdfs:label" (s^^xsd.string)
+                        a Uri.SpecificityEntity]
+                yield! r |> List.choose Graph.from
+                yield! i |> List.choose Graph.from}
       one !!"nicebnf:hasSpecificity" (Uri.froms s) sp
 
     //ungroup the patient groups adding a route if available
     static member from (RouteOfAdministration(r,pgs)) =
       let patientGrp pg =
         blank !!"nicebnf:hasDosage"
-         ([one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
-             [dataProperty !!"rdfs:label" (pg.Group^^xsd.string)
-              a Uri.PatientGroupEntity] |> Some
-           dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string) |> Some
-           dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral) |> Some
-           a Uri.DosageEntity |> Some
-           r >>= (Graph.fromsp >> Some)] |> List.choose id)
+         (optionlist {
+          yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
+                 [dataProperty !!"rdfs:label" (pg.Group^^xsd.string)
+                  a Uri.PatientGroupEntity]
+          yield dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string)
+          yield dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral)
+          yield a Uri.DosageEntity
+          yield r >>= (Graph.fromsp >> Some)})
       pgs |> Seq.map patientGrp
 
     static member from (x:TheraputicIndication) =
@@ -233,17 +236,19 @@ module DrugRdf =
       dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(x.ToString()))
 
     static member frompair (sp,s:drugProvider.Sectiondiv) =
-      [sp >>= (Graph.fromsp >> Some)
-       Some(Graph.from s)] |> List.choose id
+      optionlist {
+        yield sp >>= (Graph.fromsp >> Some)
+        yield Graph.from s}
 
     static member fromthree (t,sp,s) =
-      let st = [t >>= Graph.fromti] |> List.choose id
-      st @ (Graph.frompair (sp,s))
+      optionlist {
+        yield t >>= Graph.fromti
+        yield! Graph.frompair (sp,s)}
 
     static member fromgi (GeneralInformation (sd,sp)) =
-      let s = [Some(dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString())))
-               sp >>= (Graph.fromsp >> Some)]
-      s |> List.choose id
+      optionlist {
+        yield dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString()))
+        yield sp >>= (Graph.fromsp >> Some)}
 
     static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
 
@@ -273,49 +278,52 @@ module DrugRdf =
       [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
 
     static member fromse (x:SideEffect) =
-      let l = match x with | SideEffect s -> ((s.XElement.Value.Trim().ToLower())^^xsd.string)
-      let d = match x with | SideEffect s -> ((string s).Trim()^^xsd.xmlliteral)
-      one !!"nicebnf:hasSideEffect" (Uri.fromse x) [dataProperty !!"rdfs:label" l
-                                                    dataProperty !!"nicebnf:hasDitaContent" d
-                                                    a Uri.SideEffectEntity ]
+      one !!"nicebnf:hasSideEffect" (Uri.fromse x)
+       (optionlist {
+         yield! x |> function | SideEffect s -> ph s
+         yield a Uri.SideEffectEntity })
 
     static member fromcon (x:Contraindication) =
-      let l = match x with | Contraindication s -> ((s.XElement.Value.Trim().ToLower())^^xsd.string)
-      let d = match x with | Contraindication s -> ((string s).Trim()^^xsd.xmlliteral)
-      one !!"nicebnf:hasContraindication" (Uri.fromcon x) [dataProperty !!"rdfs:label" l
-                                                           dataProperty !!"nicebnf:hasDitaContent" d
-                                                           a Uri.ContraindicationEntity ]
+      one !!"nicebnf:hasContraindication" (Uri.fromcon x)
+        (optionlist {
+          yield! x |> function | Contraindication c -> ph c
+          yield a Uri.ContraindicationEntity })
 
     static member fromcau (x:Caution) =
-      let l = match x with | Caution s -> ((s.XElement.Value.Trim().ToLower())^^xsd.string)
-      let d = match x with | Caution s -> ((string s).Trim()^^xsd.xmlliteral)
-      one !!"nicebnf:hasCaution" (Uri.fromcau x) [dataProperty !!"rdfs:label" l
-                                                  dataProperty !!"nicebnf:hasDitaContent" d
-                                                  a Uri.CautionEntity ]
+      one !!"nicebnf:hasCaution" (Uri.fromcau x)
+       (optionlist {
+         yield! x|> function | Caution c -> ph c
+         yield a Uri.CautionEntity})
 
     static member fromfre (x:SideEffectsGroup) =
         let gf (f,p,ses) =
-          let fq = [a !!"nicebnf:Frequency"
-                    dataProperty !!"rdfs:label" (f.label^^xsd.string)]
-          [ a !!"nicebnf:SideEffectGroup"
-            one !!"nicebnf:hasFrequency" (Uri.fromfre f) fq
-            dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (ses |> Seq.map Graph.fromse |> Seq.toList)
+          optionlist {
+           yield a !!"nicebnf:SideEffectGroup"
+           yield one !!"nicebnf:hasFrequency" (Uri.fromfre f)
+             [a !!"nicebnf:Frequency"
+              dataProperty !!"rdfs:label" (f.label^^xsd.string)]
+           yield dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)
+           yield! ses |> Seq.map Graph.fromse |> Seq.toList}
         match x with
           | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subtype x
           | SideEffectsWithRoutes (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subtype x
           | SideEffectsWithIndications (f,sp,p,ses) -> (sp |> Graph.fromsp) :: gf(f,p,ses) |> subtype x
 
     static member fromcog (x:ContraindicationsGroup) =
-      let gen (p,cs) = [a !!"nicebnf:ContraindicationsGroup"
-                        dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (cs |> Seq.map Graph.fromcon |> Seq.toList)
+      let gen (p,cs) =  optionlist {
+                         yield a !!"nicebnf:ContraindicationsGroup"
+                         yield p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDitaContent")
+                         yield! (cs |> Seq.map Graph.fromcon |> Seq.toList)}
       match x with
         | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subtype x
         | ContraindicationWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
         | ContraindicationWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
 
     static member fromcg (x:CautionsGroup) =
-      let gen (p,cs) = [a !!"nicebnf:CautionsGroup"
-                        dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)] @ (cs |> List.map Graph.fromcau)
+      let gen (p,cs) =  optionlist {
+                         yield a !!"nicebnf:CautionsGroup"
+                         yield p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDitaContent")
+                         yield! (cs |> List.map Graph.fromcau)}
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x
         | CautionsWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
@@ -326,11 +334,11 @@ module DrugRdf =
         | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subtype x
         | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subtype x
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
-           let s = [ sp >>= (Graph.fromsp >> Some)
-                     Some(Graph.from s)
-                     t >>= Graph.fromti
-                     fi >>= Graph.from] |> List.choose id
-           s |> subtype x
+          optionlist {
+            yield sp >>= (Graph.fromsp >> Some)
+            yield Graph.from s
+            yield t >>= Graph.fromti
+            yield fi >>= Graph.from} |> subtype x
 
     static member frommon (x:MonitoringRequirement) =
       match x with
