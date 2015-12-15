@@ -31,10 +31,11 @@ module MedicalDeviceTypeRdf =
        |> Assert.graph Graph.setupGraph
 
     static member fromcmdig uri (x:ClinicalMedicalDeviceInformationGroup) =
-      let s = [a Uri.ClinicalMedicalDeviceInformationGroupEntity |> Some
-               dataProperty !!"rdfs:label" ((string x.title)^^xsd.string) |> Some
-               x.description >>= (Graph.fromdd uri >> Some)
-               x.complicance >>= (Graph.fromcs uri >> Some)] |> List.choose id
+      let s =  optionlist {
+                yield a Uri.ClinicalMedicalDeviceInformationGroupEntity
+                yield dataProperty !!"rdfs:label" ((string x.title)^^xsd.string)
+                yield x.description >>= (Graph.fromdd uri >> Some)
+                yield x.complicance >>= (Graph.fromcs uri >> Some)}
 
       let sec = Graph.fromsec uri
 

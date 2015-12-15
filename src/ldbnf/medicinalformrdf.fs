@@ -178,7 +178,7 @@ module TreatmentSummaryRdf =
 
 
     static member fromti (Title s) =
-      dataProperty !!"nicebnf:hasTitle" (s^^xsd.string)
+      dataProperty !!"nicebnf:rdfs:label" (s^^xsd.string)
     static member fromdoi (Shared.Doi s) =
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
     static member frombs (BodySystem s) =
