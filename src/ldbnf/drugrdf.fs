@@ -42,7 +42,7 @@ module DrugRdf =
        |> Assert.graph Graph.setupGraph
 
     static member from (x:DrugClass) =
-      let s = [a Uri.DrugClassEntity)
+      let s = [a Uri.DrugClassEntity
                dataProperty !!"rdfs:label" ((getlabeldc x.dcname)^^xsd.string)
                dataProperty !!"nicebnf:hasTitle" ((getvaldc x.dcname)^^xsd.xmlliteral)]
 
@@ -77,7 +77,7 @@ module DrugRdf =
                  | Some d -> Graph.fromsdoes d
                  | None -> Seq.empty<(Predicate * Object)>
 
-      [dr (s |> List.choose id)
+      [dr s
        dr (sdoe |> Seq.toList)
        dr (x.classifications |> Seq.map Graph.fromcl |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
