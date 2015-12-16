@@ -66,7 +66,7 @@ namespace splitter
 
             foreach (var fragment in fragments.Where(process))
             {
-                var typeDir = Path.Combine(outputdir, fragment.Type.Replace("#","_"));
+                var typeDir = Path.Combine(outputdir, fragment.Type.Replace("#",""));
                 if (!Directory.Exists(typeDir))
                     Directory.CreateDirectory(typeDir);
                 var path = Path.Combine(typeDir, fragment.Id + ".xml");
