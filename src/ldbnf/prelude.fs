@@ -15,15 +15,11 @@ module prelude =
 
     let (>>=) a b = Option.bind b a
 
-    let (~~) o l =
-      match o with
-        | Some i -> i :: l
-        | None -> l
-
+    //Generic list that allows optional values to collapse out
     type OptionlistBuilder<'a> () =
         member this.Bind(m, f) = m |> List.collect f
         member this.Zero() = []
-        member this.Yield(x:'a option) = match x with | Some x -> [x] | None -> []
+        member this.Yield(x:'a option) = match x with | Some x -> [x] | None -> [] //collapse None into an empty list
         member this.Yield(x:'a) = [x]
         member this.YieldFrom(x:'a list) = x
         member this.ReturnFrom(x:'a list option) = match x with | Some x -> x | None -> []  //naughty but convenient
@@ -32,6 +28,7 @@ module prelude =
 
     open Microsoft.FSharp.Reflection
 
+    //get a string reprasentaiton of a DU
     let toString (x:'a) = 
       match FSharpValue.GetUnionFields(x, typeof<'a>) with
         | case, _ -> case.Name
