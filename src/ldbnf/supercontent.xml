@@ -1,0 +1,54 @@
+<samples>
+  <topic id="PHP101868" rev="1.51">
+  <title>Dental Practitioners’ Formulary</title>
+  <body>
+    <section outputclass="general">
+      <sectiondiv>
+        <p outputclass="title">List of Dental Preparations</p>
+        <p>The following list has been approved by the appropriate Secretaries of State, and the preparations therein may be prescribed by dental practitioners on form FP10D (GP14 in Scotland, WP10D in Wales).</p>red.</p>
+        <p>Licensed <b>alcohol-free</b> mouthwashes, where available, are preferred.</p>
+        <ul>
+          <li>Aciclovir Cream, BP</li>
+          <li>Aciclovir Oral Suspension, BP, 200 mg/5 mL</li>
+        </ul>
+      </sectiondiv>
+    </section>
+    <section outputclass="adult">
+      <sectiondiv>
+        <p>Preparations in this list which are not included in the BP or BPC are described under Details of DPF preparations.</p>
+        <p>For details of preparations that can be prescribed, see individual entries under the relevant drug monographs throughout the BNF publications.</p>
+      </sectiondiv>
+      <sectiondiv>
+        <p outputclass="title">Details of DPF preparations</p>
+        <p>Preparations on the List of Dental Preparations which are specified as DPF are described as follows in the DPF.</p>
+        <p>Although brand names have sometimes been included for identification purposes preparations on the list should be prescribed by non-proprietary name.</p>
+        <sectiondiv>
+          <p>
+            <b>Amoxicillin Oral Powder</b>
+          </p>
+          <sectiondiv>
+            <p>amoxicillin (as trihydrate) 3 g sachet</p>
+          </sectiondiv>
+        </sectiondiv>
+        <sectiondiv>
+          <p>
+            <b>Artificial Saliva Gel</b>
+          </p>
+          <sectiondiv>
+            <p>(proprietary product: <i>Biotene Oralbalance</i>), lactoperoxidase, lactoferrin, lysozyme, glucose oxidase, xylitol in a gel basis</p>
+          </sectiondiv>
+        </sectiondiv>
+      </sectiondiv>
+    </section>
+  </body>
+  </topic>
+  <topic id="PHP102263" outputclass="borderlineSubstanceAcbs">
+  <title>Borderline substances ACBS indications</title>
+  <body>
+    <section>
+      <p>
+        <b>Standard ACBS indications:</b> Disease-related malnutrition, intractable malabsorption, pre-operative preparation of malnourished patients, dysphagia, proven inflammatory bowel disease, following total gastrectomy, short-bowel syndrome, bowel fistula</p>
+    </section>
+  </body>
+  </topic>
+</samples>
