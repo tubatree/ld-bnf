@@ -25,7 +25,7 @@ module Interaction =
      interactswith:Link;}
 
   type InteractionList =
-    | InteractionList of Id * Title * InteractsWith list
+    | InteractionList of Id * Title * InteractsWith list * Id list
 
 
 module InteracitonParser =
@@ -50,5 +50,6 @@ module InteracitonParser =
   type InteractionList with
     static member parse (x:inProvider.Topic) =
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
-      InteractionList(Id(x.Id),Title x.Title,is)
+      let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
+      InteractionList(Id(x.Id),Title x.Title,is, ids)
 

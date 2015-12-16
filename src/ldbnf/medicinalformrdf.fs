@@ -13,7 +13,7 @@ module InteractionRdf =
   open RdfUris
 
   type Graph with
-    static member from (InteractionList(id,t,il)) =
+    static member from (InteractionList(id,t,il,ids)) =
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                   "bnfsite",!!Uri.bnfsite]
@@ -35,9 +35,12 @@ module InteractionRdf =
                                   dataProperty !!"rdfs:label" ((string i.message.XElement.Value)^^xsd.string)
                                   dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
 
+      let link = Uri.fromil >> objectProperty !!"nidebnf:hasInteractionList"
+
       let dr r = resource (Uri.fromil id) r
       [dr s
-       dr (il |> List.map interactionDetail)]
+       dr (il |> List.map interactionDetail)
+       dr (ids |> List.map link)]
        |> Assert.graph og
 
 module BorderlineSubstanceRdf =

@@ -97,4 +97,14 @@
        </p>
       </body>
      </topic>
+     <xref href="bnf_int_3.xml" rel="interaction">Captopril</xref>
+     <xref href="bnf_int_5.xml" rel="interaction">Enalapril</xref>
+     <xref href="bnf_int_6.xml" rel="interaction">Fosinopril</xref>
+     <xref href="bnf_int_870.xml" rel="interaction">Imidapril</xref>
+     <xref href="bnf_int_7.xml" rel="interaction">Lisinopril</xref>
+     <xref href="bnf_int_8.xml" rel="interaction">Moexipril</xref>
+     <xref href="bnf_int_9.xml" rel="interaction">Perindopril</xref>
+     <xref href="bnf_int_10.xml" rel="interaction">Quinapril</xref>
+     <xref href="bnf_int_11.xml" rel="interaction">Ramipril</xref>
+     <xref href="bnf_int_12.xml" rel="interaction">Trandolapril</xref>
     </topic>
