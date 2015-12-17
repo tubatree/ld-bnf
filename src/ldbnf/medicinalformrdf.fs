@@ -2,7 +2,47 @@ namespace Bnf
 open FSharp.RDF
 open FSharp.Data.Runtime
 
-module InteractionRdf = 
+module ContentRdf = 
+  open prelude
+  open resource
+  open Bnf.Content
+  open Assertion
+  open rdf
+  open Rdf
+  open Shared
+  open RdfUris
+
+  type Graph with
+    static member fromContent n (Content(id,t,b,cs)) =
+      let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
+
+      let xml (n,t,b) =
+        [a !!(Uri.nicebnf + n)
+         t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
+         b |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))]
+
+      let content' n (Content(id,t,b,cs)) =
+        one !!"nicebnf:hasContent" (uri n id) (xml (n,t,b))
+
+      let content n (Content(id,t,b,cs)) =
+        optionlist {
+          yield! xml (n,t,b)
+          yield! cs |> List.map (content' n) }
+
+      let s = Content(id,t,b,cs) |> content n
+
+      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
+                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
+                                  "bnfsite",!!Uri.bnfsite]
+
+      let dr r = resource (uri n id) r
+
+      [dr s]
+      |> Assert.graph og
+
+
+
+module InteractionRdf =
   open prelude
   open resource
   open Bnf.Interaction
@@ -35,7 +75,7 @@ module InteractionRdf =
                                   dataProperty !!"rdfs:label" ((string i.message.XElement.Value)^^xsd.string)
                                   dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
 
-      let link = Uri.fromil >> objectProperty !!"nidebnf:hasInteractionList"
+      let link = Uri.fromil >> objectProperty !!"nicebnf:hasInteractionList"
 
       let dr r = resource (Uri.fromil id) r
       [dr s

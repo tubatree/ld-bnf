@@ -5,7 +5,7 @@
     <section outputclass="general">
       <sectiondiv>
         <p outputclass="title">List of Dental Preparations</p>
-        <p>The following list has been approved by the appropriate Secretaries of State, and the preparations therein may be prescribed by dental practitioners on form FP10D (GP14 in Scotland, WP10D in Wales).</p>red.</p>
+        <p>The following list has been approved by the appropriate Secretaries of State, and the preparations therein may be prescribed by dental practitioners on form FP10D (GP14 in Scotland, WP10D in Wales).</p>
         <p>Licensed <b>alcohol-free</b> mouthwashes, where available, are preferred.</p>
         <ul>
           <li>Aciclovir Cream, BP</li>
@@ -51,4 +51,39 @@
     </section>
   </body>
   </topic>
+  <topic id="guidance">
+    <title>guidance</title>
+    <topic id="PHP97234" outputclass="treatmentSummary guidance" rev="1.65">
+      <title>Guidance on prescribing</title>
+      <body>
+      <section outputclass="adult">
+        <sectiondiv>
+          <p outputclass="title">General guidance</p>
+          <ul>
+            <li>perceived lack of efficacy;</li>
+            <li>real or perceived adverse effects;</li>
+            <li>patients’ perception of the risk and severity of side-effects may differ from that of the prescriber;</li>
+            <li>instructions for administration not clear;</li>
+          </ul>
+        </sectiondiv>
+      </section>
+    </body>
+  </topic>
+   <topic id="PHP97234" outputclass="treatmentSummary guidance" rev="1.65">
+      <title>Guidance on prescribing</title>
+      <body>
+      <section outputclass="adult">
+        <sectiondiv>
+          <p outputclass="title">General guidance</p>
+          <ul>
+            <li>perceived lack of efficacy;</li>
+            <li>real or perceived adverse effects;</li>
+            <li>patients’ perception of the risk and severity of side-effects may differ from that of the prescriber;</li>
+            <li>instructions for administration not clear;</li>
+          </ul>
+        </sectiondiv>
+      </section>
+    </body>
+  </topic>
+</topic>
 </samples>

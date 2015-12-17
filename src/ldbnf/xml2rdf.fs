@@ -29,6 +29,8 @@ open Bnf.MedicalDeviceType
 open Bnf.MedicalDeviceTypeParser
 open Bnf.WoundManagement
 open Bnf.WoundManagementParser
+open Bnf.Content
+open Bnf.ContentParser
 open FSharp.RDF
 
 open resource
@@ -43,6 +45,7 @@ open Bnf.BorderlineSubstanceRdf
 open Bnf.InteractionRdf
 open Bnf.MedicalDeviceTypeRdf
 open Bnf.WoundManagementRdf
+open Bnf.ContentRdf
 
 
 module Iterator =
@@ -57,7 +60,7 @@ module Iterator =
 
   /// writes a file
   let private toFile fileName (contents : string) =
-    async {
+     async {
       File.AsyncWriteAllText(fileName, contents) |> Async.Start
       return ()
     }
@@ -78,50 +81,59 @@ module Iterator =
           | XmlDirectory _ -> "Specify a directoy for the source xml"
           | OutputDirectory _ -> "Specify an output directory for the ttl"
 
+  type Work<'a,'b> =
+    | Done of 'a
+    | NotDone of 'b
+
   let generate f =
     //get the type from the filename, somehow
     let t = Directory.GetParent(f).Name
     use fi = file f
+    let content n = fi |> contentProvider.Load |> Content.parse |> (Graph.fromContent n) |> Done
     //parse in different ways for differnt types
     let m = match t with
-            | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Some
-            | "medicinalForm" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Some
-            | "treatmentSummary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Some
-            | "drugClassifications" -> fi |> dcProvider.Load |> DrugClassifications.parse |> Graph.from |> Some
-            | "drugClass" -> fi |> drugProvider.Load |> DrugClass.parse |> Graph.from |> Some
-            | "clinicalMedicinalProductInformation" -> fi |> drugProvider.Load |> CMPI.parse |> Graph.from |> Some
-            | "borderlineSubstance" -> fi |> bsProvider.Load |> BorderlineSubstance.parse |> Graph.from |> Some
-            | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Some
-            | "medicalDeviceType" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Some
-            | "woundManagement" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Some
-            | _ -> None
+            | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Done
+            | "medicinalForm" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Done
+            | "treatmentSummary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
+            | "drugClassifications" -> fi |> dcProvider.Load |> DrugClassifications.parse |> Graph.from |> Done
+            | "drugClass" -> fi |> drugProvider.Load |> DrugClass.parse |> Graph.from |> Done
+            | "clinicalMedicinalProductInformation" -> fi |> drugProvider.Load |> CMPI.parse |> Graph.from |> Done
+            | "borderlineSubstance" -> fi |> bsProvider.Load |> BorderlineSubstance.parse |> Graph.from |> Done
+            | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Done
+            | "medicalDeviceType" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
+            | "woundManagement" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
+            | "PHP101868" -> content "dentalPreparations"
+            | "PHP101869" -> content "nursePrescribers"
+            | "borderlineSubstanceAcbs" -> content "borderlineSubstanceAcbs"
+            | "guidance" -> content "guidance"
+            | "interactions" -> content "interactions"
+            | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with
-        | Some graph ->
+        | Done graph ->
           let sb = new System.Text.StringBuilder()
           use tw = toString sb
           graph |> Graph.writeTtl tw |> ignore
           let fn = Path.GetFileName f
           let nfn = Path.ChangeExtension(fn,"ttl")
-          Some(sb.ToString(),nfn,t)
-        | _ -> None
+          Done(sb.ToString(),nfn,t)
+        | NotDone s -> NotDone s
 
   let apply o f =
       printfn "%s" f
       match (generate f) with
-       | Some(text,fn,t) ->
+       | Done(text,fn,t) ->
            let dir = (o ++ t)
            if (not(Directory.Exists(dir))) then
              Directory.CreateDirectory(dir) |> ignore
            let fn = (dir ++ fn)
            toFileSynch fn text
-           Some(fn)
-       | None -> None
+           Done(fn)
+       | NotDone s -> NotDone s
 
   [<EntryPoint>]
   let main args = 
     let parser = ArgumentParser.Create<Arguments>()
-    let useage = parser.Usage()
     let results = parser.ParseCommandLine(args,errorHandler=ProcessExiter())
     let xmlDirectory = results.GetResult <@ XmlDirectory @>
     let outputDirectory = results.GetResult <@ OutputDirectory @>
@@ -129,8 +141,10 @@ module Iterator =
 
     let fs = Directory.EnumerateFiles(xmlDirectory,"*.*",SearchOption.AllDirectories)
     fs |> Seq.map (apply outputDirectory)
-       |> Seq.choose id
-       |> Seq.iter (fun s -> printfn "%s" s)
+       //|> Seq.choose id
+    |> Seq.iter (function
+                  | Done s -> s |>  printfn "Processed %s"
+                  | NotDone s -> s |>  printfn "Not Done %s" )
     //AsyncSeq.ofSeq fs
     //    |> AsyncSeq.map (apply outputDirectory)
     //    |> AsyncSeq.iter (fun s -> printfn "%s" (Async.RunSynchronously s))
