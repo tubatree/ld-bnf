@@ -10,7 +10,7 @@ module Content =
     | Title of string
     override __.ToString () = match __ with | Title x -> x
 
-  type Content = | Content of Id * Title * contentProvider.Body option * Content list
+  type Content = | Content of Id * Title * contentProvider.Body option * Content list * ContentLink list
 
 module ContentParser =
   open Content
@@ -18,5 +18,6 @@ module ContentParser =
 
   type Content with
     static member parse (x:contentProvider.Topic) =
-      let c = x.Topics |> Array.map Content.parse |> Array.toList
-      Content(Id(x.Id), Title(x.Title),x.Body,c)
+      let cs = x.Topics |> Array.map Content.parse |> Array.toList
+      let ls = x.XElement |> ContentLink.from
+      Content(Id(x.Id), Title(x.Title),x.Body,cs,ls)

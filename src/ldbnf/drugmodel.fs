@@ -10,6 +10,21 @@ module Shared =
     | Doi of string
     override __.ToString () = match __ with | Doi x -> x
 
+  open System.Xml.Linq
+  open System.Xml.XPath
+
+  type ContentLink = {id:Id;label:string;rel:string;format:string;} with
+    static member from (x:XElement) =
+      let build (x:XElement) =
+        let href = x.Attribute(XName.Get "href").Value
+        let format = x.Attribute(XName.Get "format")
+        let rel = x.Attribute(XName.Get "rel")
+        if (rel <> null && format <> null && format.Value = "dita") then
+         {id = Id(href); label = x.Value; rel = rel.Value; format = format.Value} |> Some
+        else
+          None
+      x.XPathSelectElements("//xref") |> Seq.choose build |> Seq.toList
+
   //sensible compromise to reference the types provided to avoid replication
   type drugProvider = XmlProvider<"SuperDrug.xml", Global=true, SampleIsList=true>
 
@@ -666,7 +681,8 @@ module DrugParser =
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
                 ContraindicationWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-                ContraindicationWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+              ContraindicationWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+            | _ -> failwith "unmatched ouput class" 
         [|x.Ps |> Array.map gen
           x.Sectiondivs |> Array.filter (hasOutputclasso "additionalContraindications") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
 
@@ -682,6 +698,7 @@ module DrugParser =
                 CautionsWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
                 CautionsWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+            | _ -> failwith "unmatched output class"
 
         [|x.Ps |> Array.map gen
           x.Sectiondivs |> Array.filter (hasOutputclasso "additionalCautions") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
@@ -698,6 +715,7 @@ module DrugParser =
           | HasOutputClasso "patientMonitoringProgrammes" _ -> build PatientMonitoringProgrammes
           | HasOutputClasso "therapeuticDrugMonitoring" _ -> build TheraputicDrugMonitoring
           | HasOutputClasso "monitoringOfPatientParameters" _ -> build MonitoringOfPatientParameters
+          | _ -> failwith "unmatched output class"
 
     //build function to create the funding identifier
     type FundingIdentifier with

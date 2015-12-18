@@ -68,7 +68,7 @@ module WoundManagementParser =
 
   type WoundManagementLink with
     static member from (x:wmProvider.Xref) =
-      {id=Id(x.Href);label=x.Value;rel=x.Rel |? ""}
+      {WoundManagementLink.id=Id(x.Href);label=x.Value;rel=x.Rel |? ""}
 
   type WoundExudate with
     static member list (x:wmProvider.Sectiondiv[]) =

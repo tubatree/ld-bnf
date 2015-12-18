@@ -9,7 +9,6 @@ module TreatmentSummary =
 
   type Title = | Title of string
   type TargetAudience = | TargetAudience of string
-  type Link = {id:Id;label:string;rel:string;format:string;}
   type Content = | Content of tsProvider.Section * TargetAudience option
   type BodySystem = | BodySystem of string
 
@@ -18,7 +17,7 @@ module TreatmentSummary =
     doi:Doi option;
     bodySystem:BodySystem option;
     content:Content list;
-    links:Link seq
+    links:ContentLink seq
   }
 
   type Treatment =
@@ -65,20 +64,10 @@ module TreatmentSummaryParser =
                | Some x -> TargetAudience x |> Some
                | None -> None
       Content(x,ta)
-
-  type Link with
-    static member from (x:XElement) = 
-     let href = x.Attribute(XName.Get "href").Value
-     let format = x.Attribute(XName.Get "format").Value
-     let rel = x.Attribute(XName.Get "rel")
-     if (rel <> null && format = "dita") then
-      {id = Id(href); label = x.Value; rel = rel.Value; format = format} |> Some
-     else
-      None
  
   type Summary with
     static member from (x:tsProvider.Topic) =
-      let ls = x.XElement.XPathSelectElements("//xref") |> Seq.map Link.from |> Seq.choose id
+      let ls = x.XElement |> ContentLink.from
       let t = Title(x.Title)
       let d = x.Body.Datas |> Array.choose (withname "doi") |> Array.tryPick Doi.from
       let bs = x.Body.Datas |> Array.choose (withname "bodySystem") |> Array.tryPick BodySystem.from

@@ -36,23 +36,27 @@ module ContentRdf =
   open RdfUris
 
   type Graph with
-    static member fromContent n (Content(id,t,b,cs)) =
+    static member fromContent n (Content(id,t,b,cs,ls)) =
       let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
 
-      let xml (n,t,b) =
-        [a !!(Uri.nicebnf + n)
-         t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
-         b |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))]
+      let ln x = objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
-      let content' n (Content(id,t,b,cs)) =
-        one !!"nicebnf:hasContent" (uri n id) (xml (n,t,b))
-
-      let content n (Content(id,t,b,cs)) =
+      let xml (n,t,b,ls) =
         optionlist {
-          yield! xml (n,t,b)
+         yield a !!(Uri.nicebnf + n)
+         yield t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
+         yield b |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
+         yield! ls |> List.map ln}
+
+      let content' n (Content(id,t,b,_,ls)) =
+        one !!"nicebnf:hasContent" (uri n id) (xml (n,t,b,ls))
+
+      let content n (Content(_,t,b,cs,ls)) =
+        optionlist {
+          yield! xml (n,t,b,ls)
           yield! cs |> List.map (content' n) }
 
-      let s = Content(id,t,b,cs) |> content n
+      let s = Content(id,t,b,cs,ls) |> content n
 
       let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
@@ -260,7 +264,7 @@ module TreatmentSummaryRdf =
          yield ta >>= (Graph.fromta >> Some)
          yield dataProperty !!"nicebnf:hasDitaContent" ((string s)^^xsd.xmlliteral)})
 
-    static member from (x:Link) =
+    static member from (x:ContentLink) =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
     static member from (x:Summary) =
