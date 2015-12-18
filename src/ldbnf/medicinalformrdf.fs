@@ -2,6 +2,29 @@ namespace Bnf
 open FSharp.RDF
 open FSharp.Data.Runtime
 
+module PublicationRdf = 
+  open prelude
+  open resource
+  open Bnf.Publication
+  open Assertion
+  open rdf
+  open Rdf
+  open Shared
+  open RdfUris
+
+  type Graph with
+    static member fromPublication (Publication(d)) =
+      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
+                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
+                                  "bnfsite",!!Uri.bnfsite]
+      let dto = (System.DateTimeOffset d)^^xsd.datetime
+
+      let s = [a !!(Uri.nicebnf + "publication")
+               dto |> (dataProperty !!"nicebnf:hasPublicationDate")]
+      let dr r = resource !!(Uri.bnfsite + "publication") r
+      [dr s]
+      |> Assert.graph og
+
 module ContentRdf = 
   open prelude
   open resource

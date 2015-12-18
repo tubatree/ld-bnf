@@ -875,3 +875,30 @@ module DrugParser =
         let secondaryDomainsOfEffect = x.Body >>= SecondaryDomainsOfEffect.from
 
         {id = Id(x.Id); name = name; interactionLinks = interactionLinks; constituentDrugs = constituentDrugs; classifications = classifications; vtmid = vtmid; sections = sections; primaryDomainOfEffect = primaryDomainOfEffect; secondaryDomainsOfEffect = secondaryDomainsOfEffect; synonyms = synonyms}
+
+module Publication =
+  open Shared
+  open prelude
+
+  let name (n:string) (x:drugProvider.Data) = 
+    if x.Name = n then Some x
+    else None
+
+  type Publication =
+    | Publication of System.DateTime
+    static member parse (x:drugProvider.Topic) =
+      let value (d:drugProvider.Data) = d.Number >>= (int32 >> Some)
+      let number n ds  = ds |> Array.tryPick (fun x -> (name n x) >>= value)
+      match x.Body with
+        | Some b -> match b.Datas with
+                    | [|d|] ->
+                      let day = d.Datas |> number "publicationDay"
+                      let month = d.Datas |> number "publicationMonth"
+                      let year = d.Datas |> number "publicationYear"
+                      match (day,month,year) with
+                        | Some d, Some m, Some y ->
+                          printfn "day %d month %d year %d" d m y
+                          System.DateTime(y,m,d) |> Publication
+                        | _ -> failwith "Missing d/m/y"
+                    | _ -> failwith "No Datas"
+        | None -> failwith "Missing Body"

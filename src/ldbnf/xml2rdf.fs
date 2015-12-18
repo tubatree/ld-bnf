@@ -13,6 +13,7 @@ open Shared
 
 open System.Xml.Linq
 open FSharp.Data
+open Bnf.Publication
 open Bnf.Drug
 open Bnf.DrugParser
 open Bnf.TreatmentSummary
@@ -46,6 +47,7 @@ open Bnf.InteractionRdf
 open Bnf.MedicalDeviceTypeRdf
 open Bnf.WoundManagementRdf
 open Bnf.ContentRdf
+open Bnf.PublicationRdf
 
 
 module Iterator =
@@ -107,6 +109,7 @@ module Iterator =
             | "borderlineSubstanceAcbs" -> content "borderlineSubstanceAcbs"
             | "guidance" -> content "guidance"
             | "interactions" -> content "interactions"
+            | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with
