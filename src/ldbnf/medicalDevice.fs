@@ -13,6 +13,7 @@ module MedicalDevice =
 
 module MedicalDeviceParser =
   open MedicalDevice
+  open prelude
 
   type MedicalDevice with
     static member parse (x:drugProvider.Topic) =
