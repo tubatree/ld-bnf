@@ -28,6 +28,58 @@ module Shared =
   //sensible compromise to reference the types provided to avoid replication
   type drugProvider = XmlProvider<"SuperDrug.xml", Global=true, SampleIsList=true>
 
+  let inline name arg =
+      ( ^a : (member Name : string) arg)
+
+  type OutputClass = | OutputClass of Option<string> with
+    static member lift (x:Option<string>) = OutputClass(x)
+    static member lift (x:string) = OutputClass(Some(x))
+
+  let inline outputclasso  arg =
+    OutputClass.lift(( ^a : (member Outputclass : Option<string>) arg))
+
+  let inline outputclass arg =
+    OutputClass.lift(( ^a : (member Outputclass : string) arg))
+
+  let inline (|HasName|_|) n x =
+    if (name x) = n then Some(x)
+    else None
+
+  let inline hasName s x = name x = s
+
+  let inline (|HasOutputClass|_|) (n:string) x =
+    if (outputclass x) = OutputClass.lift n then Some(x)
+    else None
+
+  let inline (|HasOutputClasso|_|) (n:string) x =
+    if (outputclasso x) = OutputClass.lift n then Some(x)
+    else None
+
+  let inline hasOutputclass (s:string) x = outputclass x = OutputClass.lift s
+  let inline hasOutputclasso (s:string) x = outputclasso x = OutputClass.lift s
+
+  let sections (n:string) (x:drugProvider.Topic) =
+    match x.Body with
+      | Some(b) -> b.Sections |> Array.filter (fun s -> outputclasso s = OutputClass.lift n)
+      | None -> [||]
+
+  let topics (n:string) (x:drugProvider.Topic) =
+    x.Topics |> Array.filter (fun s -> outputclass s = OutputClass.lift n)
+
+  let allsections (x:drugProvider.Topic) =
+    match x.Body with
+        | Some b -> b.Sections |> Array.collect (fun s -> s.Sectiondivs)
+        | None -> [||]
+
+  let sectiondivs cl (s:drugProvider.Section[]) =
+    s |> Array.filter (hasOutputclasso cl) |> Array.collect (fun sec -> sec.Sectiondivs)
+
+  let somesections cl  (x:drugProvider.Topic) =
+    match x.Body with
+    | Some b -> b.Sections |> (sectiondivs cl)
+    | None -> [||]
+
+
 module Drug =
     open Shared
 
@@ -261,38 +313,6 @@ module DrugParser =
     open Drug
     open Shared
 
-    //all of this needs a refactor
-
-    let inline name arg =
-      ( ^a : (member Name : string) arg)
-
-    type OutputClass = | OutputClass of Option<string> with
-       static member lift (x:Option<string>) = OutputClass(x)
-       static member lift (x:string) = OutputClass(Some(x))
-
-    let inline outputclasso  arg =
-       OutputClass.lift(( ^a : (member Outputclass : Option<string>) arg))
-
-    let inline outputclass arg =
-       OutputClass.lift(( ^a : (member Outputclass : string) arg))
-
-    let inline (|HasName|_|) n x =
-        if (name x) = n then Some(x)
-        else None
-
-    let inline hasName s x = name x = s
-
-    let inline (|HasOutputClass|_|) (n:string) x =
-        if (outputclass x) = OutputClass.lift n then Some(x)
-        else None
-
-    let inline (|HasOutputClasso|_|) (n:string) x =
-        if (outputclasso x) = OutputClass.lift n then Some(x)
-        else None
-
-    let inline hasOutputclass (s:string) x = outputclass x = OutputClass.lift s
-    let inline hasOutputclasso (s:string) x = outputclasso x = OutputClass.lift s
-
     type Paragraph with
       static member from (x:drugProvider.P) =
         Paragraph(x.Value |? "",Some x)
@@ -361,12 +381,6 @@ module DrugParser =
               | None -> failwith "Missing paragraph"
       static member from (Paragraphs xs) = Seq.map TheraputicIndication.from xs
 
-
-    let sections (n:string) (x:drugProvider.Topic) =
-      match x.Body with
-        | Some(b) -> b.Sections |> Array.filter (fun s -> outputclasso s = OutputClass.lift n)
-        | None -> Array.empty<drugProvider.Section>
-
     type IndicationsAndDose with
       static member from (x:drugProvider.Section) =
          let theraputicIndications = x.Sectiondivs.[0] |> ( Paragraphs.fromsd >> TheraputicIndication.from )
@@ -397,8 +411,6 @@ module DrugParser =
              let idgss = b.Sections |> Array.choose IndicationsAndDoseSection.from
              Some(IndicationsAndDoseGroup(Id(x.Id),grps,idgss))
           | None -> None
-
-    let (>>=) a b = Option.bind b a
 
     let statements (b:drugProvider.Body option) =
       match b with
@@ -476,24 +488,7 @@ module DrugParser =
         | None -> None
 
     let withname = (|HasName|_|)
-    let withclass = (|HasOutputClasso|_|)
-
-
-//these three really need to be recfactored into something more sensible
-
-    let allsections (x:drugProvider.Topic) =
-     match x.Body with
-      | Some b -> b.Sections |> Array.collect (fun s -> s.Sectiondivs)
-      | None -> [||]
-
-    let sectiondivs cl (s:drugProvider.Section[]) =
-      s |> Array.filter (hasOutputclasso cl) |> Array.collect (fun sec -> sec.Sectiondivs)
-
-    let somesections cl  (x:drugProvider.Topic) =
-      match x.Body with
-       | Some b -> b.Sections |> (sectiondivs cl)
-       | None -> [||]
-
+    let withclass = (|HasOutputClasso|_|) 
 
     type InheritsFromClass with
       static member from (x:drugProvider.Data) =
