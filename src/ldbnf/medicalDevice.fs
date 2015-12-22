@@ -8,7 +8,7 @@ module MedicalDevice =
   type PrescribingAndDispensingInformation = | PrescribingAndDispensingInformation of drugProvider.Sectiondiv
 
   type MedicalDevice =
-    | MedicalDevice of Title * PrescribingAndDispensingInformation option * Id list
+    | MedicalDevice of Id * Title * PrescribingAndDispensingInformation option * Id list
 
 
 module MedicalDeviceParser =
@@ -27,4 +27,4 @@ module MedicalDeviceParser =
       let ids = x |> topics "medicalDeviceTypes"
                   |> Array.collect links
                   |> Array.toList
-      MedicalDevice(title,padi,ids)
+      MedicalDevice(Id(x.Id),title,padi,ids)

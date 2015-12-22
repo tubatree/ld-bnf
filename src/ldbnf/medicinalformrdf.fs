@@ -10,8 +10,22 @@ open rdf
 open RdfUris
 
 
+module MedicalDeviceRdf =
+  open MedicalDevice
+
+  type Graph with
+    static member frommedicaldevice(MedicalDevice(id,t,pdi,ids)) =
+      let s = optionlist {
+        yield a Uri.MedicalDeviceEntity
+        yield t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
+        yield pdi >>= (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent") >> Some)
+        yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
+        }
+      let dr = resource (Uri.frommd id)
+      [dr s] |> Assert.graph (empty())
+
 module BorderlineSubstanceTaxonomyRdf =
-  open Bnf.BorderlineSubstanceTaxonomy
+  open BorderlineSubstanceTaxonomy
 
   type Graph with
     static member from(x:BorderlineSubstanceTaxonomy) =

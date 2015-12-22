@@ -45,7 +45,9 @@ module RdfUris =
     static member from (x:Product) = !!(Uri.bnfsite + "woundmanagementproduct" + string x.ampid)
 
     static member from (x:TreatmentSummary) = match x with | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatmentsummary/" + string i)
+    static member frommd (x:Id) = !!(Uri.bnfsite + "medicaldevice/" + string x)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medicaldevicetype/" + string x.id)
+    static member frommdt (x:Id) = !!(Uri.bnfsite + "medicaldevicetype/" + string x)
     static member fromcmdig (x:MedicalDeviceType) id = !!(Uri.bnfsite + "medicaldevicetype/" + string x.id + "#" + string id)
     static member fromdc (s:string) = !!(Uri.bnfsite + "drugclass/"  + s)
     static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interactions/" + l.Url.Replace(".xml", ""))
@@ -79,6 +81,7 @@ module RdfUris =
     static member BorderlineSubstanceEntity = !!(Uri.nicebnf + "BorderlineSubstance")
     static member BorderlineSubstanceTaxonomyEntity = !!(Uri.nicebnf + "BorderlineSubstanceTaxonomy")
     static member MedicalDeviceTypeEntity = !!(Uri.nicebnf + "MedicalDeviceType")
+    static member MedicalDeviceEntity = !!(Uri.nicebnf + "MedicalDevice")
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnf + "ClinicalMedicalDeviceInformationGroup")
     static member WoundManagementEntity = !!(Uri.nicebnf + "WoundManagement")
     static member InteractionEntity = !!(Uri.nicebnf + "Interaction")
