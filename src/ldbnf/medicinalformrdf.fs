@@ -1,39 +1,48 @@
 namespace Bnf
 open FSharp.RDF
 open FSharp.Data.Runtime
+open prelude
+open resource
+open Assertion
+open Rdf
+open Shared
+open rdf
+open RdfUris
+
+
+module BorderlineSubstanceTaxonomyRdf =
+  open Bnf.BorderlineSubstanceTaxonomy
+
+  type Graph with
+    static member from(x:BorderlineSubstanceTaxonomy) =
+      let s = optionlist {
+        yield a Uri.BorderlineSubstanceTaxonomyEntity
+        yield x.title |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
+        yield x.general >>= (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent") >> Some)
+        yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
+        yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
+        }
+
+      let dr = resource (Uri.frombst x.id)
+      [dr s]
+      |> Assert.graph (empty())
 
 module PublicationRdf = 
-  open prelude
-  open resource
   open Bnf.Publication
-  open Assertion
-  open rdf
-  open Rdf
-  open Shared
-  open RdfUris
 
   type Graph with
     static member fromPublication (Publication(d)) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
       let dto = (System.DateTimeOffset d)^^xsd.datetime
 
       let s = [a !!(Uri.nicebnf + "publication")
                dto |> (dataProperty !!"nicebnf:hasPublicationDate")]
-      let dr r = resource !!(Uri.bnfsite + "publication") r
+
+      let dr = resource !!(Uri.bnfsite + "publication")
       [dr s]
-      |> Assert.graph og
+      |> Assert.graph (empty())
 
 module ContentRdf = 
-  open prelude
-  open resource
   open Bnf.Content
-  open Assertion
-  open rdf
-  open Rdf
-  open Shared
-  open RdfUris
 
   type Graph with
     static member fromContent n (Content(id,t,b,cs,ls)) =
@@ -58,32 +67,18 @@ module ContentRdf =
 
       let s = Content(id,t,b,cs,ls) |> content n
 
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
-
       let dr r = resource (uri n id) r
 
       [dr s]
-      |> Assert.graph og
+      |> Assert.graph (empty())
 
 
 
 module InteractionRdf =
-  open prelude
-  open resource
   open Bnf.Interaction
-  open Assertion
-  open rdf
-  open Rdf
-  open Shared
-  open RdfUris
 
   type Graph with
     static member from (InteractionList(id,t,il,ids)) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
       let s = [ a Uri.InteractionListEntity
                 t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
 
@@ -108,25 +103,15 @@ module InteractionRdf =
       [dr s
        dr (il |> List.map interactionDetail)
        dr (ids |> List.map link)]
-       |> Assert.graph og
+       |> Assert.graph (empty())
 
 module BorderlineSubstanceRdf =
-  open prelude
-  open resource
   open Bnf.BorderlineSubstance
-  open Assertion
-  open rdf
-  open Rdf
-  open Shared
-  open RdfUris
 
   let inline dpo n x = x >>= (string >> xsd.string >> (dataProperty !!("nicebnf:has" + n)) >> Some)
 
   type Graph with
     static member from (x:BorderlineSubstance) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
       let l t = match t with | Title t -> t.XElement.Value.ToString()
 
       let s =  optionlist {
@@ -141,7 +126,7 @@ module BorderlineSubstanceRdf =
       let dr r = resource (Uri.from x) r
       [dr s
        dr ds]
-       |> Assert.graph og
+       |> Assert.graph (empty())
 
 
     static member frompackinfo (PackInfo(ps,uom,acbs)) =
@@ -196,22 +181,11 @@ module BorderlineSubstanceRdf =
 
 
 module DrugClassificationRdf =
-  open prelude
-  open resource
   open DrugClassification
-  open Assertion
-  open rdf
-  open Rdf
-  open Shared
-  open RdfUris
 
   type Graph with
     static member from (DrugClassifications cs) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
-
-      cs |> List.map Graph.from |> Assert.graph og
+      cs |> List.map Graph.from |> Assert.graph (empty())
 
     static member from (x:Classification) =
       resource !!(Uri.nicebnfClass + "Classification#" + x.key)
@@ -219,27 +193,16 @@ module DrugClassificationRdf =
 
 
 module TreatmentSummaryRdf =
-  open prelude
-  open resource
   open Bnf.TreatmentSummary
-  open Assertion
-  open rdf
-  open Shared
-  open Rdf
-  open RdfUris
 
   type Graph with
     static member from (x:TreatmentSummary) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
-
       let s = [a Uri.TreatmentSummaryEntity |> Some
                Graph.secondary x] |> List.choose id
       let p = Graph.fromts x
       let dr r = resource (Uri.from x) r
       [dr s
-       dr p] |> Assert.graph og
+       dr p] |> Assert.graph (empty())
 
     static member secondary (TreatmentSummary (_,x)) =
       match x with
@@ -284,23 +247,11 @@ module TreatmentSummaryRdf =
         | Generic s -> Graph.from s
 
 module MedicinalFormRdf =
-  open prelude
-  open resource
   open Bnf.Drug
   open Bnf.MedicinalForm
-  open Assertion
-  open rdf
-  open Shared
-  open Rdf
-  open RdfUris
 
   type Graph with
     static member from (x:MedicinalForm) =
-      let og = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
-                                  "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
-                                  "bnfsite",!!Uri.bnfsite]
-
-
       let s = optionlist{
                 yield a Uri.MedicinalFormEntity
                 yield x.title >>= (string >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
@@ -319,7 +270,7 @@ module MedicinalFormRdf =
        dr mps
        dr cals
        dr cmpis]
-       |> Assert.graph og
+       |> Assert.graph (empty())
 
     static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 

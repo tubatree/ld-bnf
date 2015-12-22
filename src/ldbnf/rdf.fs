@@ -2,21 +2,6 @@ namespace Bnf
 open FSharp.RDF
 open FSharp.Data.Runtime
 
-module Rdf =
-  open prelude
-  open resource
-  open Bnf.Drug
-  open Bnf.MedicinalForm
-  open Assertion
-  open rdf
-  open Shared
-
-  type Graph with
-    static member ReallyEmpty xp =
-      let vds = new VDS.RDF.Graph()
-      xp |> List.iter (fun (p, (Uri.Sys ns)) -> vds.NamespaceMap.AddNamespace(p, ns))
-      Graph vds
-
 module RdfUris =
   open prelude
   open resource
@@ -27,6 +12,7 @@ module RdfUris =
   open Bnf.Interaction
   open Bnf.MedicalDeviceType
   open Bnf.WoundManagement
+  open Bnf.BorderlineSubstanceTaxonomy
   open Assertion
   open rdf
   open Shared
@@ -46,6 +32,9 @@ module RdfUris =
     static member fromcmpi (ClinicalMedicinalProductInformation(i)) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string i)
     static member from (x:BorderlineSubstance) = !!(Uri.bnfsite + "borderlineSubstance/" + string x.id )
     static member frombsc (x:string) = !!(Uri.bnfsite + "borderlineSubstance/" + (string x).Replace(".xml","") )
+    static member frombsc (x:Id) = !!(Uri.bnfsite + "borderlineSubstance/" + (string x) )
+    static member frombst (x:Id) = !!(Uri.bnfsite + "borderlineSubstanceTaxonomy/" + string x)
+
     static member fromsec (x:Drug) (Id i) = !!(Uri.bnfsite + "drug/" + string x.id + "#" + i)
     static member fromsecdc (x:DrugClass) (Id i) = !!(Uri.bnfsite + "drugclass/" + string x.id + "#" + i)
     static member fromseccmpi (x:CMPI) (Id i) = !!(Uri.bnfsite + "clinicalMedicinalProductInformation/" + string x.id + "#" + i)
@@ -88,6 +77,7 @@ module RdfUris =
     static member MedicinalProductEntity = !!(Uri.nicebnf + "MedicinalProduct")
     static member TreatmentSummaryEntity = !!(Uri.nicebnf + "TreatmentSummary")
     static member BorderlineSubstanceEntity = !!(Uri.nicebnf + "BorderlineSubstance")
+    static member BorderlineSubstanceTaxonomyEntity = !!(Uri.nicebnf + "BorderlineSubstanceTaxonomy")
     static member MedicalDeviceTypeEntity = !!(Uri.nicebnf + "MedicalDeviceType")
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnf + "ClinicalMedicalDeviceInformationGroup")
     static member WoundManagementEntity = !!(Uri.nicebnf + "WoundManagement")
@@ -106,3 +96,23 @@ module RdfUris =
     static member SideEffectEntity = !!(Uri.nicebnfClass + "SideEffect")
     static member ContraindicationEntity = !!(Uri.nicebnfClass + "Contraindication")
     static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
+
+module Rdf =
+  open prelude
+  open resource
+  open Bnf.Drug
+  open Bnf.MedicinalForm
+  open Assertion
+  open rdf
+  open Shared
+  open RdfUris
+
+  type Graph with
+    static member ReallyEmpty xp =
+      let vds = new VDS.RDF.Graph()
+      xp |> List.iter (fun (p, (Uri.Sys ns)) -> vds.NamespaceMap.AddNamespace(p, ns))
+      Graph vds
+
+  let empty () = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
+                                    "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
+                                    "bnfsite",!!Uri.bnfsite]

@@ -5,16 +5,24 @@ open Shared
 module BorderlineSubstanceTaxonomy =
   type Title = | Title of string
 
-  type BorderlineSubstanceCategory =
-    | BorderlineSubstanceCategory of Title * Id list
+  type BorderlineSubstanceTaxonomy = {
+    id:Id;
+    title: Title;
+    general: drugProvider.Section option
+    substances: Id list;
+    categories: Id list;
+    }
+
+//<section outputclass="general">
 
 module BorderlineSubstanceTaxonomyParser =
   open BorderlineSubstanceTaxonomy
   open prelude
 
-  type BorderlineSubstanceCategory with
+  type BorderlineSubstanceTaxonomy with
     static member parse (x:drugProvider.Topic) =
       let title = Title(x.Title.Value |? "")
+      let general = x |> sections "general" |> Array.tryPick Some
       let ids = match x.Body with
                    | Some b -> b.Sections
                                 |> Array.collect (fun s -> s.Ps)
@@ -22,4 +30,5 @@ module BorderlineSubstanceTaxonomyParser =
                                 |> Array.map (fun x -> x.Href |> Id)
                                 |> Array.toList
                    | None -> []
-      BorderlineSubstanceCategory(title, ids)
+      let cats = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
+      {id=Id(x.Id);title=title;general=general;substances=ids;categories=cats}
