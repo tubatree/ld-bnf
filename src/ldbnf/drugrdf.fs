@@ -269,7 +269,7 @@ module DrugRdf =
     static member fromulu (UnlicencedUse (sp,s)) = Graph.frompair (sp,s)
     static member fromcac (ConceptionAndContraception (sp,s)) = Graph.frompair (sp,s)
     static member fromisi (ImportantSafetyInformation(t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member fromdfa (DirectionsForAdministration (sp,s))= Graph.frompair (sp,s)
+    static member fromdfa (DirectionForAdministration (sp,s))= Graph.frompair (sp,s)
     static member frominter (InteractionStatement(sp,s)) = Graph.frompair(sp,s)
     static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
     static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
@@ -423,7 +423,7 @@ module DrugRdf =
         | UnlicencedUses (i,ulus) -> sec "UnlicencedUsageInformation" (sid i) [statements addps Graph.fromulu ulus]
         | ConceptionAndContraceptions (i,cacs) -> sec "ConceptionAndContraceptionWarning" (sid i) [statements addps Graph.fromcac cacs]
         | ImportantSafetyInformations (i,isis) -> sec "ImportantSafetyInformation" (sid i) [statements addps Graph.fromisi isis]
-        | DirectionsForAdministrations (i,dfas) -> sec "DirectionsForAdministration" (sid i) [statements addps Graph.fromdfa dfas]
+        | DirectionsForAdministration (i,dfas) -> sec "DirectionsForAdministration" (sid i) [statements addps Graph.fromdfa dfas]
         | NationalFunding (i,fds) -> sec "NationalFunding" (sid i) [statements add Graph.fromfd fds]
         | InteractionStatements (i,is) -> sec "Interactions" (sid i) [statements addps Graph.frominter is]
         | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" (sid i) [statements addps Graph.frommon mons]

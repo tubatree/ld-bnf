@@ -28,10 +28,14 @@ open Bnf.Interaction
 open Bnf.InteracitonParser
 open Bnf.MedicalDeviceType
 open Bnf.MedicalDeviceTypeParser
+open Bnf.MedicalDevice
+open Bnf.MedicalDeviceParser
 open Bnf.WoundManagement
 open Bnf.WoundManagementParser
 open Bnf.Content
 open Bnf.ContentParser
+open Bnf.BorderlineSubstanceTaxonomy
+open Bnf.BorderlineSubstanceTaxonomyParser
 open FSharp.RDF
 
 open resource
@@ -48,6 +52,8 @@ open Bnf.MedicalDeviceTypeRdf
 open Bnf.WoundManagementRdf
 open Bnf.ContentRdf
 open Bnf.PublicationRdf
+open Bnf.MedicalDeviceRdf
+open Bnf.BorderlineSubstanceTaxonomyRdf
 
 
 module Iterator =
@@ -78,7 +84,7 @@ module Iterator =
     | [<Mandatory>] OutputDirectory of string
   with
     interface IArgParserTemplate with
-      member s.Usage = 
+      member s.Usage =
         match s with
           | XmlDirectory _ -> "Specify a directoy for the source xml"
           | OutputDirectory _ -> "Specify an output directory for the ttl"
@@ -110,6 +116,8 @@ module Iterator =
             | "guidance" -> content "guidance"
             | "interactions" -> content "interactions"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
+            | "medicalDevice" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
+            | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with

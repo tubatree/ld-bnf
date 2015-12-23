@@ -246,8 +246,8 @@ module Drug =
     type ImportantSafetyInformation =
       | ImportantSafetyInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
-    type DirectionsForAdministration =
-      | DirectionsForAdministration of Option<Specificity> * drugProvider.Sectiondiv
+    type DirectionForAdministration =
+      | DirectionForAdministration of Option<Specificity> * drugProvider.Sectiondiv
 
     type FundingIdentifier = | FundingIdentifier of Link
 
@@ -283,7 +283,7 @@ module Drug =
         | MonitoringRequirements of Id * MonitoringRequirement seq
         | ConceptionAndContraceptions of Id * ConceptionAndContraception seq
         | ImportantSafetyInformations of Id * ImportantSafetyInformation seq
-        | DirectionsForAdministrations of Id * DirectionsForAdministration seq
+        | DirectionsForAdministration of Id * DirectionForAdministration seq
         | NationalFunding of Id * FundingDecision seq
         | InteractionStatements of Id * InteractionStatement seq
 
@@ -794,7 +794,7 @@ module DrugParser =
         ImportantSafetyInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> ImportantSafetyInformation))
 
       static member directionsForAdministration (x:drugProvider.Topic) =
-        DirectionsForAdministrations(Id(x.Id), allsections x |> Array.map (addSpecificity >> DirectionsForAdministration))
+        DirectionsForAdministration(Id(x.Id), allsections x |> Array.map (addSpecificity >> DirectionForAdministration))
       static member nationalFunding (x:drugProvider.Topic) =
         let fds =  match x.Body with
                          | Some b -> b.Sections |> Array.collect FundingDecision.fromfd
