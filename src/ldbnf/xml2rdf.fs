@@ -108,6 +108,7 @@ module Iterator =
             | "PHP101869" -> content "nursePrescribers"
             | "borderlineSubstanceAcbs" -> content "borderlineSubstanceAcbs"
             | "guidance" -> content "guidance"
+            | "about" -> content "about"
             | "interactions" -> content "interactions"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | _ -> sprintf "%s %s" t f |> NotDone

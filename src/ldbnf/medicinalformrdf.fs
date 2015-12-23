@@ -48,7 +48,7 @@ module PublicationRdf =
     static member fromPublication (Publication(d)) =
       let dto = (System.DateTimeOffset d)^^xsd.datetime
 
-      let s = [a !!(Uri.nicebnf + "publication")
+      let s = [a !!(Uri.nicebnf + "Publication")
                dto |> (dataProperty !!"nicebnf:hasPublicationDate")]
 
       let dr = resource !!(Uri.bnfsite + "publication")
@@ -94,7 +94,7 @@ module InteractionRdf =
   type Graph with
     static member from (InteractionList(id,t,il,ids)) =
       let s = [ a Uri.InteractionListEntity
-                t |> (string >> xsd.xmlliteral >> (dataProperty !!"rdfs:label"))]
+                t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))]
 
       let iwuri = Uri.fromiw id
 
@@ -165,7 +165,8 @@ module BorderlineSubstanceRdf =
               | Some (PreparationTitle(p,m)) ->
                 optionlist {
                   yield p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle"))
-                  yield m >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasManufacturer") >> Some)}
+                  yield p.XElement.Value |> (xsd.string >> (dataProperty !!"rdfs:label"))
+                  yield m |> dpo "Manufacturer"}
               | None -> []
       let ts = pts |> List.map Graph.frompricetarrif
       blank !!"nicebnf:hasBorderlineSubstancePrep" (s @ ts)
@@ -291,7 +292,7 @@ module MedicinalFormRdf =
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
       blank !!"nicebnf:hasCautionaryAdvisoryLabel"
                (optionlist {
-                 yield dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)
+                 yield p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
                  yield ln >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasLabelNumber") >> Some)})
 
     static member fromcals (CautionaryAdvisoryLabels(_,cals)) =
@@ -305,7 +306,7 @@ module MedicinalFormRdf =
       let s = optionlist {
                yield m >>= Graph.fromman
                yield bt >>= Graph.frombt
-               yield t |> (string >> xsd.string >> (dataProperty !!"nicebnf:hasDitaContent"))}
+               yield t |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))}
       blank !!"nicebnf:hasMedicinalProductTitle" s |> Some
 
     static member fromexc (Excipients e) =

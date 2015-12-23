@@ -33,14 +33,14 @@ module WoundManagementRdf =
       |> Assert.graph Graph.setupGraph
 
     static member fromDescription (Description sd) =
-      dataProperty !!"nicebnf:hasDitaContent" (sd |> (string >> xsd.string))
+      dataProperty !!"nicebnf:hasDitaContent" (sd |> (string >> xsd.xmlliteral))
 
     static member fromwml (x:WoundManagementLink) =
       objectProperty !!"nicebnf:hasWoundManagment" (Uri.totopic(x.rel,x.id))
 
     static member fromExudate (WoundExudate(s,wmls)) =
       blank !!"nicebnf:WoundExudate"
-        (dataProperty !!"nicebnf:Rate" (s^^xsd.string) :: (wmls |> List.map Graph.fromwml))
+        (dataProperty !!"nicebnf:hasRate" (s^^xsd.string) :: (wmls |> List.map Graph.fromwml))
 
     static member fromWoundType (WoundType(TypeOfWound(t),d,wes)) =
       blank !!"nicebnf:hasWoundType"
