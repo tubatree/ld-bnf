@@ -56,7 +56,7 @@ module WoundManagementRdf =
       one !!"nicebnf:hasProduct" (Uri.from x)
        [x.manufacturer |> dp "Manufacturer"
         x.name |> dp "Name"
-        x.price |> dp "Name"]
+        x.price |> (string >> (dp "Price"))]
 
     static member fromProductGroup (ProductGroup(t,d,pl)) =
       blank !!"nicebnf:hasProductGroup"

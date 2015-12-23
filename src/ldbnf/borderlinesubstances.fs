@@ -72,8 +72,8 @@ module BorderlineSubstance =
     override __.ToString() = match __ with | PriceText x -> x
 
   type NhsIndicativePrice =
-    | NhsIndicativePrice of string
-    override __.ToString() = match __ with | NhsIndicativePrice x -> x
+    | NhsIndicativePrice of decimal
+    override __.ToString() = match __ with | NhsIndicativePrice x -> string x
 
   type NhsIndicativeInfo = | NhsIndicativeInfo of NhsIndicative option * PriceText option * NhsIndicativePrice option
 
@@ -169,7 +169,7 @@ module BorderlineSubstanceParser =
     static member from (x:bsProvider.P) =
       let nhsi = x.Phs |> Array.tryPick (withoc "nhsIndicative") >>= (fromphs NhsIndicative)
       let pt = x.Phs |> Array.tryPick (withoc "priceText") >>= (fromphs PriceText)
-      let nhsip = x.Phs |> Array.tryPick (withoc "nhsIndicativePrice") >>= (fromphs NhsIndicativePrice)
+      let nhsip = x.Phs |> Array.tryPick (withoc "nhsIndicativePrice") >>= (fromphn NhsIndicativePrice)
       NhsIndicativeInfo(nhsi,pt,nhsip)
 
   type PackSizePriceTariff with

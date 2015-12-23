@@ -25,7 +25,7 @@ module WoundManagement =
   type Product = {
     ampid: int64;
     name: string;
-    price: string;
+    price: decimal;
     manufacturer: string;
   }
 
@@ -97,7 +97,7 @@ module WoundManagementParser =
       let m = x.Phs |> Array.tryPick (withoc "manufacturer")
       match (x.Data,n,p,m) with
         | (Some d, Some name, Some price, Some man) ->
-           {ampid=d.Value;name=name.String.Value;price=price.String.Value;manufacturer=man.String.Value}
+           {ampid=d.Value;name=name.String.Value;price=price.Number.Value;manufacturer=man.String.Value}
         | _ -> failwith "missing part of the product"
 
     static member from (x:wmProvider.Sectiondiv) =
