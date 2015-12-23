@@ -12,6 +12,8 @@ module WoundManagementRdf =
   open Rdf
   open RdfUris
 
+  let dp n = xsd.string >> dataProperty !!("nicebnf:has" + n)
+
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
@@ -21,7 +23,7 @@ module WoundManagementRdf =
     static member from (x:WoundManagement) =
       let s = optionlist {
                yield a Uri.WoundManagementEntity
-               yield x.general >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasGeneral") >> Some)
+               yield x.general >>= (string >> (dp "General") >> Some)
                yield x.title |> Graph.fromTitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup
@@ -45,16 +47,16 @@ module WoundManagementRdf =
     static member fromWoundType (WoundType(TypeOfWound(t),d,wes)) =
       blank !!"nicebnf:hasWoundType"
         (optionlist {
-            yield t |> (xsd.string >> dataProperty !!"nicebnf:hasTypeOfWound")
+            yield t |> dp "TypeOfWound"
             yield d >>= (Graph.fromDescription >> Some)
             yield! wes |> List.map Graph.fromExudate
           })
 
     static member fromProduct (x:Product) =
       one !!"nicebnf:hasProduct" (Uri.from x)
-       [x.manufacturer |> (xsd.string >> dataProperty !!"nicebnf:hasManufacturer")
-        x.name |> (xsd.string >> dataProperty !!"nicebnf:hasName")
-        x.price |> (xsd.string >> dataProperty !!"nicebnf:hasPrice")]
+       [x.manufacturer |> dp "Manufacturer"
+        x.name |> dp "Name"
+        x.price |> dp "Name"]
 
     static member fromProductGroup (ProductGroup(t,d,pl)) =
       blank !!"nicebnf:hasProductGroup"

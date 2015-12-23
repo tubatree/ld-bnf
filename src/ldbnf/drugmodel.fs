@@ -766,7 +766,7 @@ module DrugParser =
         SideEffects(Id(x.Id), Array.concat [gse;sse] ,adv, ods)
       static member contraindications (x:drugProvider.Topic) =
         let s = firstsection (withclass "contraindications") x
-        let cgs = match s with 
+        let cgs = match s with
                   | Some (s) -> ContraindicationsGroup.from s |> Array.toList
                   | None -> List.empty<ContraindicationsGroup>
         let ias = x |> (somesections "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
@@ -774,8 +774,8 @@ module DrugParser =
         Contraindications(Id(x.Id), cgs, ias, ciri)
 
       static member cautions (x:drugProvider.Topic) =
-        let s = firstsection (withclass "cautions") x 
-        let cgs = match s with 
+        let s = firstsection (withclass "cautions") x
+        let cgs = match s with
                    | Some (s) -> CautionsGroup.from s |> Array.toList
                    | None -> List.empty<CautionsGroup>
         let ias = x |> (somesections "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
