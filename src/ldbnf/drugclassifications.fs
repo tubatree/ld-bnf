@@ -7,7 +7,7 @@ open FSharp.Data.Runtime
 open Shared
 
 module DrugClassification =
-  type dcProvider = XmlProvider<"drugClassifications.xml", Global=true>
+  type dcProvider = XmlProvider<"./samples/drugClassifications.xml", Global=true>
 
   type Classification = {key:string; value:string}
 

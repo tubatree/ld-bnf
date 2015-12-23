@@ -5,7 +5,7 @@ open Shared
 
 module BorderlineSubstance =
 
-  type bsProvider = XmlProvider<"borderlinesubstances.xml", Global=true, SampleIsList=true>
+  type bsProvider = XmlProvider<"./samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
 
   type Title =
     | Title of bsProvider.Title

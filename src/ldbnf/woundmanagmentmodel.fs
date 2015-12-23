@@ -4,7 +4,7 @@ open FSharp.Data
 module WoundManagement =
   open Shared
 
-  type wmProvider = XmlProvider<"superwoundmanagment.xml", Global=true, SampleIsList=true>
+  type wmProvider = XmlProvider<"./samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
 
   type Title =
     | Title of string

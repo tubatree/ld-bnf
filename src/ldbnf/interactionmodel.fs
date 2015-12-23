@@ -4,7 +4,7 @@ open Shared
 open prelude
 
 module Interaction =
-  type inProvider = XmlProvider<"superinteraction.xml", Global=true>
+  type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true>
 
   type Title =
     | Title of string

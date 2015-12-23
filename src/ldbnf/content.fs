@@ -2,7 +2,7 @@ namespace Bnf
 open FSharp.Data
 
 module Content =
-  type contentProvider = XmlProvider<"supercontent.xml", Global=true, SampleIsList=true>
+  type contentProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
 
   open Shared
 

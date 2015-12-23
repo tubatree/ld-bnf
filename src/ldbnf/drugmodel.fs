@@ -26,7 +26,7 @@ module Shared =
       x.XPathSelectElements("//xref") |> Seq.choose build |> Seq.toList
 
   //sensible compromise to reference the types provided to avoid replication
-  type drugProvider = XmlProvider<"SuperDrug.xml", Global=true, SampleIsList=true>
+  type drugProvider = XmlProvider<"./samples/SuperDrug.xml", Global=true, SampleIsList=true>
 
   let inline name arg =
       ( ^a : (member Name : string) arg)

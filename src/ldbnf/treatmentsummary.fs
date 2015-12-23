@@ -5,7 +5,7 @@ open System.Xml.XPath
 open Shared
 
 module TreatmentSummary =
-  type tsProvider = XmlProvider<"supertreatmentsummary.xml", Global=true>
+  type tsProvider = XmlProvider<"./samples/supertreatmentsummary.xml", Global=true>
 
   type Title = | Title of string
   type TargetAudience = | TargetAudience of string
