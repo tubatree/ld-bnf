@@ -48,22 +48,11 @@
     <None Include="paket.template" />
     <Compile Include="prelude.fs" />
     <None Include="types.fsx" />
-    <Compile Include="drugmodel.fs" />
-    <Compile Include="medicinalformmodel.fs" />
-    <Compile Include="medicaldevicetypemodel.fs" />
-    <Compile Include="treatmentsummary.fs" />
-    <Compile Include="drugclassifications.fs" />
-    <Compile Include="borderlinesubstances.fs" />
-    <Compile Include="interactionmodel.fs"/>
-    <Compile Include="woundmanagmentmodel.fs"/>
-    <Compile Include="content.fs"/>
-    <Compile Include="borderlineSubstanceTaxonomy.fs"/>
-    <Compile Include="medicalDevice.fs"/>
+    <Compile Include="monograph.fs" />
+    <Compile Include="models.fs"/>
     <Compile Include="rdf.fs" />
-    <Compile Include="drugrdf.fs" />
-    <Compile Include="medicinalformrdf.fs" />
-    <Compile Include="medicaldevicetyperdf.fs"/>
-    <Compile Include="woundmanagmentrdf.fs"/>
+    <Compile Include="monographrdf.fs" />
+    <Compile Include="modelsrdf.fs"/>
     <Compile Include="xml2rdf.fs" />
   </ItemGroup>
   <PropertyGroup>
