@@ -1,5 +1,6 @@
 namespace Bnf
 open FSharp.Data
+open prelude
 
 module Shared =
   type Id =
@@ -28,43 +29,13 @@ module Shared =
   //sensible compromise to reference the types provided to avoid replication
   type drugProvider = XmlProvider<"./samples/SuperDrug.xml", Global=true, SampleIsList=true>
 
-  let inline name arg =
-      ( ^a : (member Name : string) arg)
-
-  type OutputClass = | OutputClass of Option<string> with
-    static member lift (x:Option<string>) = OutputClass(x)
-    static member lift (x:string) = OutputClass(Some(x))
-
-  let inline outputclasso  arg =
-    OutputClass.lift(( ^a : (member Outputclass : Option<string>) arg))
-
-  let inline outputclass arg =
-    OutputClass.lift(( ^a : (member Outputclass : string) arg))
-
-  let inline (|HasName|_|) n x =
-    if (name x) = n then Some(x)
-    else None
-
-  let inline hasName s x = name x = s
-
-  let inline (|HasOutputClass|_|) (n:string) x =
-    if (outputclass x) = OutputClass.lift n then Some(x)
-    else None
-
-  let inline (|HasOutputClasso|_|) (n:string) x =
-    if (outputclasso x) = OutputClass.lift n then Some(x)
-    else None
-
-  let inline hasOutputclass (s:string) x = outputclass x = OutputClass.lift s
-  let inline hasOutputclasso (s:string) x = outputclasso x = OutputClass.lift s
-
   let sections (n:string) (x:drugProvider.Topic) =
     match x.Body with
-      | Some(b) -> b.Sections |> Array.filter (fun s -> outputclasso s = OutputClass.lift n)
+      | Some(b) -> b.Sections |> Array.choose (hasOutputclasso n)
       | None -> [||]
 
   let topics (n:string) (x:drugProvider.Topic) =
-    x.Topics |> Array.filter (fun s -> outputclass s = OutputClass.lift n)
+    x.Topics |> Array.choose (hasOutputclass n)
 
   let allsections (x:drugProvider.Topic) =
     match x.Body with
@@ -72,7 +43,7 @@ module Shared =
         | None -> [||]
 
   let sectiondivs cl (s:drugProvider.Section[]) =
-    s |> Array.filter (hasOutputclasso cl) |> Array.collect (fun sec -> sec.Sectiondivs)
+    s |> Array.choose (hasOutputclasso cl) |> Array.collect (fun sec -> sec.Sectiondivs)
 
   let somesections cl  (x:drugProvider.Topic) =
     match x.Body with
@@ -309,7 +280,6 @@ module Drug =
                  sections: MonographSection seq;}
 
 module DrugParser =
-    open prelude
     open Drug
     open Shared
 
@@ -345,14 +315,14 @@ module DrugParser =
 
     type Specificity with
       static member from (x:drugProvider.P) =
-        let rs = x.Phs |> Array.filter (hasOutputclass "route") |> Array.map Route.from |> Array.toList
-        let is = x.Phs |> Array.filter (hasOutputclass "indication") |> Array.map Indication.from |> Array.toList
+        let rs = x.Phs |> Array.choose (hasOutputclass "route") |> Array.map Route.from |> Array.toList
+        let is = x.Phs |> Array.choose (hasOutputclass "indication") |> Array.map Indication.from |> Array.toList
         Specificity(Paragraph.from x,rs,is)
       static member from (x:string) =
         Specificity(Paragraph(x,None),[],[])
 
     let extractSpecificity (x:drugProvider.Sectiondiv) =
-      x.Ps |> Array.filter (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
+      x.Ps |> Array.choose (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
 
     let addSpecificity x =
       extractSpecificity x, x
@@ -407,7 +377,7 @@ module DrugParser =
       static member indicationsAndDoseGroup (x:drugProvider.Topic) =
         match x.Body with
           | Some(b) ->
-             let grps = b.Sections |> Array.filter (hasOutputclasso "indicationAndDoseGroup") |> Array.map IndicationsAndDose.from
+             let grps = b.Sections |> Array.choose (hasOutputclasso "indicationAndDoseGroup") |> Array.map IndicationsAndDose.from
              let idgss = b.Sections |> Array.choose IndicationsAndDoseSection.from
              Some(IndicationsAndDoseGroup(Id(x.Id),grps,idgss))
           | None -> None
@@ -440,7 +410,7 @@ module DrugParser =
         Title(Paragraph.from x) 
 
     let extractTitle (x:drugProvider.Sectiondiv) =
-      x.Ps |> Array.filter (hasOutputclasso "title") |> Array.map Title.from |> Array.tryPick Some
+      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.map Title.from |> Array.tryPick Some
 
     let addTitle (sp,s) =
       extractTitle s,sp,s
@@ -457,14 +427,14 @@ module DrugParser =
         x.Sectiondivs |> Array.map DoseAdjustment.from
 
     let subsections cl c s =
-      s |> Array.filter (hasOutputclasso cl) |> Array.collect c
+      s |> Array.choose (hasOutputclasso cl) |> Array.collect c
  
     let renalImpairment (x:drugProvider.Topic) =
       match x.Body with
         | Some(b) -> 
            let gi = b.Sections |> subsections "generalInformation" GeneralInformation.from
            let am = b.Sections
-                    |> Array.filter (hasOutputclasso "additionalMonitoringInRenalImpairment")
+                    |> Array.choose (hasOutputclasso "additionalMonitoringInRenalImpairment")
                     |> Array.map (string >> AdditionalMonitoringInRenalImpairment)
            let da = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from
            Some(RenalImpairment(Id(x.Id),gi,am,da))
@@ -504,7 +474,7 @@ module DrugParser =
           | Some(l) -> Some( Classification(l,i))
           | None -> None
       static member fromlist (x:drugProvider.Data) =
-        x.Datas |> Array.filter (hasName "classification") |> Array.choose Classification.from
+        x.Datas |> Array.choose (hasName "classification") |> Array.choose Classification.from
 
     type TheraputicUse with
       static member from (x:drugProvider.Data) =
@@ -679,7 +649,7 @@ module DrugParser =
               ContraindicationWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
             | _ -> failwith "unmatched ouput class" 
         [|x.Ps |> Array.map gen
-          x.Sectiondivs |> Array.filter (hasOutputclasso "additionalContraindications") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
+          x.Sectiondivs |> Array.choose (hasOutputclasso "additionalContraindications") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
 
 
     type Caution with
@@ -696,7 +666,7 @@ module DrugParser =
             | _ -> failwith "unmatched output class"
 
         [|x.Ps |> Array.map gen
-          x.Sectiondivs |> Array.filter (hasOutputclasso "additionalCautions") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
+          x.Sectiondivs |> Array.choose (hasOutputclasso "additionalCautions") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
 
     let firstsection n (x:drugProvider.Topic) =
       match x.Body with
@@ -754,10 +724,10 @@ module DrugParser =
         DrugActions(Id(x.Id), allsections x |> Array.map DrugAction)
       static member sideEffects (x:drugProvider.Topic) =
         let gse = x |> (somesections "generalSideEffects")
-                    |> Array.filter (hasOutputclasso "frequencies")
+                    |> Array.choose (hasOutputclasso "frequencies")
                     |> Array.collect (fun f -> f.Sectiondivs |> Array.map SideEffectsGroup.fromge)
         let sse = x |> (somesections "specificSideEffects")
-                    |> Array.filter (hasOutputclasso "frequencies")
+                    |> Array.choose (hasOutputclasso "frequencies")
                     |> Array.collect (fun f -> f.Sectiondivs |> Array.collect SideEffectsGroup.fromsp)
         let adv = x |> (somesections "sideEffectsAdvice")
                     |> Array.map SideEffectAdvice.from
@@ -858,17 +828,17 @@ module DrugParser =
         let name = DrugName(x.Title)
 
         let interactionLinks = match x.Body with
-                               | Some(b) -> b.Ps |> Array.filter (hasOutputclasso "interactionsLinks")
+                               | Some(b) -> b.Ps |> Array.choose (hasOutputclasso "interactionsLinks")
                                                  |> Array.collect (fun p -> p.Xrefs |> Array.map InteractionLink.from)
                                | None -> [||]
 
         let constituentDrugs = match x.Body with
-                               | Some(b) -> b.Ps |> Array.filter (hasOutputclasso "constituentDrugs")
+                               | Some(b) -> b.Ps |> Array.choose (hasOutputclasso "constituentDrugs")
                                                  |> Array.collect (fun p -> p.Xrefs |> Array.map ConstituentDrug.from)
                                | None -> [||]
         let classifications = match x.Body with
                               | Some(b) -> b.Datas
-                                           |> Array.filter (hasName "classifications")
+                                           |> Array.choose (hasName "classifications")
                                            |> Array.collect (fun cs -> Classification.fromlist cs)
                               | None -> Array.empty<Classification>
 

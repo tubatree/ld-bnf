@@ -38,19 +38,35 @@ module prelude =
         |[|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
         |_ -> None
 
-
+    //deal with names and output class properties on type providers
     let inline name arg =
-      ( ^a : (member Name : string) arg)
+        ( ^a : (member Name : string) arg)
 
-    let inline (|HasName|_|) n x =
-      if (name x) = n then Some(x)
-      else None
+    let inline hasName s x =
+        if (name x) = s then Some(x)
+        else None
 
-    let inline hasName s x = name x = s
+    let inline (|HasName|_|) n x = hasName n x
 
-    let inline outputclass arg = ( ^a : (member Outputclass : string) arg)
+    let inline outputclasso  arg =
+        ( ^a : (member Outputclass : Option<string>) arg)
 
-    let inline (|HasOutputClass|_|) (n:string) x =
-      let cs = (outputclass x).Split [|' '|]
-      if (cs |> Array.exists (fun  c -> c = n)) then Some(x)
-      else None
+    let inline outputclass arg =
+        ( ^a : (member Outputclass : string) arg) 
+
+    let inline hasOutputclass (s:string) x =
+        let cs = (outputclass x).Split [|' '|]
+        if (cs |> Array.exists (fun  c -> c = s)) then Some(x)
+        else None
+
+    let inline hasOutputclasso (s:string) x =
+        if (outputclasso x) = Some s then Some(x)
+        else None
+
+    let inline (|HasOutputClass|_|) (n:string) x = hasOutputclass n x
+
+    let inline (|HasOutputClasso|_|) (n:string) x = hasOutputclasso n x
+
+
+
+
