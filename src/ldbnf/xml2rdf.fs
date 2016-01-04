@@ -113,8 +113,8 @@ module Iterator =
             | "PHP101868" -> content "DentalPractitionersFormulary"
             | "PHP101869" -> content "NursePrescribersFormulary"
             | "borderlineSubstanceAcbs" -> content "BorderlineSubstanceAcbs"
-            | "guidance" -> content "Guidance"
-            | "about" -> content "About"
+            | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
+            | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "interactions" -> content "Interactions"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | "medicalDevice" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done

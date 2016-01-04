@@ -330,6 +330,8 @@ module TreatmentSummary =
     | ManagementOfConditions of Summary
     | MedicalEmergenciesBodySystems of Summary
     | TreatmentOfBodySystems of Summary
+    | About of Summary
+    | Guidance of Summary
     | Generic of Summary
 
   type TreatmentSummary = | TreatmentSummary of Id * Treatment
@@ -385,12 +387,15 @@ module TreatmentSummaryParser =
 
   type TreatmentSummary with
     static member parse (x:tsProvider.Topic) =
+      let build c t = Summary.from t |> TreatmentSummary.from c
       match x with
-        | HasOutputClass "comparativeInformation" t -> Summary.from t |> TreatmentSummary.from ComparativeInformation
-        | HasOutputClass "managementOfConditions" t -> Summary.from t |> TreatmentSummary.from ManagementOfConditions
-        | HasOutputClass "medicalEmergenciesBodySystems" t -> Summary.from t |> TreatmentSummary.from MedicalEmergenciesBodySystems
-        | HasOutputClass "treatmentOfBodySystems" t -> Summary.from t |> TreatmentSummary.from TreatmentOfBodySystems
-        | t -> Summary.from t |> TreatmentSummary.from Generic
+        | HasOutputClass "comparativeInformation" t -> t |> build ComparativeInformation
+        | HasOutputClass "managementOfConditions" t -> t |> build ManagementOfConditions
+        | HasOutputClass "medicalEmergenciesBodySystems" t -> t |> build MedicalEmergenciesBodySystems
+        | HasOutputClass "treatmentOfBodySystems" t -> t |> build TreatmentOfBodySystems
+        | HasOutputClass "about" t -> t |> build About
+        | HasOutputClass "guidance" t -> t |> build Guidance
+        | t -> t |> build Generic
 
 
 module DrugClassification =

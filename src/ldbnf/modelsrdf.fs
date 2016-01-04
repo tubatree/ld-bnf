@@ -212,21 +212,19 @@ module TreatmentSummaryRdf =
 
   type Graph with
     static member from (x:TreatmentSummary) =
-      let s = [a Uri.TreatmentSummaryEntity |> Some
-               Graph.secondary x] |> List.choose id
+      let secondary  (TreatmentSummary (_,x)) =
+        match x with
+          | Generic _ -> None
+          | _ -> a !!(Uri.nicebnf + (toString x)) |> Some
+
+      let s = optionlist {
+               yield a Uri.TreatmentSummaryEntity |> Some
+               yield secondary x}
+
       let p = Graph.fromts x
       let dr r = resource (Uri.from x) r
       [dr s
        dr p] |> Assert.graph (empty())
-
-    static member secondary (TreatmentSummary (_,x)) =
-      match x with
-        | ComparativeInformation _ -> a !!(Uri.nicebnf + "ComparativeInformation") |> Some
-        | ManagementOfConditions _ -> a !!(Uri.nicebnf + "ManagementOfConditions") |> Some
-        | MedicalEmergenciesBodySystems _ -> a !!(Uri.nicebnf + "MedicalEmergenciesBodySystems") |> Some
-        | TreatmentOfBodySystems _ -> a !!(Uri.nicebnf + "TreatmentOfBodySystems") |> Some
-        | Generic _ -> None
-
 
     static member fromti (Title s) =
       dataProperty !!"rdfs:label" (s^^xsd.string)
@@ -259,6 +257,8 @@ module TreatmentSummaryRdf =
         | ManagementOfConditions s -> Graph.from s
         | MedicalEmergenciesBodySystems s -> Graph.from s
         | TreatmentOfBodySystems s -> Graph.from s
+        | About s -> Graph.from s
+        | Guidance s -> Graph.from s
         | Generic s -> Graph.from s
 
 module MedicinalFormRdf =

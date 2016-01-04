@@ -147,6 +147,8 @@ namespace splitter
 			"#clinicalMedicinalProductInformation",
 
 			"interaction",
+       "guidance",
+       "about",
 
             //no output class
 			"#PHP101868",
@@ -157,8 +159,6 @@ namespace splitter
             "#treatmentSummaries",
             "#medicalDevices",
             "#interactions",
-            "#guidance",
-            "#about",
             "#borderlineSubstances",
             "#drugClasses",
             "#labels"
