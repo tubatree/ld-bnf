@@ -32,8 +32,8 @@ open Bnf.MedicalDevice
 open Bnf.MedicalDeviceParser
 open Bnf.WoundManagement
 open Bnf.WoundManagementParser
-open Bnf.Content
-open Bnf.ContentParser
+open Bnf.Generic
+open Bnf.GenericParser
 open Bnf.BorderlineSubstanceTaxonomy
 open Bnf.BorderlineSubstanceTaxonomyParser
 open FSharp.RDF
@@ -50,7 +50,7 @@ open Bnf.BorderlineSubstanceRdf
 open Bnf.InteractionRdf
 open Bnf.MedicalDeviceTypeRdf
 open Bnf.WoundManagementRdf
-open Bnf.ContentRdf
+open Bnf.GenericRdf
 open Bnf.PublicationRdf
 open Bnf.MedicalDeviceRdf
 open Bnf.BorderlineSubstanceTaxonomyRdf
@@ -97,7 +97,7 @@ module Iterator =
     //get the type from the filename, somehow
     let t = Directory.GetParent(f).Name
     use fi = file f
-    let content n = fi |> contentProvider.Load |> Content.parse |> (Graph.fromContent n) |> Done
+    let content n = fi |> genericProvider.Load |> Generic.parse |> (Graph.fromGeneric n) |> Done
     //parse in different ways for differnt types
     let m = match t with
             | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Done

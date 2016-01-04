@@ -37,3 +37,20 @@ module prelude =
       match FSharpType.GetUnionCases typeof<'a> |> Array.filter (fun case -> case.Name = s) with
         |[|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
         |_ -> None
+
+
+    let inline name arg =
+      ( ^a : (member Name : string) arg)
+
+    let inline (|HasName|_|) n x =
+      if (name x) = n then Some(x)
+      else None
+
+    let inline hasName s x = name x = s
+
+    let inline outputclass arg = ( ^a : (member Outputclass : string) arg)
+
+    let inline (|HasOutputClass|_|) (n:string) x =
+      let cs = (outputclass x).Split [|' '|]
+      if (cs |> Array.exists (fun  c -> c = n)) then Some(x)
+      else None

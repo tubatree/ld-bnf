@@ -339,25 +339,7 @@ module TreatmentSummary =
 module TreatmentSummaryParser =
   open TreatmentSummary
 
-  let inline name arg =
-    ( ^a : (member Name : string) arg)
-
-  let inline (|HasName|_|) n x =
-    if (name x) = n then Some(x)
-    else None
-
-  let inline hasName s x = name x = s
-
-  let inline outputclass arg = ( ^a : (member Outputclass : string) arg)
-
-  let inline (|HasOutputClass|_|) (n:string) x =
-    let cs = (outputclass x).Split [|' '|]
-    if (cs |> Array.exists (fun  c -> c = n)) then Some(x)
-    else None
-
   let withname = (|HasName|_|)
-
-  let (>>=) a b = Option.bind b a
 
   type Doi with
     static member from (x:tsProvider.Data) = Doi(x.Value) |> Some
@@ -371,7 +353,7 @@ module TreatmentSummaryParser =
                | Some x -> TargetAudience x |> Some
                | None -> None
       Content(x,ta)
- 
+
   type Summary with
     static member from (x:tsProvider.Topic) =
       let ls = x.XElement |> ContentLink.from
@@ -823,23 +805,43 @@ module WoundManagementParser =
                 |> Array.toList
       {id=Id(x.Id);title=t;general=gen;dressingChoices=dcs;links=ls;productGroups=pgs}
 
-module Content =
-  type contentProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
+
+
+module Generic =
+  type genericProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
 
   type Title =
     | Title of string
     override __.ToString () = match __ with | Title x -> x
+  type TargetAudience = | TargetAudience of string
+  type Content = | Content of genericProvider.Section * TargetAudience option
 
-  type Content = | Content of Id * Title * contentProvider.Body option * Content list * ContentLink list
+  type Generic = {
+    id:Id;
+    title:Title;
+    content:Content list;
+    links:ContentLink seq
+  }
 
-module ContentParser =
-  open Content
+module GenericParser =
+  open Generic
 
   type Content with
-    static member parse (x:contentProvider.Topic) =
-      let cs = x.Topics |> Array.map Content.parse |> Array.toList
+    static member from (x:genericProvider.Section) =
+      let ta = match x.Outputclass with
+               | Some x -> TargetAudience x |> Some
+               | None -> None
+      Content(x,ta)
+
+  type Generic with
+    static member parse (x:genericProvider.Topic) =
+      let c = match x.Body with
+              | Some b -> b.Sections |> Array.map Content.from |> Array.toList
+              | None -> []
       let ls = x.XElement |> ContentLink.from
-      Content(Id(x.Id), Title(x.Title),x.Body,cs,ls)
+      {id=Id(x.Id); title = Title(x.Title); content = c; links = ls}
+
+
 
 module BorderlineSubstanceTaxonomy =
   type Title = | Title of string
@@ -852,7 +854,6 @@ module BorderlineSubstanceTaxonomy =
     categories: Id list;
     }
 
-//<section outputclass="general">
 
 module BorderlineSubstanceTaxonomyParser =
   open BorderlineSubstanceTaxonomy

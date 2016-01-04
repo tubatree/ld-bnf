@@ -55,38 +55,37 @@ module PublicationRdf =
       [dr s]
       |> Assert.graph (empty())
 
-module ContentRdf = 
-  open Bnf.Content
+module GenericRdf = 
+  open Bnf.Generic
 
   type Graph with
-    static member fromContent n (Content(id,t,b,cs,ls)) =
+    static member fromti (Title s) =
+      dataProperty !!"rdfs:label" (s^^xsd.string)
+
+    static member fromta (TargetAudience s) =
+      dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
+
+    static member fromcontent (Content(s,ta)) =
+      blank !!"nicebnf:hasContent"
+        (optionlist {
+          yield ta >>= (Graph.fromta >> Some)
+          yield dataProperty !!"nicebnf:hasDitaContent" ((string s)^^xsd.xmlliteral)})
+
+    static member from (x:ContentLink) =
+      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+
+    static member fromGeneric n (x:Generic) =
       let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
 
-      let ln x = objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
-
-      let xml (n,t,b,ls) =
-        optionlist {
-         yield a !!(Uri.nicebnf + n)
-         yield t |> (string >> xsd.string >> (dataProperty !!"rdfs:label"))
-         yield b |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
-         yield! ls |> List.map ln}
-
-      let content' n (Content(id,t,b,_,ls)) =
-        one !!"nicebnf:hasContent" (uri n id) (xml (n,t,b,ls))
-
-      let content n (Content(_,t,b,cs,ls)) =
-        optionlist {
-          yield! xml (n,t,b,ls)
-          yield! cs |> List.map (content' n) }
-
-      let s = Content(id,t,b,cs,ls) |> content n
+      let s = optionlist {
+        yield Graph.fromti x.title
+        yield! x.links |> Seq.map Graph.from |> Seq.toList
+        yield! x.content |> List.map Graph.fromcontent}
 
       let dr r = resource (uri n id) r
 
       [dr s]
       |> Assert.graph (empty())
-
-
 
 module InteractionRdf =
   open Bnf.Interaction
