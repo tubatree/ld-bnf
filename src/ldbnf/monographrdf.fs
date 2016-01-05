@@ -20,16 +20,14 @@ module DrugRdf =
   let getvaldc (DrugClassName n) = string n
   let getlabelcmpi (CMPIName n) = string n.Value.Value
   let getvalcmpi (CMPIName n) = string n
-  let getvtmid (Vtmid i) = Some(string i)
   let tosys (Sys s) = s
 
   let subject x l = dataProperty !!"nicebnf:hasSubject" ((toString x)^^xsd.string) :: l
   let subtype x l = (a !!("nicebnf:" + (toString x))) :: l
-  let label (s:string) = s.Trim().ToLower()
 
   let ph (ph:drugProvider.Ph) =
-    [dataProperty !!"rdfs:label"  (ph.XElement.Value |> (label >> xsd.string))
-     dataProperty !!"nicebnf:hasDitaContent" ((string ph).Trim()^^xsd.xmlliteral)]
+    [ph.XElement.Value |> label
+     ph |> dita]
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
@@ -38,8 +36,8 @@ module DrugRdf =
 
     static member from (x:CMPI) =
       let s = [ a Uri.CMPIEntity
-                dataProperty !!"rdfs:label" ((getlabelcmpi x.cmpiname)^^xsd.string)
-                dataProperty !!"nicebnf:hasTitle" ((getvalcmpi x.cmpiname)^^xsd.xmlliteral)]
+                getlabelcmpi x.cmpiname |> label
+                getvalcmpi x.cmpiname |> title]
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromseccmpi x)
       [dr s
@@ -48,8 +46,8 @@ module DrugRdf =
 
     static member from (x:DrugClass) =
       let s = [a Uri.DrugClassEntity
-               dataProperty !!"rdfs:label" ((getlabeldc x.dcname)^^xsd.string)
-               dataProperty !!"nicebnf:hasTitle" ((getvaldc x.dcname)^^xsd.xmlliteral)]
+               getlabeldc x.dcname |> label
+               getvaldc x.dcname |> title]
 
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromsecdc x)
@@ -59,11 +57,12 @@ module DrugRdf =
        |> Assert.graph Graph.setupGraph
 
     static member from (x:Drug) =
+      let getvtmid (Vtmid i) = Some(string i)
 
       let s = optionlist {
                  yield a Uri.DrugEntity
-                 yield dataProperty !!"rdfs:label" ((getlabeld x.name)^^xsd.string)
-                 yield dataProperty !!"nicebnf:hasTitle" ((getvald x.name)^^xsd.xmlliteral)
+                 yield getlabeld x.name |> label
+                 yield getvald x.name |> title
                  yield x.vtmid >>= getvtmid >>= (xsd.string >> dataProperty !!"nicebnf:hasVtmid" >> Some)
                  yield x.primaryDomainOfEffect >>= (Graph.frompdoe >> Some)
                  yield x.synonyms >>= (Graph.fromsyn >> Some)
@@ -108,14 +107,14 @@ module DrugRdf =
     static member fromcd (x:ConstituentDrug) =
       one !!"nicebnf:hasConstituentDrug" (Uri.from x )
        [a Uri.ConstituentDrugEntity
-        dataProperty !!"rdfs:label" (x |> (string >> label >> xsd.string))]
+        x |> (string >> label)]
 
     static member fromtu ((x:TheraputicUse), ?name0:string) =
       let name = defaultArg name0 "nicebnf:hasTherapeuticUse"
       let s = match x with | TheraputicUse(n,u) ->
                               optionlist {
                                yield a Uri.TheraputicUseEntity
-                               yield dataProperty !!"rdfs:label" (n^^xsd.string)
+                               yield n |> label
                                yield u >>= (Graph.fromtu >> Some)}
       one !!name (Uri.from x) s
 
@@ -128,7 +127,7 @@ module DrugRdf =
     static member fromdoe (DomainOfEffect (n,p,s)) =
       optionlist {
         yield a Uri.DomainOfEffectEntity
-        yield n >>= (label >> xsd.string >> (dataProperty !!"rdfs:label") >> Some)
+        yield n >>= (label >> Some)
         yield p >>= Graph.fromptu
         yield s >>= Graph.fromstu}
 
@@ -142,21 +141,18 @@ module DrugRdf =
       ds |> Seq.map (Graph.hasdoe "SecondaryDomainOfEffect") |> Seq.toList
 
     static member from (x:Route) =
-      let l = match x with | Route r -> r^^xsd.string
       Some(one !!"nicebnf:hasRoute" (Uri.from x)
-            [dataProperty !!"rdfs:label" l
+            [x |> (string >> label)
              a Uri.RouteEntity])
 
     static member from (x:Indication) =
-      let l = match x with | Indication i -> i^^xsd.string
       Some(one !!"nicebnf:hasIndication" (Uri.from x)
-            [dataProperty !!"rdfs:label" l
+            [x |> (string >> label)
              a Uri.IndicationEntity ])
 
     static member from (x:FundingIdentifier) =
-      let l = match x with | FundingIdentifier f -> f.Title^^xsd.string
       Some(one !!"nicebnf:hasFundingIdentifier" (Uri.fromfi x)
-              [dataProperty !!"rdfs:label" l
+              [x |> (string >> label)
                a Uri.FundingIdentifierEntity])
 
     static member fromti (Bnf.Drug.Title (Paragraph(s,_))) =
@@ -164,7 +160,7 @@ module DrugRdf =
 
     static member fromsp (Specificity (Paragraph(s,_),r,i)) =
       let sp = optionlist {
-                yield dataProperty !!"rdfs:label" (s^^xsd.string)
+                yield s |> label
                 yield a Uri.SpecificityEntity
                 yield! r |> List.choose Graph.from
                 yield! i |> List.choose Graph.from}
@@ -176,10 +172,10 @@ module DrugRdf =
         blank !!"nicebnf:hasDosage"
          (optionlist {
           yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
-                 [dataProperty !!"rdfs:label" (pg.Group^^xsd.string)
+                 [pg.Group |> label
                   a Uri.PatientGroupEntity]
-          yield dataProperty !!"rdfs:label" (pg.Dosage^^xsd.string)
-          yield dataProperty !!"nicebnf:hasDitaContent" ((string pg.dosageXml )^^xsd.xmlliteral)
+          yield pg.Dosage |> label
+          yield pg.dosageXml |> dita
           yield a Uri.DosageEntity
           yield r >>= (Graph.fromsp >> Some)})
       pgs |> Seq.map patientGrp
@@ -189,15 +185,15 @@ module DrugRdf =
         | TheraputicIndication (s,p) ->
            Some(one !!"nicebnf:hasIndication" (Uri.from x)
              [a Uri.IndicationEntity
-              dataProperty !!"rdfs:label" (s^^xsd.string)
-              dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)])
+              s |> label
+              p |> dita])
 
     static member fromidg (IndicationsAndDose(tis,roas)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
 
     static member fromidgs (x:IndicationsAndDoseSection) =
-      let dp n s = [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))
+      let dp n s = [s |> dita
                     (a !!("nicebnf:" + n))]
       match x with
        | Pharmacokinetics s -> s |> dp "Pharmacokinetics"
@@ -216,24 +212,18 @@ module DrugRdf =
         | PatientAdviceInPregnancy  (t,sp,s) -> (t,sp,s) |> pca p
         | PatientAdviceInConceptionAndContraception (t,sp,s) -> (t,sp,s) |> pca p
 
-    static member fromlvs (LicensingVariationStatement(p)) =
-        [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
+    static member fromlvs (LicensingVariationStatement(p)) = [p |> dita]
 
-    static member fromavs (AdditionalFormsStatement(p)) =
-        [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(p.ToString()))]
+    static member fromavs (AdditionalFormsStatement(p)) = [p |> dita]
 
     static member frommfl (MedicinalForm(l)) =
-      one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url))
-         [dataProperty !!"rdfs:label" (l.Title^^xsd.string)]
+      one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url)) [l.Title |> label]
 
-    static member fromcsc (AllergyAndCrossSensitivityContraindications s) =
-        [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
+    static member fromcsc (AllergyAndCrossSensitivityContraindications s) = [s |> dita]
 
-    static member fromcscs (AllergyAndCrossSensitivityCrossSensitivity s) =
-        [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
+    static member fromcscs (AllergyAndCrossSensitivityCrossSensitivity s) = [s |> dita]
 
-    static member from (x:drugProvider.Sectiondiv) =
-      dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(x.ToString()))
+    static member from (x:drugProvider.Sectiondiv) = x |> dita
 
     static member frompair (sp,s:drugProvider.Sectiondiv) =
       optionlist {
@@ -247,7 +237,7 @@ module DrugRdf =
 
     static member fromgi (GeneralInformation (sd,sp)) =
       optionlist {
-        yield dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(sd.ToString()))
+        yield sd |> dita
         yield sp >>= (Graph.fromsp >> Some)}
 
     static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
@@ -301,8 +291,8 @@ module DrugRdf =
            yield a !!"nicebnf:SideEffectGroup"
            yield one !!"nicebnf:hasFrequency" (Uri.fromfre f)
              [a !!"nicebnf:Frequency"
-              dataProperty !!"rdfs:label" (f.label^^xsd.string)]
-           yield dataProperty !!"nicebnf:hasDitaContent" ((string p)^^xsd.xmlliteral)
+              f.label |> label]
+           yield p |> dita
            yield! ses |> Seq.map Graph.fromse |> Seq.toList}
         match x with
           | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subtype x
@@ -312,7 +302,7 @@ module DrugRdf =
     static member fromcog (x:ContraindicationsGroup) =
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:ContraindicationsGroup"
-                         yield p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDitaContent")
+                         yield p |> dita
                          yield! (cs |> Seq.map Graph.fromcon |> Seq.toList)}
       match x with
         | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subtype x
@@ -322,7 +312,7 @@ module DrugRdf =
     static member fromcg (x:CautionsGroup) =
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:CautionsGroup"
-                         yield p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDitaContent")
+                         yield p |> dita
                          yield! (cs |> List.map Graph.fromcau)}
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x

@@ -19,6 +19,18 @@ module RdfUris =
 
   let optionlist = new OptionlistBuilder<Predicate * Object>()
 
+  let fettle (s:string) = s.Trim().ToLower()
+
+  let label = fettle >> xsd.string >> (dataProperty !!"rdfs:label")
+  let title = xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")
+
+  let inline dita x =
+    let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
+    element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
+
+  let inline ditastr x =
+    x |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
+
   type Uri with
     static member nicebnf = "http://ld.nice.org.uk/ns/bnf#"
     static member nicebnfClass = "http://ld.nice.org.uk/ns/bnf/"

@@ -84,8 +84,13 @@ module Drug =
 
     type PatientGroup = {Group:string; Dosage:string; dosageXml:drugProvider.P;}
 
-    type Route = | Route of string
-    type Indication = | Indication of string
+    type Route =
+      | Route of string
+      override __.ToString () = match __ with | Route x -> x
+
+    type Indication =
+      | Indication of string
+      override __.ToString () = match __ with | Indication x -> x
 
     type Specificity = | Specificity of Paragraph * Route list * Indication list
 
@@ -220,7 +225,9 @@ module Drug =
     type DirectionForAdministration =
       | DirectionForAdministration of Option<Specificity> * drugProvider.Sectiondiv
 
-    type FundingIdentifier = | FundingIdentifier of Link
+    type FundingIdentifier =
+      | FundingIdentifier of Link
+      override __.ToString () = match __ with | FundingIdentifier x -> x.Title
 
     type FundingDecision =
       | NonNHS of Specificity option * drugProvider.Sectiondiv
