@@ -390,6 +390,7 @@ module WoundManagementRdf =
                yield x.title |> Graph.fromTitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup
+               yield! x.links |> List.map Graph.fromwml
               }
 
       let dr r = resource (Uri.from x) r
@@ -427,7 +428,9 @@ module WoundManagementRdf =
             yield t |>  Graph.fromTitle
             yield d >>= (Graph.fromDescription >> Some)
             yield! pl |> List.map Graph.fromProduct
-          })
+            })
+
+
 namespace Bnf
 open FSharp.RDF
 open FSharp.Data.Runtime
