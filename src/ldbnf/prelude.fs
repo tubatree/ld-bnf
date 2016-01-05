@@ -54,14 +54,16 @@ module prelude =
     let inline outputclass arg =
         ( ^a : (member Outputclass : string) arg) 
 
-    let inline hasOutputclass (s:string) x =
-        let cs = (outputclass x).Split [|' '|]
-        if (cs |> Array.exists (fun  c -> c = s)) then Some(x)
-        else None
+    let overlap s (o:string) x = 
+      if (o.Split [|' '|] |> Array.exists (fun  c -> c = s)) then Some(x)
+      else None
+
+    let inline hasOutputclass (s:string) x = overlap s (outputclass x) x
 
     let inline hasOutputclasso (s:string) x =
-        if (outputclasso x) = Some s then Some(x)
-        else None
+        match outputclasso x with
+          | Some o -> overlap s o x
+          | None -> None
 
     let inline (|HasOutputClass|_|) (n:string) x = hasOutputclass n x
 
