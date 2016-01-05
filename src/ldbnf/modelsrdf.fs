@@ -92,7 +92,8 @@ module InteractionRdf =
   type Graph with
     static member from (InteractionList(id,t,il,ids)) =
       let s = [ a Uri.InteractionListEntity
-                t |> (string >> label)]
+                t.XElement.Value |> label
+                t.XElement |> (string >> title)]
 
       let iwuri = Uri.fromiw id
 

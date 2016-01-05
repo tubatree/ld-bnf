@@ -628,10 +628,6 @@ module BorderlineSubstanceParser =
 module Interaction =
   type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true>
 
-  type Title =
-    | Title of string
-    override __.ToString() = match __ with | Title x -> x
-
   type Link = {url: string; label: string;}
 
   type Importance =
@@ -641,13 +637,13 @@ module Interaction =
 
   type InteractsWith =
     {id:Id;
-     title:Title;
+     title:inProvider.Title;
      importance:Importance;
      message:inProvider.P;
      interactswith:Link;}
 
   type InteractionList =
-    | InteractionList of Id * Title * InteractsWith list * Id list
+    | InteractionList of Id * inProvider.Title * InteractsWith list * Id list
 
 
 module InteracitonParser =
@@ -655,7 +651,7 @@ module InteracitonParser =
 
   type InteractsWith with
     static member from (x:inProvider.Topic) =
-      let t = Title x.Title
+      let t = x.Title
       let p,l = match x.Body.P with
                 | Some p ->
                   let ds = p.Phs |> Array.filter (fun p -> p.Outputclass = "drug")
@@ -673,7 +669,7 @@ module InteracitonParser =
     static member parse (x:inProvider.Topic) =
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
       let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      InteractionList(Id(x.Id),Title x.Title,is, ids)
+      InteractionList(Id(x.Id),x.Title,is, ids)
 
 
 module WoundManagement =
