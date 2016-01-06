@@ -115,7 +115,7 @@ module Drug =
     type AdditionalMonitoringInBreastFeeding =
       | AdditionalMonitoringInBreastFeeding of Option<Specificity> * drugProvider.Sectiondiv
 
-    type AdditionalMonitoringInRenalImpairment = | AdditionalMonitoringInRenalImpairment of string
+    type AdditionalMonitoringInRenalImpairment = | AdditionalMonitoringInRenalImpairment of Specificity option * drugProvider.Sectiondiv
 
     type AdditionalMonitoringInHepaticImpairment = | AdditionalMonitoringInHepaticImpairment of Specificity option * drugProvider.Sectiondiv
 
@@ -440,9 +440,9 @@ module DrugParser =
       match x.Body with
         | Some(b) -> 
            let gi = b.Sections |> subsections "generalInformation" GeneralInformation.from
-           let am = b.Sections
-                    |> Array.choose (hasOutputclasso "additionalMonitoringInRenalImpairment")
-                    |> Array.map (string >> AdditionalMonitoringInRenalImpairment)
+           let am = x |> (somesections "additionalMonitoringInRenalImpairment")
+                      |> Array.map (addSpecificity >> AdditionalMonitoringInRenalImpairment)
+                      |> Array.toSeq
            let da = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from
            Some(RenalImpairment(Id(x.Id),gi,am,da))
         | None -> None

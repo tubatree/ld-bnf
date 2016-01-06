@@ -264,8 +264,7 @@ module DrugRdf =
     static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
     static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
-    static member fromamri (AdditionalMonitoringInRenalImpairment s) =
-      [dataProperty !!"nicebnf:hasDitaContent" (xsd.xmlliteral(s.ToString()))]
+    static member fromamri (AdditionalMonitoringInRenalImpairment (sp,s)) = Graph.frompair(sp,s)
 
     static member fromse (x:SideEffect) =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x)
