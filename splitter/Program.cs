@@ -59,7 +59,7 @@ namespace splitter
                 if (href == null) continue;
                 var id = href.Value.Replace(".xml", "").Replace("#","");
                 if (lookup.ContainsKey(id))
-                    xref.SetAttributeValue("rel",lookup[id]);
+                    xref.SetAttributeValue("rel",lookup[id].ToLower());
             }
 
             var fragments = ProcessWithId(doc.Root);
