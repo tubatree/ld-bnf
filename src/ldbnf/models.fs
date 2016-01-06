@@ -626,9 +626,13 @@ module BorderlineSubstanceParser =
        }
 
 module Interaction =
-  type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true>
+  type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true, SampleIsList=true>
 
   type Link = {url: string; label: string;}
+
+  type NoteType = | Note
+
+  type Note = | Note of inProvider.P * NoteType
 
   type Importance =
     | High
@@ -643,7 +647,7 @@ module Interaction =
      interactswith:Link;}
 
   type InteractionList =
-    | InteractionList of Id * inProvider.Title * InteractsWith list * Id list
+    | InteractionList of Id * inProvider.Title * InteractsWith list * Id list * Note option
 
 
 module InteracitonParser =
@@ -667,9 +671,16 @@ module InteracitonParser =
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
+      let note (x:inProvider.Note) =
+        let t = match x.Type with
+                | "note" -> NoteType.Note
+                | _ -> failwith ("cant find note type" + x.Type)
+        Note(x.P,t)
+
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
       let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      InteractionList(Id(x.Id),x.Title,is, ids)
+      let n = x.Body.Note >>= (note >> Some)
+      InteractionList(Id(x.Id),x.Title,is,ids, n)
 
 
 module WoundManagement =

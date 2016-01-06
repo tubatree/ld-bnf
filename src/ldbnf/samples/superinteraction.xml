@@ -1,6 +1,17 @@
+<samples>
+  <topic id="bnf_int_1095" outputclass="interaction">
+    <title>Abatacept</title>
+    <body/>
+  </topic>
 <topic id="bnf_int_1095" outputclass="interaction">
      <title>Abatacept</title>
-     <body/>
+     <body>
+      <note type="note">
+        <p>
+          <b>Note:</b>
+          <i>See also</i> Surgery and Long-term Medication, under General Anaesthesia in BNF </p>
+       </note>
+     </body>
      <topic id="bnf_d1e4">
       <title>Adalimumab</title>
       <body outputclass="int-list">
@@ -108,3 +119,4 @@
      <xref href="bnf_int_11.xml" rel="interaction">Ramipril</xref>
      <xref href="bnf_int_12.xml" rel="interaction">Trandolapril</xref>
     </topic>
+  </samples>

@@ -90,10 +90,15 @@ module InteractionRdf =
   open Bnf.Interaction
 
   type Graph with
-    static member from (InteractionList(id,t,il,ids)) =
-      let s = [ a Uri.InteractionListEntity
-                t.XElement.Value |> label
-                t.XElement |> (string >> title)]
+    static member from (InteractionList(id,t,il,ids,n)) =
+      let note (Note(p,t)) = blank !!"nicebnf:hasNote"
+                              [t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")
+                               p |> dita]
+      let s = optionlist{
+                yield a Uri.InteractionListEntity
+                yield t.XElement.Value |> label
+                yield t.XElement |> (string >> title)
+                yield n >>= (note >> Some)}
 
       let iwuri = Uri.fromiw id
 
