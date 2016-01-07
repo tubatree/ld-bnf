@@ -136,7 +136,7 @@ module BorderlineSubstanceRdf =
                 yield a Uri.BorderlineSubstanceEntity
                 yield x.title |> (l >> label)
                 yield x.title |> (string >> title)
-                yield x.category |> (string >> Uri.frombsc >> (objectProperty !!"nicebnf:hasCategory"))
+                yield x.category |> (string >> Uri.frombst >> (objectProperty !!"nicebnf:hasCategory"))
                 yield x.intro >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasIntroductoryNote") >> Some)}
 
       let ds = x.details |> List.map Graph.fromdetails
