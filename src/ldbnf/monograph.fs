@@ -107,17 +107,17 @@ module Drug =
 
     type GeneralInformation = | GeneralInformation of drugProvider.Sectiondiv * Option<Specificity>
 
-    type DoseAdjustment = | DoseAdjustment of Option<Specificity> * drugProvider.Sectiondiv
+    type DoseAdjustment = | DoseAdjustment of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type AdditionalMonitoringInPregnancy =
-      | AdditionalMonitoringInPregnancy of Option<Specificity> * drugProvider.Sectiondiv
+      | AdditionalMonitoringInPregnancy of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type AdditionalMonitoringInBreastFeeding =
-      | AdditionalMonitoringInBreastFeeding of Option<Specificity> * drugProvider.Sectiondiv
+      | AdditionalMonitoringInBreastFeeding of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
-    type AdditionalMonitoringInRenalImpairment = | AdditionalMonitoringInRenalImpairment of Specificity option * drugProvider.Sectiondiv
+    type AdditionalMonitoringInRenalImpairment = | AdditionalMonitoringInRenalImpairment of Title option * Specificity option * drugProvider.Sectiondiv
 
-    type AdditionalMonitoringInHepaticImpairment = | AdditionalMonitoringInHepaticImpairment of Specificity option * drugProvider.Sectiondiv
+    type AdditionalMonitoringInHepaticImpairment = | AdditionalMonitoringInHepaticImpairment of Title option * Specificity option * drugProvider.Sectiondiv
 
     type LicensingVariationStatement = | LicensingVariationStatement of drugProvider.P
 
@@ -149,31 +149,31 @@ module Drug =
       | AllergyAndCrossSensitivityContraindications of drugProvider.Sectiondiv
 
     type AllergyAndCrossSensitivityCrossSensitivity =
-        | AllergyAndCrossSensitivityCrossSensitivity of drugProvider.Sectiondiv
+      | AllergyAndCrossSensitivityCrossSensitivity of drugProvider.Sectiondiv
 
-    type ExceptionToLegalCategory = | ExceptionToLegalCategory of Option<Specificity> * drugProvider.Sectiondiv
+    type ExceptionToLegalCategory = | ExceptionToLegalCategory of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
-    type DentalPractitionersFormulary = | DentalPractitionersFormulary of Option<Specificity> * drugProvider.Sectiondiv
+    type DentalPractitionersFormularyInformation = | DentalPractitionersFormularyInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
-    type AdviceForDentalPractitioners = | AdviceForDentalPractitioners of Specificity option * drugProvider.Sectiondiv
+    type AdviceForDentalPractitioners = | AdviceForDentalPractitioners of Title option * Specificity option * drugProvider.Sectiondiv
 
     type EffectOnLaboratoryTest = | EffectOnLaboratoryTest of drugProvider.Sectiondiv
 
     type PreTreatmentScreening = | PreTreatmentScreening of drugProvider.Sectiondiv
 
-    type LessSuitableForPrescribing = | LessSuitableForPrescribing of Option<Specificity> * drugProvider.Sectiondiv
+    type LessSuitableForPrescribing = | LessSuitableForPrescribing of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
  
-    type HandlingAndStorage = | HandlingAndStorage of Option<Specificity> * drugProvider.Sectiondiv
+    type HandlingAndStorage = | HandlingAndStorage of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type TreatmentCessation = | TreatmentCessation of drugProvider.Sectiondiv
 
     type DrugAction = | DrugAction of drugProvider.Sectiondiv
 
     type SideEffectAdvice =
-      | SideEffectAdvice of Option<Specificity> * drugProvider.Sectiondiv
+      | SideEffectAdvice of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type SideEffectsOverdosageInformation =
-      | SideEffectsOverdosageInformation of Option<Specificity> * drugProvider.Sectiondiv
+      | SideEffectsOverdosageInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type SideEffect = | SideEffect of drugProvider.Ph
 
@@ -206,24 +206,24 @@ module Drug =
       | CautionsWithIndications of Specificity * drugProvider.P * Caution list
 
     type PrescribingAndDispensingInformation =
-      | PrescribingAndDispensingInformation of Option<Specificity> * drugProvider.Sectiondiv
+      | PrescribingAndDispensingInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type UnlicencedUse =
-      | UnlicencedUse of Option<Specificity> * drugProvider.Sectiondiv
+      | UnlicencedUse of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type MonitoringRequirement =
-      | PatientMonitoringProgrammes of Option<Specificity> * drugProvider.Sectiondiv
-      | TheraputicDrugMonitoring of Option<Specificity> * drugProvider.Sectiondiv
-      | MonitoringOfPatientParameters of Option<Specificity> * drugProvider.Sectiondiv
+      | PatientMonitoringProgrammes of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
+      | TheraputicDrugMonitoring of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
+      | MonitoringOfPatientParameters of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type ConceptionAndContraception =
-      | ConceptionAndContraception of Option<Specificity> * drugProvider.Sectiondiv
+      | ConceptionAndContraception of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type ImportantSafetyInformation =
       | ImportantSafetyInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type DirectionForAdministration =
-      | DirectionForAdministration of Option<Specificity> * drugProvider.Sectiondiv
+      | DirectionForAdministration of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type FundingIdentifier =
       | FundingIdentifier of Link
@@ -234,7 +234,7 @@ module Drug =
       | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv
       | SmcDecisions of Specificity option * drugProvider.Sectiondiv
 
-    type InteractionStatement = | InteractionStatement of Specificity option * drugProvider.Sectiondiv
+    type InteractionStatement = | InteractionStatement of Title option * Specificity option * drugProvider.Sectiondiv
 
     type MonographSection =
         | IndicationsAndDoseGroup of Id * IndicationsAndDose seq * IndicationsAndDoseSection seq
@@ -246,7 +246,7 @@ module Drug =
         | MedicinalForms of Id * LicensingVariationStatement option * AdditionalFormsStatement option * MedicinalForm seq
         | AllergyAndCrossSensitivity of Id * Option<AllergyAndCrossSensitivityContraindications> * Option<AllergyAndCrossSensitivityCrossSensitivity>
         | ExceptionsToLegalCategory of Id * ExceptionToLegalCategory seq
-        | ProfessionSpecificInformation of Id * DentalPractitionersFormulary seq * AdviceForDentalPractitioners seq
+        | ProfessionSpecificInformation of Id * DentalPractitionersFormularyInformation seq * AdviceForDentalPractitioners seq
         | EffectOnLaboratoryTests of Id * EffectOnLaboratoryTest seq
         | PreTreatmentScreenings of Id * PreTreatmentScreening seq
         | LessSuitableForPrescribings of Id * LessSuitableForPrescribing seq
@@ -429,7 +429,7 @@ module DrugParser =
         x.Sectiondivs |> Array.map GeneralInformation.from
 
     type DoseAdjustment with
-      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> DoseAdjustment)
+      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> DoseAdjustment)
       static member from (x:drugProvider.Section) =
         x.Sectiondivs |> Array.map DoseAdjustment.from
 
@@ -441,7 +441,7 @@ module DrugParser =
         | Some(b) -> 
            let gi = b.Sections |> subsections "generalInformation" GeneralInformation.from
            let am = x |> (somesections "additionalMonitoringInRenalImpairment")
-                      |> Array.map (addSpecificity >> AdditionalMonitoringInRenalImpairment)
+                      |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInRenalImpairment)
                       |> Array.toSeq
            let da = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from
            Some(RenalImpairment(Id(x.Id),gi,am,da))
@@ -539,18 +539,18 @@ module DrugParser =
       static member pregnancyfrom (x:drugProvider.Topic) =
         let gis = x |> (somesections "generalInformation") |> Array.map GeneralInformation.from
         let das = x |> (somesections "doseAdjustments") |> Array.map DoseAdjustment.from
-        let amps = x|> (somesections "additionalMonitoringInPregnancy") |> Array.map (addSpecificity >> AdditionalMonitoringInPregnancy)
+        let amps = x|> (somesections "additionalMonitoringInPregnancy") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInPregnancy)
         Pregnancy(Id(x.Id),gis,das,amps)
       static member breastFeedingFrom (x:drugProvider.Topic) =
         let gis = x |> (somesections "generalInformation") |> Array.map GeneralInformation.from
-        let ambfs = x |> (somesections "additionalMonitoringInBreastFeeding") |> Array.map (addSpecificity >> AdditionalMonitoringInBreastFeeding)
-        let das = x |> (somesections "doseAdjustments") |> Array.map (addSpecificity >> DoseAdjustment)
+        let ambfs = x |> (somesections "additionalMonitoringInBreastFeeding") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInBreastFeeding)
+        let das = x |> (somesections "doseAdjustments") |> Array.map (addSpecificity >> addTitle >> DoseAdjustment)
         BreastFeeding(Id(x.Id),gis,ambfs,das)
       static member hepaticImparmentFrom (x:drugProvider.Topic) =
         match x.Body with
           | Some(b) ->
                     let hi = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from |> Array.toSeq
-                    let am = x |> (somesections "additionalMonitoringInHepaticImpairment") |> Array.map (addSpecificity >> AdditionalMonitoringInHepaticImpairment) |> Array.toSeq
+                    let am = x |> (somesections "additionalMonitoringInHepaticImpairment") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInHepaticImpairment) |> Array.toSeq
                     let c (i,gi) = HepaticImpairment(i, gi, hi, am) //build a partial constructor
                     MonographSection.buidgi c x
           | None -> None
@@ -576,7 +576,7 @@ module DrugParser =
 
     type ExceptionToLegalCategory with
       static member from (x:drugProvider.Sectiondiv) =
-        ExceptionToLegalCategory(extractSpecificity x,x)
+        x |> (addSpecificity >> addTitle >> ExceptionToLegalCategory)
 
     type MonographSection with
       static member exceptionsToLegalCategory (x:drugProvider.Topic) =
@@ -585,16 +585,16 @@ module DrugParser =
                        | None -> Array.empty<ExceptionToLegalCategory>
         ExceptionsToLegalCategory(Id(x.Id),es)
 
-    type DentalPractitionersFormulary with
+    type DentalPractitionersFormularyInformation with
       static member from (x:drugProvider.Sectiondiv) =
-        DentalPractitionersFormulary(extractSpecificity x,x)
+        x |> (addSpecificity >> addTitle >> DentalPractitionersFormularyInformation)
       static member from (x:drugProvider.Section) =
-        x.Sectiondivs |> Array.map DentalPractitionersFormulary.from
+        x.Sectiondivs |> Array.map DentalPractitionersFormularyInformation.from
 
     type MonographSection with
       static member professionSpecificInformation (x:drugProvider.Topic) =
-        let psi = x |> somesections "dentalPractitionersFormulary" |> Array.map (addSpecificity >> DentalPractitionersFormulary)
-        let adp = x |> somesections "adviceForDentalPractitioners" |> Array.map (addSpecificity >> AdviceForDentalPractitioners)
+        let psi = x |> somesections "dentalPractitionersFormulary" |> Array.map (addSpecificity >> addTitle >> DentalPractitionersFormularyInformation)
+        let adp = x |> somesections "adviceForDentalPractitioners" |> Array.map (addSpecificity >> addTitle >> AdviceForDentalPractitioners)
         ProfessionSpecificInformation(Id(x.Id),psi,adp)
 
     type SideEffectsGroup with
@@ -637,11 +637,11 @@ module DrugParser =
 
     type SideEffectAdvice with
       static member from (x:drugProvider.Sectiondiv) =
-        addSpecificity x |> SideEffectAdvice
+        x |> (addSpecificity >> addTitle >> SideEffectAdvice)
 
     type SideEffectsOverdosageInformation with
       static member from (x:drugProvider.Sectiondiv) =
-        addSpecificity x |> SideEffectsOverdosageInformation
+        x |> (addSpecificity >> addTitle >> SideEffectsOverdosageInformation)
 
     type Contraindication with
       static member from (x:drugProvider.Ph) = Contraindication x
@@ -682,7 +682,7 @@ module DrugParser =
 
     type MonitoringRequirement with
       static member from (x:drugProvider.Section) =
-        let build c = x.Sectiondivs |> Array.map (addSpecificity >> c)
+        let build c = x.Sectiondivs |> Array.map (addSpecificity >> addTitle >> c)
         match x with
           | HasOutputClasso "patientMonitoringProgrammes" _ -> build PatientMonitoringProgrammes
           | HasOutputClasso "therapeuticDrugMonitoring" _ -> build TheraputicDrugMonitoring
@@ -722,9 +722,9 @@ module DrugParser =
       static member preTreatmentScreenings (x:drugProvider.Topic) =
         PreTreatmentScreenings(Id(x.Id), allsections x |> Array.map PreTreatmentScreening)
       static member lessSuitableForPrescribings (x:drugProvider.Topic) =
-        LessSuitableForPrescribings(Id(x.Id), allsections x |> Array.map (addSpecificity >> LessSuitableForPrescribing))
+        LessSuitableForPrescribings(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> LessSuitableForPrescribing))
       static member handlingAndStorages (x:drugProvider.Topic) =
-        HandlingAndStorages(Id(x.Id), allsections x |> Array.map (addSpecificity >> HandlingAndStorage))
+        HandlingAndStorages(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> HandlingAndStorage))
       static member treatmentCessations (x:drugProvider.Topic) =
         TreatmentCessations(Id(x.Id), allsections x |> Array.map TreatmentCessation)
       static member drugActions (x:drugProvider.Topic) =
@@ -758,20 +758,20 @@ module DrugParser =
         let ias = x |> (somesections "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
         Cautions(Id(x.Id), cgs, ias)
       static member prescribingAndDispensingInformation (x:drugProvider.Topic) =
-        PrescribingAndDispensingInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> PrescribingAndDispensingInformation))
+        PrescribingAndDispensingInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> PrescribingAndDispensingInformation))
       static member unlicencedUse (x:drugProvider.Topic) =
-        UnlicencedUses(Id(x.Id), allsections x |> Array.map (addSpecificity >> UnlicencedUse))
+        UnlicencedUses(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> UnlicencedUse))
       static member monitoringRequirements (x:drugProvider.Topic) =
         match x.Body with
           | Some b -> MonitoringRequirements(Id(x.Id),b.Sections |> Array.collect MonitoringRequirement.from)
           | None -> MonitoringRequirements(Id(x.Id), Array.empty<MonitoringRequirement>)
       static member conceptionAndContraception (x:drugProvider.Topic) =
-        ConceptionAndContraceptions(Id(x.Id), allsections x |> Array.map (addSpecificity >> ConceptionAndContraception))
+        ConceptionAndContraceptions(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> ConceptionAndContraception))
       static member importantSafetyInformation (x:drugProvider.Topic) =
         ImportantSafetyInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> ImportantSafetyInformation))
 
       static member directionsForAdministration (x:drugProvider.Topic) =
-        DirectionsForAdministration(Id(x.Id), allsections x |> Array.map (addSpecificity >> DirectionForAdministration))
+        DirectionsForAdministration(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> DirectionForAdministration))
       static member nationalFunding (x:drugProvider.Topic) =
         let fds =  match x.Body with
                          | Some b -> b.Sections |> Array.collect FundingDecision.fromfd
@@ -780,7 +780,7 @@ module DrugParser =
       static member interactionStatements (x:drugProvider.Topic) =
         let fs = x |> firstsection (withclass "general")
         let is = match fs with
-                 | Some s -> s.Sectiondivs |> Array.map (addSpecificity >> InteractionStatement)
+                 | Some s -> s.Sectiondivs |> Array.map (addSpecificity >> addTitle >> InteractionStatement)
                  | None -> [||]
         InteractionStatements(Id(x.Id),is)
 

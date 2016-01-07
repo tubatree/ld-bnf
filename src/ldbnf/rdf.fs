@@ -52,6 +52,7 @@ module RdfUris =
     static member from (x:BorderlineSubstance) = !!(Uri.bnfsite + "borderlinesubstance/" + string x.id )
     static member frombsc (x:string) = !!(Uri.bnfsite + "borderlinesubstance/" + (string x).Replace(".xml","") )
     static member frombsc (x:Id) = !!(Uri.bnfsite + "borderlinesubstance/" + (string x) )
+    static member frombst (x:string) = !!(Uri.bnfsite + "borderlinesubstancetaxonomy/" + (string x).Replace(".xml","") )
     static member frombst (x:Id) = !!(Uri.bnfsite + "borderlinesubstancetaxonomy/" + string x)
     static member from (x:MedicinalForm) = !!(Uri.bnfsite + "medicinalform/" + string x.id )
     static member from (x:MedicinalProduct) = !!(Uri.bnfsite + "medicinalproduct/" + string x.ampid)
