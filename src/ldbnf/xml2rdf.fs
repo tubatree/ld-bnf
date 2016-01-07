@@ -132,7 +132,6 @@ module Iterator =
         | NotDone s -> NotDone s
 
   let apply o f =
-      printfn "%s" f
       match (generate f) with
        | Done(text,fn,t) ->
            let dir = (o ++ t)
@@ -155,8 +154,8 @@ module Iterator =
     fs |> Seq.map (apply outputDirectory)
        //|> Seq.choose id
     |> Seq.iter (function
-                  | Done s -> s |>  printfn "Processed %s"
-                  | NotDone s -> s |>  printfn "Not Done %s" )
+                  | Done _ -> ()
+                  | NotDone s -> s |>  printfn "%s unprocessed" )
     //AsyncSeq.ofSeq fs
     //    |> AsyncSeq.map (apply outputDirectory)
     //    |> AsyncSeq.iter (fun s -> printfn "%s" (Async.RunSynchronously s))
