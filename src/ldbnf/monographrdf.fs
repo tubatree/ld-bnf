@@ -240,31 +240,30 @@ module DrugRdf =
         yield sd |> dita
         yield sp >>= (Graph.fromsp >> Some)}
 
-    static member fromda (DoseAdjustment (sp,sd)) = Graph.fromgi(GeneralInformation (sd,sp))
-
-    static member fromexc (ExceptionToLegalCategory (sp,s)) = Graph.frompair (sp,s)
-    static member fromden (DentalPractitionersFormulary (sp,s)) = Graph.frompair (sp,s)
-    static member fromadp (AdviceForDentalPractitioners (sp,s)) = Graph.frompair (sp,s)
-    static member fromlsfp (LessSuitableForPrescribing (sp,s)) = Graph.frompair (sp,s)
-    static member fromhas (HandlingAndStorage (sp,s)) = Graph.frompair (sp,s)
+    static member fromda (DoseAdjustment (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromexc (ExceptionToLegalCategory (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromden (DentalPractitionersFormularyInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromadp (AdviceForDentalPractitioners (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromlsfp (LessSuitableForPrescribing (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromhas (HandlingAndStorage (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromelt (EffectOnLaboratoryTest s) = [(Graph.from s)]
     static member frompts (PreTreatmentScreening s) = [(Graph.from s)]
     static member fromtc (TreatmentCessation s) = [(Graph.from s)]
     static member fromdac (DrugAction s) = [(Graph.from s)]
-    static member fromsea (SideEffectAdvice (sp,s)) = Graph.frompair (sp,s)
-    static member fromod (SideEffectsOverdosageInformation (sp,s)) = Graph.frompair (sp,s)
+    static member fromsea (SideEffectAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromod (SideEffectsOverdosageInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromciri (ContraindicationsRenalImpairment (t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member frompadi (PrescribingAndDispensingInformation (sp,s)) = Graph.frompair (sp,s)
-    static member fromulu (UnlicencedUse (sp,s)) = Graph.frompair (sp,s)
-    static member fromcac (ConceptionAndContraception (sp,s)) = Graph.frompair (sp,s)
+    static member frompadi (PrescribingAndDispensingInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromulu (UnlicencedUse (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromcac (ConceptionAndContraception (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromisi (ImportantSafetyInformation(t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member fromdfa (DirectionForAdministration (sp,s))= Graph.frompair (sp,s)
-    static member frominter (InteractionStatement(sp,s)) = Graph.frompair(sp,s)
-    static member fromamp (AdditionalMonitoringInPregnancy(sp,s)) = Graph.frompair(sp,s)
-    static member fromambf (AdditionalMonitoringInBreastFeeding(sp,s)) = Graph.frompair(sp,s)
-    static member fromamhi (AdditionalMonitoringInHepaticImpairment(sp,s)) = Graph.frompair(sp,s)
-    static member fromamri (AdditionalMonitoringInRenalImpairment (sp,s)) = Graph.frompair(sp,s)
+    static member fromdfa (DirectionForAdministration (t,sp,s))= Graph.fromthree (t,sp,s)
+    static member frominter (InteractionStatement(t,sp,s)) = Graph.fromthree(t,sp,s)
+    static member fromamp (AdditionalMonitoringInPregnancy(t,sp,s)) = Graph.fromthree(t,sp,s)
+    static member fromambf (AdditionalMonitoringInBreastFeeding(t,sp,s)) = Graph.fromthree(t,sp,s)
+    static member fromamhi (AdditionalMonitoringInHepaticImpairment(t,sp,s)) = Graph.fromthree(t,sp,s)
+    static member fromamri (AdditionalMonitoringInRenalImpairment (t,sp,s)) = Graph.fromthree(t,sp,s)
 
     static member fromse (x:SideEffect) =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x)
@@ -331,9 +330,9 @@ module DrugRdf =
 
     static member frommon (x:MonitoringRequirement) =
       match x with
-        | PatientMonitoringProgrammes (sp,s) -> Graph.frompair (sp,s) |> subtype x
-        | TheraputicDrugMonitoring (sp,s) -> Graph.frompair (sp,s) |> subtype x
-        | MonitoringOfPatientParameters (sp,s) -> Graph.frompair (sp,s) |> subtype x
+        | PatientMonitoringProgrammes (t,sp,s) -> Graph.fromthree (t,sp,s) |> subtype x
+        | TheraputicDrugMonitoring (t,sp,s) -> Graph.fromthree (t,sp,s) |> subtype x
+        | MonitoringOfPatientParameters (t,sp,s) -> Graph.fromthree (t,sp,s) |> subtype x
 
     static member fromsec sid (x:MonographSection) =
 
