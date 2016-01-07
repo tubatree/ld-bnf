@@ -836,7 +836,10 @@ module GenericParser =
 
 
 module BorderlineSubstanceTaxonomy =
-  type Title = | Title of string
+
+  type Title =
+      | Title of drugProvider.Title
+      override __.ToString() = match __ with | Title x -> string x
 
   type BorderlineSubstanceTaxonomy = {
     id:Id;
@@ -852,7 +855,7 @@ module BorderlineSubstanceTaxonomyParser =
 
   type BorderlineSubstanceTaxonomy with
     static member parse (x:drugProvider.Topic) =
-      let title = Title(x.Title.Value |? "")
+      let title = x.Title |> Title
       let general = x |> sections "general" |> Array.tryPick Some
       let ids = match x.Body with
                    | Some b -> b.Sections

@@ -29,9 +29,11 @@ module BorderlineSubstanceTaxonomyRdf =
 
   type Graph with
     static member from(x:BorderlineSubstanceTaxonomy) =
+      let l t = match t with | Title t -> t.XElement.Value.ToString()
+
       let s = optionlist {
         yield a Uri.BorderlineSubstanceTaxonomyEntity
-        yield x.title |> (string >> label)
+        yield x.title |> (l >> label)
         yield x.general >>= (ditastr >> Some)
         yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
         yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
