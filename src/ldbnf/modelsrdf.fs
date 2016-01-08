@@ -84,7 +84,7 @@ module GenericRdf =
         yield! x.links |> Seq.map Graph.from |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent}
 
-      let dr r = resource (uri n id) r
+      let dr r = resource (uri n x.id) r
 
       [dr s]
       |> Assert.graph (empty())
@@ -407,7 +407,7 @@ module WoundManagementRdf =
     static member fromDescription (Description sd) = sd |> dita
 
     static member fromwml (x:WoundManagementLink) =
-      objectProperty !!"nicebnf:hasWoundManagment" (Uri.totopic(x.rel,x.id))
+      objectProperty !!"nicebnf:hasWoundManagement" (Uri.from x)
 
     static member fromExudate (WoundExudate(s,wmls)) =
       blank !!"nicebnf:WoundExudate"
