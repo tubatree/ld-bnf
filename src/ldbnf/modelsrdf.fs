@@ -79,6 +79,7 @@ module GenericRdf =
       let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
 
       let s = optionlist {
+        yield a !!(Uri.nicebnf + n)
         yield Graph.fromti x.title
         yield! x.links |> Seq.map Graph.from |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent}
