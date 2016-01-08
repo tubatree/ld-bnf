@@ -217,14 +217,13 @@ module TreatmentSummaryRdf =
 
   type Graph with
     static member from (x:TreatmentSummary) =
-      let secondary  (TreatmentSummary (_,x)) =
+      let isa  (TreatmentSummary (_,x)) =
         match x with
-          | Generic _ -> None
-          | _ -> a !!(Uri.nicebnf + (toString x)) |> Some
+          | Generic _ ->  a Uri.TreatmentSummaryEntity
+          | _ -> a !!(Uri.nicebnf + (toString x))
 
       let s = optionlist {
-               yield a Uri.TreatmentSummaryEntity |> Some
-               yield secondary x}
+               yield isa x}
 
       let p = Graph.fromts x
       let dr r = resource (Uri.from x) r
