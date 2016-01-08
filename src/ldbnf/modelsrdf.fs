@@ -406,7 +406,7 @@ module WoundManagementRdf =
     static member fromDescription (Description sd) = sd |> dita
 
     static member fromwml (x:WoundManagementLink) =
-      objectProperty !!"nicebnf:hasWoundManagment" (Uri.from x)
+      objectProperty !!"nicebnf:hasWoundManagement" (Uri.from x)
 
     static member fromExudate (WoundExudate(s,wmls)) =
       blank !!"nicebnf:WoundExudate"
