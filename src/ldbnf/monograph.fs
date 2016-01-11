@@ -105,7 +105,7 @@ module Drug =
       | ExtremesOfBodyWeight of drugProvider.Section
       | Potency of drugProvider.Section
 
-    type GeneralInformation = | GeneralInformation of drugProvider.Sectiondiv * Option<Specificity>
+    type GeneralInformation = | GeneralInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type DoseAdjustment = | DoseAdjustment of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
@@ -167,7 +167,7 @@ module Drug =
 
     type TreatmentCessation = | TreatmentCessation of drugProvider.Sectiondiv
 
-    type DrugAction = | DrugAction of drugProvider.Sectiondiv
+    type DrugAction = | DrugAction of Option<Specificity> * drugProvider.Sectiondiv
 
     type SideEffectAdvice =
       | SideEffectAdvice of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
@@ -423,15 +423,14 @@ module DrugParser =
       extractTitle s,sp,s
 
     type GeneralInformation with
-      static member from (x:drugProvider.Sectiondiv) =
-        GeneralInformation(x,extractSpecificity x)
+      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> GeneralInformation)
       static member from (x:drugProvider.Section) =
         x.Sectiondivs |> Array.map GeneralInformation.from
 
     type DoseAdjustment with
       static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> DoseAdjustment)
       static member from (x:drugProvider.Section) =
-        x.Sectiondivs |> Array.map DoseAdjustment.from
+          x.Sectiondivs |> Array.map DoseAdjustment.from
 
     let subsections cl c s =
       s |> Array.choose (hasOutputclasso cl) |> Array.collect c
@@ -728,7 +727,7 @@ module DrugParser =
       static member treatmentCessations (x:drugProvider.Topic) =
         TreatmentCessations(Id(x.Id), allsections x |> Array.map TreatmentCessation)
       static member drugActions (x:drugProvider.Topic) =
-        DrugActions(Id(x.Id), allsections x |> Array.map DrugAction)
+        DrugActions(Id(x.Id), allsections x |> Array.map (addSpecificity >> DrugAction))
       static member sideEffects (x:drugProvider.Topic) =
         let gse = x |> (somesections "generalSideEffects")
                     |> Array.choose (hasOutputclasso "frequencies")
