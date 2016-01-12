@@ -235,11 +235,7 @@ module DrugRdf =
         yield t >>= Graph.fromti
         yield! Graph.frompair (sp,s)}
 
-    static member fromgi (GeneralInformation (sd,sp)) =
-      optionlist {
-        yield sd |> dita
-        yield sp >>= (Graph.fromsp >> Some)}
-
+    static member fromgi (GeneralInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromda (DoseAdjustment (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromexc (ExceptionToLegalCategory (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromden (DentalPractitionersFormularyInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
@@ -249,7 +245,7 @@ module DrugRdf =
     static member fromelt (EffectOnLaboratoryTest s) = [(Graph.from s)]
     static member frompts (PreTreatmentScreening s) = [(Graph.from s)]
     static member fromtc (TreatmentCessation s) = [(Graph.from s)]
-    static member fromdac (DrugAction s) = [(Graph.from s)]
+    static member fromdac (DrugAction (sp,s)) = Graph.frompair (sp,s)
     static member fromsea (SideEffectAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromod (SideEffectsOverdosageInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
