@@ -219,9 +219,9 @@ module DrugRdf =
     static member frommfl (MedicinalForm(l)) =
       one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url)) [l.Title |> label]
 
-    static member fromcsc (AllergyAndCrossSensitivityContraindications s) = [s |> dita]
+    static member fromcsc (AllergyAndCrossSensitivityContraindications (t,sp,s)) = Graph.fromthree (t,sp,s)
 
-    static member fromcscs (AllergyAndCrossSensitivityCrossSensitivity s) = [s |> dita]
+    static member fromcscs (AllergyAndCrossSensitivityCrossSensitivity (t,sp,s)) = Graph.fromthree (t,sp,s)
 
     static member from (x:drugProvider.Sectiondiv) = x |> dita
 
@@ -242,10 +242,10 @@ module DrugRdf =
     static member fromadp (AdviceForDentalPractitioners (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromlsfp (LessSuitableForPrescribing (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromhas (HandlingAndStorage (t,sp,s)) = Graph.fromthree (t,sp,s)
-    static member fromelt (EffectOnLaboratoryTest s) = [(Graph.from s)]
-    static member frompts (PreTreatmentScreening s) = [(Graph.from s)]
-    static member fromtc (TreatmentCessation s) = [(Graph.from s)]
-    static member fromdac (DrugAction (sp,s)) = Graph.frompair (sp,s)
+    static member fromelt (EffectOnLaboratoryTest (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member frompts (PreTreatmentScreening (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromtc (TreatmentCessation (t,sp,s)) = Graph.fromthree (t,sp,s)
+    static member fromdac (DrugAction (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromsea (SideEffectAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromod (SideEffectsOverdosageInformation (t,sp,s)) = Graph.fromthree (t,sp,s)
     static member fromia (ImportantAdvice (t,sp,s)) = Graph.fromthree (t,sp,s)
@@ -384,8 +384,8 @@ module DrugRdf =
         | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" (sid i) [statements addps Graph.frompca pcas]
         | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" (sid i) [statement addps Graph.fromlvs lvs
                                                                                   statement addps Graph.fromavs avs]
-        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivity" (sid i) [ statement addps Graph.fromcsc csc
-                                                                                                statement addps Graph.fromcscs cscs]
+        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivity" (sid i) [ statements addps Graph.fromcsc csc
+                                                                                                statements addps Graph.fromcscs cscs]
         | ExceptionsToLegalCategory (i,es) -> sec "ExceptionsToLegalCategory" (sid i) [statements addps Graph.fromexc es]
         | ProfessionSpecificInformation (i,dps,adps) -> sec "ProfessionSpecificInformation" (sid i) [statements addps Graph.fromden dps
                                                                                                      statements addps Graph.fromadp adps]

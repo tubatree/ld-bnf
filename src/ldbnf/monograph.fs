@@ -146,10 +146,10 @@ module Drug =
     type SecondaryDomainsOfEffect = | SecondaryDomainsOfEffect of DomainOfEffect seq
 
     type AllergyAndCrossSensitivityContraindications =
-      | AllergyAndCrossSensitivityContraindications of drugProvider.Sectiondiv
+      | AllergyAndCrossSensitivityContraindications of Title option * Specificity option * drugProvider.Sectiondiv
 
     type AllergyAndCrossSensitivityCrossSensitivity =
-      | AllergyAndCrossSensitivityCrossSensitivity of drugProvider.Sectiondiv
+      | AllergyAndCrossSensitivityCrossSensitivity of Title option * Specificity option * drugProvider.Sectiondiv
 
     type ExceptionToLegalCategory = | ExceptionToLegalCategory of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
@@ -157,17 +157,17 @@ module Drug =
 
     type AdviceForDentalPractitioners = | AdviceForDentalPractitioners of Title option * Specificity option * drugProvider.Sectiondiv
 
-    type EffectOnLaboratoryTest = | EffectOnLaboratoryTest of drugProvider.Sectiondiv
+    type EffectOnLaboratoryTest = | EffectOnLaboratoryTest of Title option * Specificity option * drugProvider.Sectiondiv
 
-    type PreTreatmentScreening = | PreTreatmentScreening of drugProvider.Sectiondiv
+    type PreTreatmentScreening = | PreTreatmentScreening of Title option * Specificity option * drugProvider.Sectiondiv
 
     type LessSuitableForPrescribing = | LessSuitableForPrescribing of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
  
     type HandlingAndStorage = | HandlingAndStorage of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
-    type TreatmentCessation = | TreatmentCessation of drugProvider.Sectiondiv
+    type TreatmentCessation = | TreatmentCessation of Title option * Specificity option * drugProvider.Sectiondiv
 
-    type DrugAction = | DrugAction of Option<Specificity> * drugProvider.Sectiondiv
+    type DrugAction = | DrugAction of Title option * Specificity option * drugProvider.Sectiondiv
 
     type SideEffectAdvice =
       | SideEffectAdvice of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
@@ -244,7 +244,7 @@ module Drug =
         | RenalImpairment of Id * GeneralInformation seq * AdditionalMonitoringInRenalImpairment seq * DoseAdjustment seq
         | PatientAndCarerAdvices of Id * PatientAndCarerAdvice seq
         | MedicinalForms of Id * LicensingVariationStatement option * AdditionalFormsStatement option * MedicinalForm seq
-        | AllergyAndCrossSensitivity of Id * Option<AllergyAndCrossSensitivityContraindications> * Option<AllergyAndCrossSensitivityCrossSensitivity>
+        | AllergyAndCrossSensitivity of Id * AllergyAndCrossSensitivityContraindications seq * AllergyAndCrossSensitivityCrossSensitivity seq
         | ExceptionsToLegalCategory of Id * ExceptionToLegalCategory seq
         | ProfessionSpecificInformation of Id * DentalPractitionersFormularyInformation seq * AdviceForDentalPractitioners seq
         | EffectOnLaboratoryTests of Id * EffectOnLaboratoryTest seq
@@ -555,27 +555,24 @@ module DrugParser =
           | None -> None
 
     type AllergyAndCrossSensitivityContraindications with
+      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> AllergyAndCrossSensitivityContraindications)
       static member from (x:drugProvider.Section) =
-        x.Sectiondivs |> Array.map AllergyAndCrossSensitivityContraindications |> Array.tryPick Some
+                x.Sectiondivs |> Array.map AllergyAndCrossSensitivityContraindications.from
 
     type AllergyAndCrossSensitivityCrossSensitivity with
+      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> AllergyAndCrossSensitivityCrossSensitivity)
       static member from (x:drugProvider.Section) =
-        x.Sectiondivs |> Array.map AllergyAndCrossSensitivityCrossSensitivity |> Array.tryPick Some
+                x.Sectiondivs |> Array.map AllergyAndCrossSensitivityCrossSensitivity.from
 
     type MonographSection with
       static member allergyAndCrossSensitivity (x:drugProvider.Topic) =
-        match x.Body with
-          | Some(b) -> 
-            let ac = b.Sections
-                     |> Array.tryPick (Some >=> withclass "allergyAndCrossSensitivityContraindications" >=> AllergyAndCrossSensitivityContraindications.from)
-            let acss = b.Sections
-                       |> Array.tryPick (Some >=> withclass "allergyAndCrossSensitivityCrossSensitivity" >=> AllergyAndCrossSensitivityCrossSensitivity.from)
-            Some(AllergyAndCrossSensitivity(Id(x.Id),ac,acss))
-          | None -> None
+        let ac = x |> (somesections "allergyAndCrossSensitivityContraindications") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityContraindications)
+        let acss = x |> (somesections "allergyAndCrossSensitivityCrossSensitivity") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityCrossSensitivity)
+        AllergyAndCrossSensitivity(Id(x.Id),ac,acss)
 
     type ExceptionToLegalCategory with
       static member from (x:drugProvider.Sectiondiv) =
-        x |> (addSpecificity >> addTitle >> ExceptionToLegalCategory)
+                x |> (addSpecificity >> addTitle >> ExceptionToLegalCategory)
 
     type MonographSection with
       static member exceptionsToLegalCategory (x:drugProvider.Topic) =
@@ -722,17 +719,17 @@ module DrugParser =
 
     type MonographSection with
       static member effectOnLaboratoryTests (x:drugProvider.Topic) =
-        EffectOnLaboratoryTests(Id(x.Id),allsections x |> Array.map EffectOnLaboratoryTest)
+        EffectOnLaboratoryTests(Id(x.Id),allsections x |> Array.map (addSpecificity >> addTitle >> EffectOnLaboratoryTest))
       static member preTreatmentScreenings (x:drugProvider.Topic) =
-        PreTreatmentScreenings(Id(x.Id), allsections x |> Array.map PreTreatmentScreening)
+        PreTreatmentScreenings(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> PreTreatmentScreening))
       static member lessSuitableForPrescribings (x:drugProvider.Topic) =
         LessSuitableForPrescribings(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> LessSuitableForPrescribing))
       static member handlingAndStorages (x:drugProvider.Topic) =
         HandlingAndStorages(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> HandlingAndStorage))
       static member treatmentCessations (x:drugProvider.Topic) =
-        TreatmentCessations(Id(x.Id), allsections x |> Array.map TreatmentCessation)
+        TreatmentCessations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> TreatmentCessation))
       static member drugActions (x:drugProvider.Topic) =
-        DrugActions(Id(x.Id), allsections x |> Array.map (addSpecificity >> DrugAction))
+        DrugActions(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> DrugAction))
       static member sideEffects (x:drugProvider.Topic) =
         let gse = x |> (somesections "generalSideEffects")
                     |> Array.choose (hasOutputclasso "frequencies")
@@ -805,7 +802,7 @@ module DrugParser =
         | HasOutputClass "lessSuitableForPrescribing" _ -> Some(MonographSection.lessSuitableForPrescribings x)
         | HasOutputClass "handlingAndStorage" _ -> Some(MonographSection.handlingAndStorages x)
         | HasOutputClass "treatmentCessation" _ -> Some(MonographSection.treatmentCessations x)
-        | HasOutputClass "allergyAndCrossSensitivity" _ -> MonographSection.allergyAndCrossSensitivity x
+        | HasOutputClass "allergyAndCrossSensitivity" _ -> Some(MonographSection.allergyAndCrossSensitivity x)
         | HasOutputClass "drugAction" _ -> Some(MonographSection.drugActions x)
         | HasOutputClass "sideEffects" _ -> Some(MonographSection.sideEffects x)
         | HasOutputClass "contraindications" _ -> Some(MonographSection.contraindications x)
