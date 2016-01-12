@@ -324,7 +324,7 @@ module DrugRdf =
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
           optionlist {
             yield sp >>= (Graph.fromsp >> Some)
-            yield Graph.from s
+            yield s >>= (Graph.from >> Some)
             yield t >>= Graph.fromti
             yield fi >>= Graph.from} |> subtype x
 

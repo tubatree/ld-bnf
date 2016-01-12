@@ -231,7 +231,7 @@ module Drug =
 
     type FundingDecision =
       | NonNHS of Specificity option * drugProvider.Sectiondiv
-      | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv
+      | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv option
       | SmcDecisions of Specificity option * drugProvider.Sectiondiv
 
     type InteractionStatement = | InteractionStatement of Title option * Specificity option * drugProvider.Sectiondiv
@@ -702,9 +702,14 @@ module DrugParser =
             | HasOutputClasso "fundingIdentifier" p -> p |> FundingIdentifier.from s1.Xref.Value.Value.Value
             | _ -> None
           let fi = s1.Ps |> Array.tryPick fid
-          let (t,sp,s) = s1.Sectiondivs.[0] |> (addSpecificity >> addTitle)
-          NiceTechnologyAppraisals (fi,t,sp,s)
+          match s1.Sectiondivs with
+            | [|head|] ->
+              let (t,sp,s) = head |> (addSpecificity >> addTitle)
+              NiceTechnologyAppraisals (fi,t,sp,Some s)
+            | _ -> NiceTechnologyAppraisals (fi,None,None,None)
+
         let buildSmc (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> SmcDecisions)
+
         match x with
           | HasOutputClasso "niceTechnologyAppraisals" _ ->
              x.Sectiondivs |> Array.map buildTa

@@ -132,6 +132,7 @@ module Iterator =
         | NotDone s -> NotDone s
 
   let apply o f =
+    try 
       match (generate f) with
        | Done(text,fn,t) ->
            let dir = (o ++ t)
@@ -141,7 +142,9 @@ module Iterator =
            toFileSynch fn text
            Done(fn)
        | NotDone s -> NotDone s
-
+     with
+       | :? Exception as ex -> NotDone (sprintf "%s failed with %s %s" f ex.Message ex.StackTrace)
+ 
   [<EntryPoint>]
   let main args = 
     let parser = ArgumentParser.Create<Arguments>()
