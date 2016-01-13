@@ -56,8 +56,9 @@ module MedicinalForm =
 
   type NhsIndicativePrice = | NhsIndicativePrice of decimal
 
-  type NhsIndicativeInfo = | NhsIndicativeInfo of Option<NhsIndicative> * Option<PriceText> * Option<NhsIndicativePrice>
+  type Hospital = | Hospital of string
 
+  type NhsIndicativeInfo = | NhsIndicativeInfo of NhsIndicative option * PriceText option * NhsIndicativePrice option * Hospital option
 
   type DrugTarrif = | DrugTarrif of string
 
@@ -152,7 +153,8 @@ module MedicinalFormParser =
       let nhsi = x.Phs |> Array.tryPick (withoc "nhsIndicative") >>= (fromphs NhsIndicative)
       let pt = x.Phs |> Array.tryPick (withoc "priceText") >>= (fromphs PriceText)
       let nhsip = x.Phs |> Array.tryPick (withoc "nhsIndicativePrice") >>= (fromphn NhsIndicativePrice)
-      NhsIndicativeInfo(nhsi,pt,nhsip)
+      let hos = x.Phs |> Array.tryPick (withoc "hospital") >>= (fromphs Hospital)
+      NhsIndicativeInfo(nhsi,pt,nhsip,hos)
 
   type DrugTariffInfo with
     static member from (x:drugProvider.P) =

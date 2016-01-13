@@ -324,11 +324,13 @@ module MedicinalFormRdf =
     static member fromnhsi (NhsIndicative x) = Graph.dp "NhsIndicative" x |> Some
     static member frompt (PriceText x) = Graph.dp "PriceText" x |> Some
     static member fromnhsip (NhsIndicativePrice x) = Graph.dp "NhsIndicativePrice" (string x) |> Some
-    static member fromnhsii (NhsIndicativeInfo(nhsi,pt,nhsip)) =
+    static member fromhos (Hospital x) = Graph.dp "Hospital" x |> Some
+    static member fromnhsii (NhsIndicativeInfo(nhsi,pt,nhsip,hos)) =
       optionlist {
         yield nhsi >>= Graph.fromnhsi
         yield pt >>= Graph.frompt
-        yield nhsip >>= Graph.fromnhsip}
+        yield nhsip >>= Graph.fromnhsip
+        yield hos >>= Graph.fromhos}
 
     static member fromps (PackSize d) = Graph.dp "PackSize" (string d) |> Some
     static member fromuom u = Graph.dp "UnitOfMeasure" (string u) |> Some
