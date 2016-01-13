@@ -48,7 +48,9 @@ module MedicinalForm =
     | GSL
     override __.ToString() = toString __
 
-  type PackInfo = | PackInfo of Option<PackSize> * Option<UnitOfMeasure> * Option<LegalCategory>
+  type Acbs = | Acbs of string
+
+  type PackInfo = | PackInfo of PackSize option * UnitOfMeasure option * LegalCategory option * Acbs option
 
   type PriceText = | PriceText of string
 
@@ -146,7 +148,8 @@ module MedicinalFormParser =
       let ps = x.Phs |> Array.tryPick (withoc "packSize") >>= (fromphn PackSize)
       let uom = x.Phs |> Array.tryPick (withoc "unitOfMeasure") >>= UnitOfMeasure.from
       let lc = x.Phs |> Array.tryPick (withoc "legalCategory") >>= LegalCategory.from
-      PackInfo(ps,uom,lc)
+      let acbs = x.Phs |> Array.tryPick (withoc "acbs") >>= (fromphs Acbs)
+      PackInfo(ps,uom,lc,acbs)
 
   type NhsIndicativeInfo with
     static member from (x:drugProvider.P) =

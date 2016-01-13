@@ -335,11 +335,13 @@ module MedicinalFormRdf =
     static member fromps (PackSize d) = Graph.dp "PackSize" (string d) |> Some
     static member fromuom u = Graph.dp "UnitOfMeasure" (string u) |> Some
     static member fromlc lc = Graph.dp "LegalCategory" (string lc) |> Some
-    static member frompackinfo (PackInfo(ps,uom,lc)) =
+    static member fromacbs (Acbs x) = Graph.dp "Acbs" x |> Some
+    static member frompackinfo (PackInfo(ps,uom,lc,acbs)) =
       optionlist {
        yield ps >>= Graph.fromps
        yield uom >>= Graph.fromuom
-       yield lc >>= Graph.fromlc}
+       yield lc >>= Graph.fromlc
+       yield acbs >>= Graph.fromacbs}
 
     static member fromdt (DrugTarrif s) = Graph.dp "DrugTarrif" s |> Some
     static member fromdtp (DrugTariffPrice dtp) = Graph.dp "DrugTariffPrice" (string dtp) |> Some
