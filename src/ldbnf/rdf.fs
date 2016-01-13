@@ -13,6 +13,7 @@ module RdfUris =
   open Bnf.MedicalDeviceType
   open Bnf.WoundManagement
   open Bnf.BorderlineSubstanceTaxonomy
+  open Bnf.Publication
   open Assertion
   open rdf
   open Shared
@@ -58,6 +59,7 @@ module RdfUris =
     static member from (x:MedicinalProduct) = !!(Uri.bnfsite + "medicinalproduct/" + string x.ampid)
     static member from (x:WoundManagement) = !!(Uri.bnfsite + "woundmanagement/" + string x.id )
     static member from (x:WoundManagementLink) = !!(Uri.bnfsite + "woundmanagement/" + string x.id )
+    static member fromwm (WoundManagmentId(id)) = !!(Uri.bnfsite + "woundmanagement/" + string id )
     static member from (x:Product) = !!(Uri.bnfsite + "woundmanagementproduct" + string x.ampid)
     static member from (x:TreatmentSummary) = match x with | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatmentsummary/" + string i)
     static member frommd (x:Id) = !!(Uri.bnfsite + "medicaldevice/" + string x)

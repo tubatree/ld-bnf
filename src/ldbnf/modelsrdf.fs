@@ -47,11 +47,15 @@ module PublicationRdf =
   open Bnf.Publication
 
   type Graph with
-    static member fromPublication (Publication(d)) =
+    static member fromPublication (Publication(d,wmid)) =
       let dto = (System.DateTimeOffset d)^^xsd.datetime
 
+      let wm wmid = one !!"nicebnf:hasWoundManagement" (Uri.fromwm wmid)
+                      [a !!(Uri.nicebnfClass + "WoundManagementRoot")]
+
       let s = [a !!(Uri.nicebnf + "Publication")
-               dto |> (dataProperty !!"nicebnf:hasPublicationDate")]
+               dto |> (dataProperty !!"nicebnf:hasPublicationDate")
+               wmid |> wm]
 
       let dr = resource !!(Uri.bnfsite + "publication")
       [dr s]
