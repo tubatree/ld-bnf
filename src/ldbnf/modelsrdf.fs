@@ -103,7 +103,7 @@ module IndexRdf =
 
       let s = optionlist {
         yield a !!(sprintf "%s%ss" Uri.nicebnf n)
-        yield! ids |> List.map ((uri n) >> objectProperty !!("nicebn:has" + n))
+        yield! ids |> List.map ((uri n) >> objectProperty !!("nicebnf:has" + n))
         }
 
       let dr r = resource (uri (sprintf "%ss" n) id) r
