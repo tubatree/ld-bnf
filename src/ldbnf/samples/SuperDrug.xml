@@ -7,7 +7,7 @@
       <p outputclass="interactionsLinks"> List of individual interactants: <xref format="dita" href="bnf_int_783.xml">Ibuprofen</xref></p>
       <p outputclass="constituentDrugs">The properties listed below are those particular to the combination only. For the properties of the components please consider, <xref format="dita" href="PHP4479.xml">ethinylestradiol</xref>, <xref format="dita" href="PHP97243.xml">etonogestrel</xref>.</p>
       <data name="vtmid">38268001</data>
-      <data name="classifications">
+      <data name="classifications" type="primary">
         <data name="classification">
           <data name="drugClassification">_322611837</data>
           <data name="inheritsFromClass">PHP34650</data>

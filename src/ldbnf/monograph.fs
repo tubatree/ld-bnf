@@ -484,14 +484,18 @@ module DrugParser =
           | None -> None
 
       static member fromlist (x:drugProvider.Data) =
-        let ty = match x |> name with
-                 | "primary" -> Primary
+        let ty = match x.Type with
+                 | Some "primary" -> Primary
                  | _ -> Secondary
 
         //recursively flatten the classificaiton data's to make them easier to fold
         let rec flatten (x:drugProvider.Data) =
           let children = x.Datas |> Array.choose (hasName "classification") |> Array.toList
-          x :: children |> List.collect flatten
+          match children with
+            | [] -> [x]
+            | [d] -> x :: (flatten d)
+            | _ -> []
+            //| _ ->  x :: children |> List.collect flatten
 
         let cs = x.Datas |> Array.toList |> List.collect flatten
 
