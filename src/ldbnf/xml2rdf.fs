@@ -36,6 +36,8 @@ open Bnf.Generic
 open Bnf.GenericParser
 open Bnf.BorderlineSubstanceTaxonomy
 open Bnf.BorderlineSubstanceTaxonomyParser
+open Bnf.Index
+open Bnf.IndexParser
 open FSharp.RDF
 
 open resource
@@ -54,7 +56,7 @@ open Bnf.GenericRdf
 open Bnf.PublicationRdf
 open Bnf.MedicalDeviceRdf
 open Bnf.BorderlineSubstanceTaxonomyRdf
-
+open Bnf.IndexRdf
 
 module Iterator =
 
@@ -116,9 +118,13 @@ module Iterator =
             | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "interactions" -> content "Interactions"
+            | "labels" -> content "Labels"
+            | "cautionaryAndAdvisoryLabels" -> content "CautionaryAndAdvisoryLabels"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | "medicalDevice" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
             | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
+            | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
+            | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with

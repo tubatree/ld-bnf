@@ -1,0 +1,17 @@
+<topic id="medicalDevices">
+  <title>Medical devices</title>
+  <xref href="PHP80482.xml" rel="medicalDevice">Nebuliser solutions</xref>
+  <xref href="PHP80475.xml" rel="medicalDevice">Camouflages</xref>
+  <xref href="PHP80481.xml" rel="medicalDevice">Catheter maintenance solutions</xref>
+  <xref href="PHP80479.xml" rel="medicalDevice">Skin adhesives</xref>
+  <xref href="PHP80474.xml" rel="medicalDevice">Needle free Insulin delivery systems</xref>
+  <xref href="PHP80480.xml" rel="medicalDevice">Irrigation solutions</xref>
+  <xref href="PHP80478.xml" rel="medicalDevice">Urinanalysis reagent strips</xref>
+  <xref href="PHP80473.xml" rel="medicalDevice">Hypodermic insulin injection pens</xref>
+  <xref href="PHP80484.xml" rel="medicalDevice">Gloves</xref>
+  <xref href="PHP80477.xml" rel="medicalDevice">Blood monitoring test strips</xref>
+  <xref href="PHP80472.xml" rel="medicalDevice">Spacers</xref>
+  <xref href="PHP80483.xml" rel="medicalDevice">Vaginal contraceptives</xref>
+  <xref href="PHP80476.xml" rel="medicalDevice">Artificial saliva products</xref>
+  <xref href="PHP80471.xml" rel="medicalDevice">Peak flow meters</xref>
+</topic>

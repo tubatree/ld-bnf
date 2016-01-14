@@ -96,9 +96,13 @@ module DrugRdf =
       one !!"nicebnf:inheritsFromClass" (Uri.fromdc c) [a Uri.DrugClassEntity]
 
     //the label for this is in another part of the feed so will be created elsewhere
-    static member fromcl (Classification(id,ifcs)) =
+    static member fromcl (Classification(id,ifcs,typ)) =
+      let pname = function
+                      | Primary -> !!"nicebnf:hasPrimaryClassification"
+                      | Secondary -> !!"nicebnf:hasSecondaryClassification"
+
       let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
-      let cl = one !!"nicebnf:hasClassification" (Classification(id,ifcs) |> Uri.fromc) [(a Uri.ClassificationEntity)]
+      let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc) [(a Uri.ClassificationEntity)]
       cl :: ifs
 
     static member fromil (i:InteractionLink) =

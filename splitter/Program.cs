@@ -149,6 +149,8 @@ namespace splitter
 			"interaction",
        "guidance",
        "about",
+       "labels",
+       "cautionaryAndAdvisoryLabels",
 
             //no output class
 			"#PHP101868",
@@ -161,7 +163,7 @@ namespace splitter
             "#interactions",
             "#borderlineSubstances",
             "#drugClasses",
-            "#labels"
+            "#bnf-interactions-list"
         };
 
 

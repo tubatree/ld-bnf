@@ -93,6 +93,25 @@ module GenericRdf =
       [dr s]
       |> Assert.graph (empty())
 
+module IndexRdf = 
+  open Bnf.Index
+
+  type Graph with
+    static member fromindex n (Index(id,ids)) =
+
+      let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
+
+      let s = optionlist {
+        yield a !!(sprintf "%s%ss" Uri.nicebnf n)
+        yield! ids |> List.map ((uri n) >> objectProperty !!("nicebn:has" + n))
+        }
+
+      let dr r = resource (uri (sprintf "%ss" n) id) r
+
+      [dr s]
+      |> Assert.graph (empty())
+
+
 module InteractionRdf =
   open Bnf.Interaction
 

@@ -68,7 +68,9 @@ module Drug =
 
     type InheritsFromClass = | InheritsFromClass of string
 
-    type Classification = | Classification of Id * InheritsFromClass seq
+    type ClassificationType = | Primary | Secondary
+
+    type Classification = | Classification of Id * InheritsFromClass list * ClassificationType
 
     type DrugName = | DrugName of drugProvider.Title
 
@@ -472,15 +474,36 @@ module DrugParser =
           | Some(s) -> InheritsFromClass s |> Some
           | None -> None
 
+
     type Classification with
       static member from (x:drugProvider.Data) =
         let l = x.Datas |> Array.tryPick (Some >=> withname "drugClassification" >=> (fun d -> d.String >>= (Id >> Some)))
-        let i = x.Datas |> Array.choose (Some >=> withname "inheritsFromClass" >=> InheritsFromClass.from)
+        let i = x.Datas |> Array.choose (Some >=> withname "inheritsFromClass" >=> InheritsFromClass.from) |> Array.toList
         match l with
-          | Some(l) -> Some( Classification(l,i))
+          | Some(l) -> Some( Classification(l,i, Primary))
           | None -> None
+
       static member fromlist (x:drugProvider.Data) =
-        x.Datas |> Array.choose (hasName "classification") |> Array.choose Classification.from
+        let ty = match x |> name with
+                 | "primary" -> Primary
+                 | _ -> Secondary
+
+        //recursively flatten the classificaiton data's to make them easier to fold
+        let rec flatten (x:drugProvider.Data) =
+          let children = x.Datas |> Array.choose (hasName "classification") |> Array.toList
+          x :: children |> List.collect flatten
+
+        let cs = x.Datas |> Array.toList |> List.collect flatten
+
+        //gather up the inherits from but only take the last classification id
+        let folder (Classification(st_id,st_in,st_type)) (x:drugProvider.Data) =
+          let cl = Classification.from x
+          match cl with
+            | Some(Classification(id,inherits,typ)) -> Classification(id,st_in @ inherits,typ)
+            | None -> Classification(st_id,st_in,st_type)
+
+        cs |> List.fold folder (Classification(Id(""),[],ty))
+
 
     type TheraputicUse with
       static member from (x:drugProvider.Data) =
@@ -847,8 +870,8 @@ module DrugParser =
         let classifications = match x.Body with
                               | Some(b) -> b.Datas
                                            |> Array.choose (hasName "classifications")
-                                           |> Array.collect (fun cs -> Classification.fromlist cs)
-                              | None -> Array.empty<Classification>
+                                           |> Array.map (fun cs -> Classification.fromlist cs)
+                              | None -> [||]
 
         let vtmid = x.Body >>= (fun b ->  b.Datas |> Array.tryPick (Some >=> withname "vtmid" >=> Vtmid.from))
 

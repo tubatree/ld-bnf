@@ -838,7 +838,17 @@ module GenericParser =
       let ls = x.XElement |> ContentLink.from
       {id=Id(x.Id); title = Title(x.Title); content = c; links = ls}
 
+module Index = 
+  type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>
 
+  type Index = | Index of Id * Id list
+
+module IndexParser =
+  open Index
+  type Index with
+    static member parse (x:indexProvider.Topic) =
+      let ids = x.Xrefs |> Array.map (fun xref -> xref.Href |> Id) |> Array.toList
+      Index(Id(x.Id),ids)
 
 module BorderlineSubstanceTaxonomy =
 
