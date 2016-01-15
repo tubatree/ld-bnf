@@ -87,6 +87,7 @@ module RdfUris =
     static member fromcau (Caution s) = !!(Uri.nicebnfClass + "Caution#" + (NameUtils.niceCamelName s.String.Value))
     static member fromcon (Contraindication s) = !!(Uri.nicebnfClass + "Contraindication#" + (NameUtils.niceCamelName s.String.Value))
     static member fromfre (f:Frequency) = !!(Uri.nicebnfClass + "Frequency#" + (NameUtils.niceCamelName f.frequencyid))
+    static member frombs (s:string) = !!(Uri.nicebnfClass + "BodySystem#" + (NameUtils.niceCamelName s))
 
     // ontotlogy Classes
     static member DrugEntity = !!(Uri.nicebnf + "Drug")
@@ -117,6 +118,7 @@ module RdfUris =
     static member SideEffectEntity = !!(Uri.nicebnfClass + "SideEffect")
     static member ContraindicationEntity = !!(Uri.nicebnfClass + "Contraindication")
     static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
+    static member BodySystemEntity = !!(Uri.nicebnfClass + "BodySystem")
 
 module Rdf =
   open prelude
