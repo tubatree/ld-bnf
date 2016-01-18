@@ -117,7 +117,7 @@ module Iterator =
             | "borderlineSubstanceAcbs" -> content "BorderlineSubstanceAcbs"
             | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
-            | "interactions" -> content "Interactions"
+            | "interactions" -> content "InteractionsIntroduction"
             | "labels" -> content "Labels"
             | "cautionaryAndAdvisoryLabels" -> content "CautionaryAndAdvisoryLabels"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
