@@ -256,8 +256,12 @@ module TreatmentSummaryRdf =
     static member fromti (Title s) = s |> label
     static member fromdoi (Shared.Doi s) =
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
-    static member frombs (BodySystem s) =
-      dataProperty !!"nicebnf:hasBodySystem" (s^^xsd.string)
+    static member frombs (BodySystem x) =
+        one !!"nicebnf:hasBodySystem" (Uri.frombs x) (optionlist {
+          yield a Uri.BodySystemEntity
+          yield dataProperty !!"rdfs:label" (x^^xsd.string)
+          })
+
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
     static member fromcontent (Content(s,ta)) =
