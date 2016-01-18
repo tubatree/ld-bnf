@@ -907,3 +907,106 @@ module MedicalDeviceParser =
                   |> Array.collect links
                   |> Array.toList
       MedicalDevice(Id(x.Id),title,padi,ids)
+
+
+module Sections =
+
+  type sectionProvider = XmlProvider<"./samples/others.xml", Global=true, SampleIsList=true>
+
+  type Title = | Title of string
+
+  type NormalPlasmaValues = {
+    title:Title;
+    sodium:string;
+    potassium:string;
+    bicarbonate:string;
+    chloride:string;
+    calcium:string;
+    }
+
+  type IntravenousInfusion = {
+    title:Title;
+    sodium:string option;
+    potassium:string option;
+    bicarbonate:string option;
+    chloride:string option;
+    calcium:string option;
+    forMetabolicAcidosis:bool option
+    }
+
+
+  type ElectrolyteConcentrations =
+    | ElectrolyteConcentrations of Title * NormalPlasmaValues * IntravenousInfusion list
+
+  type TypeOfFluid = {
+    title:Title;
+    hydrogen:string option;
+    sodium:string option;
+    potassium:string option;
+    bicarbonate:string option;
+    chloride:string option;
+    }
+
+  type ElectrolyteContent = | ElectrolyteContent of Title * TypeOfFluid list
+
+
+
+  let p oc = (hasOutputclasso oc) >> Option.bind (fun (p:sectionProvider.P) -> p.String)
+
+  type Electrolytes =
+    | Electrolytes of Title option * ElectrolyteConcentrations * ElectrolyteContent
+
+    static member parse (x:sectionProvider.Section) =
+      let concentrations (x:sectionProvider.Sectiondiv) =
+        let normalplasmavalues (x:sectionProvider.Sectiondiv) = {
+            NormalPlasmaValues.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            sodium = x.Ps |> Array.pick (p "sodium")
+            potassium = x.Ps |> Array.pick (p "potassium")
+            bicarbonate = x.Ps |> Array.pick (p "bicarbonate")
+            chloride = x.Ps |> Array.pick (p "chloride")
+            calcium = x.Ps |> Array.pick (p "calcium")
+          }
+
+        let intravenousinfusion (x:sectionProvider.Sectiondiv) = {
+            IntravenousInfusion.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            sodium = x.Ps |> Array.tryPick (p "sodium")
+            potassium = x.Ps |> Array.tryPick (p "potassium")
+            bicarbonate = x.Ps |> Array.tryPick (p "bicarbonate")
+            chloride = x.Ps |> Array.tryPick (p "chloride")
+            calcium = x.Ps |> Array.tryPick (p "calcium")
+            forMetabolicAcidosis = x.Data |> Option.map (fun d -> d.Value)
+          }
+
+        let title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+        let npv = x.Sectiondivs
+                    |> Array.pick ((hasOutputclass "normalPlasmaValues") >> (Option.map normalplasmavalues))
+        let iis = x.Sectiondivs
+                    |> Array.choose (hasOutputclass "intravenousInfusions")
+                    |> Array.collect (fun s -> s.Sectiondivs |> Array.map intravenousinfusion)
+                    |> Array.toList
+        ElectrolyteConcentrations(title,npv,iis)
+
+      let electrolytecontent (x:sectionProvider.Sectiondiv) =
+        let typeoffluid (x:sectionProvider.Sectiondiv) = {
+            TypeOfFluid.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            sodium = x.Ps |> Array.tryPick (p "sodium")
+            potassium = x.Ps |> Array.tryPick (p "potassium")
+            bicarbonate = x.Ps |> Array.tryPick (p "bicarbonate")
+            chloride = x.Ps |> Array.tryPick (p "chloride")
+            hydrogen = x.Ps |> Array.tryPick (p "hydrogen")
+          }
+
+        let title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+        let ftypes = x.Sectiondivs
+                        |> Array.choose (hasOutputclass "typesOfFluid")
+                        |> Array.collect (fun s -> s.Sectiondivs |> Array.map typeoffluid)
+                        |> Array.toList
+        ElectrolyteContent(title,ftypes)
+
+
+      let title = x.P.String <!> Title
+      let econcen = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteConcentrations" >> Option.map concentrations)
+      let content = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteContent" >> Option.map electrolytecontent)
+      Electrolytes(title,econcen,content)
+
+

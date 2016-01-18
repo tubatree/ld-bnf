@@ -205,7 +205,7 @@ module DrugRdf =
        | DoseAdjustments s -> s |> dp "DoseAdjustments"
        | ExtremesOfBodyWeight s -> s |> dp "ExtremesOfBodyWeight"
        | Potency s -> s |> dp "Potency" 
-
+ 
     static member frompca (p:PatientAndCarerAdvice) =
       let pca t = Graph.fromthree >> (subtype t)
       match p with

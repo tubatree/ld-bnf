@@ -163,17 +163,28 @@ namespace splitter
             "#interactions",
             "#borderlineSubstances",
             "#drugClasses",
-            "#bnf-interactions-list"
+            "#bnf-interactions-list",
+
+            //treatmentSummaries
+            "malariaProphylaxisRegimens",
+            "intramuscularAdrenalineEmergency",
+            "helicobacterPyloriRegimens",
+            "antiTuberculosisTreatments",
+            "bloodMonitoringStrips",
+            "hrtRisks",
+            "parenteralFeeding",
+            "electrolytes"
         };
 
 
         static bool IsUnitOfWork(XElement xElement)
         {
-            if (xElement.Name != "topic") return false;
-
-            var type = GetTopicType(xElement);
-
-            return TypesOfInterest.Contains(type);
+            if (xElement.Name == "topic" || xElement.Name == "section")
+            {
+                var type = GetTopicType(xElement);
+                return TypesOfInterest.Contains(type);
+            }
+            return false;
         }
 
         static string GetTopicType(XElement topic)

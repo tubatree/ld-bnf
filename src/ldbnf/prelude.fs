@@ -15,6 +15,8 @@ module prelude =
 
     let (>>=) a b = Option.bind b a
 
+    let (<!>) a b = Option.map b a
+
     //Generic list that allows optional values to collapse out
     type OptionlistBuilder<'a> () =
         member this.Bind(m, f) = m |> List.collect f

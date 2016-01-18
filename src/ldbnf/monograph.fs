@@ -461,12 +461,12 @@ module DrugParser =
           | _ -> failwith ("patientAndCarerAdvice missed " + s.Outputclass.Value)
       match x.Body with
         | Some(b) ->
-            let a = b.Sections |> Array.collect c 
+            let a = b.Sections |> Array.collect c
             Some(PatientAndCarerAdvices(Id(x.Id),a))
         | None -> None
 
     let withname = (|HasName|_|)
-    let withclass = (|HasOutputClasso|_|) 
+    let withclass = (|HasOutputClasso|_|)
 
     type InheritsFromClass with
       static member from (x:drugProvider.Data) =
@@ -495,7 +495,6 @@ module DrugParser =
             | [] -> [x]
             | [d] -> x :: (flatten d)
             | _ -> []
-            //| _ ->  x :: children |> List.collect flatten
 
         let cs = x.Datas |> Array.toList |> List.collect flatten
 
