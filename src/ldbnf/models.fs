@@ -1010,3 +1010,62 @@ module Sections =
       Electrolytes(title,econcen,content)
 
 
+
+  type Pack = | Pack of sectionProvider.P
+
+  type Preparation = {
+    title:Title;
+    manufacturer:string;
+    nitrogen:string option;
+    energy:string option;
+    potassium:string option;
+    magnesium:string option;
+    sodium:string option;
+    acetate:string option;
+    chloride:string option;
+    otherComponentsPerLitre:string option;
+    adultOnly:bool option;
+    packs:Pack list;
+    }
+
+  type EnergyNotes = | EnergyNotes of sectionProvider.Sectiondiv
+
+  open Option
+
+  type ParenteralFeeding =
+    | ParenteralFeeding of Preparation list
+    static member parse (x:sectionProvider.Section) =
+      let preparation (x:sectionProvider.Sectiondiv) =
+        let title (p:sectionProvider.P) =
+          let ti = p.String <!> Title
+          let man = p.Phs |> Array.pick ((hasOutputclass "manufacturer") >> Option.map (fun ph -> ph.String))
+          Option.lift2 (fun a b -> (a,b)) ti man
+        let pack (x:sectionProvider.Sectiondiv) =
+          match x.Ps with
+          | [|p|] -> Pack p
+          | _ -> failwith "no paragraph found"
+
+        let ti,man = x.Ps |> Array.pick title
+        {
+          Preparation.title = ti
+          manufacturer = man
+          nitrogen = x.Ps |> Array.tryPick (p "nitrogen")
+          energy = x.Ps |> Array.tryPick (p "energy")
+          potassium = x.Ps |> Array.tryPick (p "potassium")
+          magnesium = x.Ps |> Array.tryPick (p "magnesium")
+          sodium = x.Ps |> Array.tryPick (p "sodium")
+          acetate = x.Ps |> Array.tryPick (p "acetate")
+          chloride = x.Ps |> Array.tryPick (p "chloride")
+          otherComponentsPerLitre = x.Ps |> Array.tryPick (p "otherComponentsPerLitre")
+          adultOnly = x.Data |> Option.map (fun d -> d.Value)
+          packs = x.Sectiondivs
+                    |> Array.choose (hasOutputclass "packs")
+                    |> Array.collect (fun ps -> ps.Sectiondivs |> Array.map pack)
+                    |> Array.toList
+          }
+      let preps = x.Sectiondivs
+                    |> Array.choose (hasOutputclass "preparations")
+                    |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map preparation)
+                    |> Array.toList
+
+      ParenteralFeeding preps

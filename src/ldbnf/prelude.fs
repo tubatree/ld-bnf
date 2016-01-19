@@ -17,6 +17,17 @@ module prelude =
 
     let (<!>) a b = Option.map b a
 
+    //lift2 : ('a -> 'b -> 'c) -> 'a option -> 'b option -> 'c option
+    type Option<'a> with
+      static member lift2 f x y =
+        match x with 
+        | None -> None
+        | Some x' -> 
+            match y with
+            | None -> None
+            | Some y' -> Some <| f x' y'
+
+
     //Generic list that allows optional values to collapse out
     type OptionlistBuilder<'a> () =
         member this.Bind(m, f) = m |> List.collect f
