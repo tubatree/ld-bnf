@@ -950,16 +950,35 @@ module Sections =
   type ElectrolyteContent = | ElectrolyteContent of Title * TypeOfFluid list
 
 
-
   let p oc = (hasOutputclasso oc) >> Option.bind (fun (p:sectionProvider.P) -> p.String)
 
+  let title = p "title" >> Option.map Title
+
+  let rec unravel (ocs:string list) (x:sectionProvider.Sectiondiv) =
+    match ocs with
+      | [] -> [x]
+      | head :: tail ->
+        x.Sectiondivs
+          |> Array.choose (hasOutputclass head)
+          |> Array.toList
+          |> List.collect (unravel tail)
+
+  let unravelr (ocs: string list) (x:sectionProvider.Section) =
+    match ocs with
+      | [] -> failwith "must have oc"
+      | head::tail ->
+        x.Sectiondivs
+          |> Array.choose (hasOutputclass head)
+          |> Array.toList
+          |> List.collect (unravel tail)
+
   type Electrolytes =
-    | Electrolytes of Title option * ElectrolyteConcentrations * ElectrolyteContent
+    | Electrolytes of Id * Title option * ElectrolyteConcentrations * ElectrolyteContent
 
     static member parse (x:sectionProvider.Section) =
       let concentrations (x:sectionProvider.Sectiondiv) =
         let normalplasmavalues (x:sectionProvider.Sectiondiv) = {
-            NormalPlasmaValues.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            NormalPlasmaValues.title = x.Ps |> Array.pick title
             sodium = x.Ps |> Array.pick (p "sodium")
             potassium = x.Ps |> Array.pick (p "potassium")
             bicarbonate = x.Ps |> Array.pick (p "bicarbonate")
@@ -968,7 +987,7 @@ module Sections =
           }
 
         let intravenousinfusion (x:sectionProvider.Sectiondiv) = {
-            IntravenousInfusion.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            IntravenousInfusion.title = x.Ps |> Array.pick title
             sodium = x.Ps |> Array.tryPick (p "sodium")
             potassium = x.Ps |> Array.tryPick (p "potassium")
             bicarbonate = x.Ps |> Array.tryPick (p "bicarbonate")
@@ -977,7 +996,7 @@ module Sections =
             forMetabolicAcidosis = x.Data |> Option.map (fun d -> d.Value)
           }
 
-        let title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+        let title = x.Ps |> Array.pick title
         let npv = x.Sectiondivs
                     |> Array.pick ((hasOutputclass "normalPlasmaValues") >> (Option.map normalplasmavalues))
         let iis = x.Sectiondivs
@@ -988,7 +1007,7 @@ module Sections =
 
       let electrolytecontent (x:sectionProvider.Sectiondiv) =
         let typeoffluid (x:sectionProvider.Sectiondiv) = {
-            TypeOfFluid.title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+            TypeOfFluid.title = x.Ps |> Array.pick title
             sodium = x.Ps |> Array.tryPick (p "sodium")
             potassium = x.Ps |> Array.tryPick (p "potassium")
             bicarbonate = x.Ps |> Array.tryPick (p "bicarbonate")
@@ -996,7 +1015,7 @@ module Sections =
             hydrogen = x.Ps |> Array.tryPick (p "hydrogen")
           }
 
-        let title = x.Ps |> Array.pick (p "title" >> Option.map Title)
+        let title = x.Ps |> Array.pick title
         let ftypes = x.Sectiondivs
                         |> Array.choose (hasOutputclass "typesOfFluid")
                         |> Array.collect (fun s -> s.Sectiondivs |> Array.map typeoffluid)
@@ -1007,7 +1026,7 @@ module Sections =
       let title = x.P.String <!> Title
       let econcen = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteConcentrations" >> Option.map concentrations)
       let content = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteContent" >> Option.map electrolytecontent)
-      Electrolytes(title,econcen,content)
+      Electrolytes(Id(x.Id),title,econcen,content)
 
 
 
@@ -1033,7 +1052,7 @@ module Sections =
   open Option
 
   type ParenteralFeeding =
-    | ParenteralFeeding of Preparation list
+    | ParenteralFeeding of Id * EnergyNotes * Preparation list
     static member parse (x:sectionProvider.Section) =
       let preparation (x:sectionProvider.Sectiondiv) =
         let title (p:sectionProvider.P) =
@@ -1068,4 +1087,103 @@ module Sections =
                     |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map preparation)
                     |> Array.toList
 
-      ParenteralFeeding preps
+      let en = x.Sectiondivs
+                |> Array.pick (hasOutputclass "energyNotes" >> Option.map EnergyNotes)
+
+      ParenteralFeeding(Id(x.Id),en,preps)
+
+
+
+  type IncedenceDuration = | IncedenceDuration of string
+
+  type Incedence = | Incedence of IncedenceDuration * int
+
+  type IncedencesType = 
+   | BackgroundIncidences
+   | AdditionalCasesOestrogenOnly
+   | AdditionalCasesCombined
+
+  type Indedences = | Incedences of Title * IncedencesType * Incedence list
+
+  type AgeRange = | AgeRange of string
+
+  type Group = | Group of AgeRange * Indedences list
+
+  type Note = | Note of sectionProvider.Sectiondiv
+
+  type Risk = | Risk of Title * Note option * Group list
+
+  type HrtRisks =
+    | HrtRisks of Id * Note * Risk list
+
+    static member parse (x:sectionProvider.Section) =
+      let risk (x:sectionProvider.Sectiondiv) =
+        let group (x:sectionProvider.Sectiondiv) =
+          let incedences (x:sectionProvider.Sectiondiv) =
+            let incedence  (x:sectionProvider.Sectiondiv) =
+              let duration = x.Ps |> Array.pick (p "incidenceDuration" >> Option.map IncedenceDuration)
+              let count = x.Ps |> Array.pick (p "incedence" >> Option.map int)
+              Incedence(duration,count)
+            let itype = match x.Outputclass with
+                        | "backgroundIncidences" -> BackgroundIncidences
+                        | "additionalCasesOestrogenOnly" -> AdditionalCasesOestrogenOnly
+                        | "additionalCasesCombined" -> AdditionalCasesCombined
+                        | _ -> failwith "type not matched"
+            let title = x.Ps |> Array.pick title
+            let incedences = x |> unravel ["incedences";"incedence"] |> List.map incedence
+            Incedences(title,itype,incedences)
+          let ar = x.Ps |> Array.pick (p "ageRange" >> Option.map AgeRange)
+          let is = x.Sectiondivs |> Array.map incedences |> Array.toList
+          Group(ar,is)
+
+        let title = x.Ps |> Array.pick title
+        let note = x |> unravel ["notes"] |> List.tryPick (Note >> Some)
+        let groups = x |> unravel ["groups";"group"] |> List.map group
+        Risk(title,note,groups)
+
+      let note = x |> unravelr ["note"] |> List.pick (Note >> Some)
+      let risks = x |> unravelr ["risks";"risk"] |> List.map risk
+      HrtRisks(Id(x.Id),note,risks)
+
+  type CompatibleStrip = {
+    name: string;
+    packSize: string;
+    price: decimal
+    }
+
+  type BloodMonitoringStrip = {
+    meter : sectionProvider.P
+    typeOfMonitoring: string
+    compatibleStrip : CompatibleStrip
+    sensitivityRange: sectionProvider.P
+    manufacturer: string
+    }
+
+  type BloodMonitoringStrips =
+    | BloodMonitoringStrips of Id * Title option * BloodMonitoringStrip list
+    static member parse (x:sectionProvider.Section) =
+      let strip (x:sectionProvider.Sectiondiv) =
+        let compatiblestrip (x:sectionProvider.Sectiondiv) =
+          let pi (x:sectionProvider.Sectiondiv) =
+            match x.Ps with
+            | [|p|] -> match p.Phs with
+                       | [|ps;pr|] -> Option.lift2 (fun a b -> (a,b)) ps.String pr.Number
+                       | _ -> None
+            | _ -> None
+          let name = x.Ps |> Array.pick (p "compatibleStripName")
+          let psize,price = x |> unravel ["compatibleStrips"] |> List.pick pi
+          {
+            name = name
+            packSize = psize
+            price = price
+            }
+
+        {
+        meter = x.Ps |> Array.pick (hasOutputclasso "meter")
+        typeOfMonitoring = x.Ps |> Array.pick (p "typeOfMonitoring")
+        compatibleStrip = x |> compatiblestrip
+        sensitivityRange = x.Ps |> Array.pick (hasOutputclasso "sensitivityRange")
+        manufacturer = x.Ps |> Array.pick (p "manufacturer")
+        }
+      let title = x.P.String <!> Title
+      BloodMonitoringStrips(Id(x.Id),title, x |> unravelr ["bloodMonitoringStrip"] |> List.map strip)
