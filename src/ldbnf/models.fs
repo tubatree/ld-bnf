@@ -1194,9 +1194,9 @@ module Sections =
   type AgeGroup =
     | Adult of string
     | Child of string
-  type Regimen = | Regimen of sectionProvider.P
+  type Directions = | Directions of sectionProvider.P
 
-  type PatientGroup = | PatientGroup of AgeGroup * Regimen
+  type PatientGroup = | PatientGroup of AgeGroup * Directions
   type TakenInMonths = | TakenInMonths of string
 
   type Therapy = {
@@ -1216,9 +1216,9 @@ module Sections =
         let group (x:sectionProvider.Li) =
           let ageGroup,regimen = match x.Outputclass,x.Ps with
                                  | "patientGroup adult",[|p;r|] ->
-                                     p.String <!> Adult, r |> Regimen |> Some
+                                     p.String <!> Adult, r |> Directions |> Some
                                  | "patientGroup child",[|p;r|] ->
-                                     p.String <!> Child, r |> Regimen |> Some
+                                     p.String <!> Child, r |> Directions |> Some
                                  | _ -> None,None
           Option.lift2 (fun a b -> PatientGroup(a,b)) ageGroup regimen
 
@@ -1247,3 +1247,37 @@ module Sections =
                 |> List.map (therapy Single Supervised)
 
       AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d)
+
+
+  type Quantity = | Quantity of string
+
+  type Drug =
+    | AcidSuppressant of string * Quantity
+    | Antibacterial of string * Quantity
+
+  type Course = | Course of sectionProvider.P
+
+  type Regimen = | Regimen of Title * Drug list * Course
+
+  type HelicobacterPyloriRegimens =
+    | HelicobacterPyloriRegimens of Id * Title option * Regimen list
+    static member parse (x:sectionProvider.Section) =
+      let regimen (x:sectionProvider.Sectiondiv) =
+        let drug (x:sectionProvider.Sectiondiv) =
+          match x.Outputclass,x.Ps with
+            | "acidSuppressant",[|d;q|]
+               -> Option.lift2 (fun d q -> AcidSuppressant(d,Quantity(q))) d.String q.String
+            | "antibacterial",[|d;q|]
+               -> Option.lift2 (fun d q -> Antibacterial(d,Quantity(q))) d.String q.String
+            | (_,_) -> failwith "unknown class"
+
+        let title = x.Ps |> Array.pick title
+        let course = x.Ps |> Array.pick (hasOutputclasso "course" >> Option.map Course)
+        let acid = x |> unravel ["acidSuppressant"] |> List.choose drug
+        let anti = x |> unravel ["antibacterials";"antibacterial"] |> List.choose drug
+        Regimen(title,acid @ anti,course)
+
+      let rs = x |> unravelr["regimens";"regimen"] |> List.map regimen
+      let title = x.P.String <!> Title
+      HelicobacterPyloriRegimens(Id(x.Id),title,rs)
+
