@@ -1281,3 +1281,28 @@ module Sections =
       let title = x.P.String <!> Title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
 
+
+  type MalariaRisk = {
+    content:string
+    regimen:string
+    }
+
+  type Country = | Country of string
+
+  type MalariaProphylaxisRegimen = | MalariaProphylaxisRegimen of Country * MalariaRisk list
+
+  type MalariaProphylaxisRegimens =
+    | MalariaProphylaxisRegimens of Id * Title option * MalariaProphylaxisRegimen list
+    static member parse (x:sectionProvider.Section) =
+      let regimen (x:sectionProvider.Sectiondiv) =
+        let risks (x:sectionProvider.Sectiondiv) =
+          x |> unravel ["risks";"risk"]
+            |> List.choose (fun sd -> match sd.Ps with | [|c;r|] -> Option.lift2 (fun c r -> {content = c;regimen = r}) c.String r.String)
+        let country = x.Ps |> Array.pick (p "country" >> Option.map Country)
+        let rsks = x |> risks
+        MalariaProphylaxisRegimen(country,rsks)
+
+      let title = x.P.String <!> Title
+      let regs = x |> unravelr ["malariaProphylaxisRegimen"] |> List.map regimen
+      MalariaProphylaxisRegimens(Id(x.Id),title,regs)
+
