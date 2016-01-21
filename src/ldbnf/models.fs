@@ -1187,3 +1187,63 @@ module Sections =
         }
       let title = x.P.String <!> Title
       BloodMonitoringStrips(Id(x.Id),title, x |> unravelr ["bloodMonitoringStrip"] |> List.map strip)
+
+
+  type TherapyType = | Combination | Single
+  type Supervision = | Supervised | Unsupervised
+  type AgeGroup =
+    | Adult of string
+    | Child of string
+  type Regimen = | Regimen of sectionProvider.P
+
+  type PatientGroup = | PatientGroup of AgeGroup * Regimen
+  type TakenInMonths = | TakenInMonths of string
+
+  type Therapy = {
+    therapyType:TherapyType;
+    supervision:Supervision;
+    title:Title;
+    takenInMonths:TakenInMonths;
+    groups:PatientGroup list;
+  }
+
+  type AntiTuberculosisTreatments =
+    | AntiTuberculosisTreatments of Id * Title option * Therapy list
+    static member parse (x:sectionProvider.Section) =
+      let therapy ty su (x:sectionProvider.Sectiondiv) =
+        let takeninmonths (x:sectionProvider.P) =
+          x.Phs |> Array.tryPick (hasOutputclass "takenInMonths" >> Option.bind (fun ph -> ph.String) >> Option.map TakenInMonths)
+        let group (x:sectionProvider.Li) =
+          let ageGroup,regimen = match x.Outputclass,x.Ps with
+                                 | "patientGroup adult",[|p;r|] ->
+                                     p.String <!> Adult, r |> Regimen |> Some
+                                 | "patientGroup child",[|p;r|] ->
+                                     p.String <!> Child, r |> Regimen |> Some
+                                 | _ -> None,None
+          Option.lift2 (fun a b -> PatientGroup(a,b)) ageGroup regimen
+
+        let title = x.Ps |> Array.pick title
+        let takenInMonths = x.Ps |> Array.pick (hasOutputclasso "title" >> Option.bind takeninmonths)
+        let groups = x.Ul |> function
+                              | Some ul -> ul.Lis |> Array.choose group |> Array.toList
+                              | None -> []
+        {
+          therapyType = ty
+          supervision = su
+          title = title
+          takenInMonths = takenInMonths
+          groups = groups
+          }
+      let title = x.P.String <!> Title
+
+      let a = x |> unravelr ["unsupervisedTreatment";"combinationDrugTherapies";"combinationDrugTherapy"]
+                |> List.map (therapy Combination Unsupervised)
+      let b = x |> unravelr ["unsupervisedTreatment";"singleDrugTherapies";"singleDrugTherapy"]
+                |> List.map (therapy Single Unsupervised)
+
+      let c = x |> unravelr ["supervisedTreatment";"combinationDrugTherapies";"combinationDrugTherapy"]
+                |> List.map (therapy Combination Supervised)
+      let d = x |> unravelr ["supervisedTreatment";"singleDrugTherapies";"singleDrugTherapy"]
+                |> List.map (therapy Single Supervised)
+
+      AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d)
