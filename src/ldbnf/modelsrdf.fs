@@ -397,19 +397,9 @@ module MedicinalFormRdf =
           yield! x.packs |> List.map Graph.frompack
           })
 
-namespace Bnf
-open FSharp.RDF
-open FSharp.Data.Runtime
 
 module WoundManagementRdf =
-  open prelude
-  open resource
   open Bnf.WoundManagement
-  open Assertion
-  open rdf
-  open Shared
-  open Rdf
-  open RdfUris
 
   let dp n = xsd.string >> dataProperty !!("nicebnf:has" + n)
 
@@ -466,21 +456,11 @@ module WoundManagementRdf =
             })
 
 
-namespace Bnf
-open FSharp.RDF
-open FSharp.Data.Runtime
 
 module MedicalDeviceTypeRdf =
-  open prelude
-  open resource
   open Bnf.Drug
   open Bnf.MedicinalForm
   open Bnf.MedicalDeviceType
-  open Assertion
-  open rdf
-  open Shared
-  open Rdf
-  open RdfUris
   open DrugRdf
   open MedicinalFormRdf
 
