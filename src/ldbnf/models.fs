@@ -913,7 +913,9 @@ module Sections =
 
   type sectionProvider = XmlProvider<"./samples/others.xml", Global=true, SampleIsList=true>
 
-  type Title = | Title of string
+  type Title =
+    | Title of string
+    override __.ToString() = match __ with | Title s -> s
 
   type NormalPlasmaValues = {
     title:Title;
@@ -972,8 +974,12 @@ module Sections =
           |> Array.toList
           |> List.collect (unravel tail)
 
-  type Electrolytes =
-    | Electrolytes of Id * Title option * ElectrolyteConcentrations * ElectrolyteContent
+  type Electrolytes = {
+    id:Id
+    title:Title option
+    concentrations:ElectrolyteConcentrations
+    content:ElectrolyteContent
+    } with
 
     static member parse (x:sectionProvider.Section) =
       let concentrations (x:sectionProvider.Sectiondiv) =
@@ -1026,7 +1032,7 @@ module Sections =
       let title = x.P.String <!> Title
       let econcen = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteConcentrations" >> Option.map concentrations)
       let content = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteContent" >> Option.map electrolytecontent)
-      Electrolytes(Id(x.Id),title,econcen,content)
+      {id = Id(x.Id); title = title; concentrations = econcen; content = content}
 
 
 

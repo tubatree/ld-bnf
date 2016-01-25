@@ -50,6 +50,10 @@ module prelude =
         |[|case|] -> Some(FSharpValue.MakeUnion(case,[||]) :?> 'a)
         |_ -> None
 
+    let typename o = match o.GetType().BaseType.Name, o.GetType().Name with
+                     | "Object", n -> n
+                     | n, _ -> n
+
     //deal with names and output class properties on type providers
     let inline name arg =
         ( ^a : (member Name : string) arg)

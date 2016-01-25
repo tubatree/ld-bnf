@@ -39,6 +39,13 @@ module RdfUris =
 
     static member totopic (rel, id:Id) = !!(sprintf "%s%s/%s" Uri.bnfsite rel (string id))
 
+    static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o) s)
+    static member fromtype<'a> s =
+      let n = typeof<'a>.Name
+      !!(sprintf "%s%s/%s" Uri.bnfsite n s)
+
+    static member has o = !!("bnfsite:has" + typename o)
+    static member has<'a>() = !!("bnfsite:has" + typeof<'a>.Name)
 
     // BNF website entity identifiers
     static member from (x:Drug) = !!(Uri.bnfsite + "drug/" + string x.id )
@@ -119,6 +126,9 @@ module RdfUris =
     static member ContraindicationEntity = !!(Uri.nicebnfClass + "Contraindication")
     static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
     static member BodySystemEntity = !!(Uri.nicebnfClass + "BodySystem")
+
+    static member TypeEntity o = !!(Uri.nicebnf + typename o)
+    static member TypeEntity<'a>() = !!(Uri.nicebnf + typeof<'a>.Name)
 
 module Rdf =
   open prelude

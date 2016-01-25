@@ -482,8 +482,8 @@ module MedicalDeviceTypeRdf =
       let s =  optionlist {
                 yield a Uri.ClinicalMedicalDeviceInformationGroupEntity
                 yield x.title |> (string >> label)
-                yield x.description >>= (Graph.fromdd uri >> Some)
-                yield x.complicance >>= (Graph.fromcs uri >> Some)}
+                yield x.description <!> (Graph.fromdd uri)
+                yield x.complicance <!> (Graph.fromcs uri)}
 
       let sec = Graph.fromsec uri
 
@@ -497,3 +497,75 @@ module MedicalDeviceTypeRdf =
 
     static member fromcs uri (ComplicanceStandards(id,sd)) =
       one !!"bnfsite:hasComplicanceStandards" (uri id) [sd |> dita]
+
+module SectionsRdf =
+  open Sections
+
+  open Bnf.Drug
+  open DrugRdf
+  open MedicinalFormRdf
+
+  let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + n))
+
+
+  type Graph with
+    static member fromelectrolytes (x:Electrolytes) =
+      let concentrations (ElectrolyteConcentrations(t,npv,iis)) =
+        let normalplasmavalues (x:NormalPlasmaValues) =
+          let intravenous (x:IntravenousInfusion) =
+            blank (Uri.has x) (optionlist {
+              yield a (Uri.TypeEntity x)
+              yield x.title |> (string >> label)
+              yield x.sodium <!> (dp "sodium")
+              yield x.potassium <!> (dp "potassium")
+              yield x.bicarbonate <!> (dp "bicarbonate")
+              yield x.chloride <!> (dp "chloride")
+              yield x.calcium <!> (dp "calcium")
+              yield x.forMetabolicAcidosis <!> (string >> dp "forMetabolicAcidosis")
+              })
+
+          blank (Uri.has x) (optionlist {
+            yield a (Uri.TypeEntity x)
+            yield x.title |> (string >> label)
+            yield x.sodium |> (dp "sodium")
+            yield x.potassium |> (dp "potassium")
+            yield x.bicarbonate |> (dp "bicarbonate")
+            yield x.chloride |> (dp "chloride")
+            yield x.calcium |> (dp "calcium")
+            yield! iis |> List.map intravenous
+            })
+
+        blank (Uri.has<ElectrolyteConcentrations>()) (optionlist {
+            yield a (Uri.TypeEntity<ElectrolyteConcentrations>())
+            yield t |> (string >> label)
+            yield npv |> normalplasmavalues
+          })
+
+      let content (ElectrolyteContent(title,fluids)) =
+        let fluid (x:TypeOfFluid) =
+          blank (Uri.has x) (optionlist {
+            yield a (Uri.TypeEntity x)
+            yield x.title |> (string >> label)
+            yield x.hydrogen <!> (dp "hydrogen")
+            yield x.sodium <!> (dp "sodium")
+            yield x.potassium <!> (dp "potassium")
+            yield x.bicarbonate <!> (dp "bicarbonate")
+            yield x.chloride <!> (dp "chloride")
+            })
+
+        blank (Uri.has<ElectrolyteContent>()) (optionlist{
+          yield a (Uri.TypeEntity<ElectrolyteContent>())
+          yield title |> (string >> label)
+          yield! fluids |> List.map fluid
+          })
+
+      let s = optionlist {
+               yield a (Uri.TypeEntity x)
+               yield x.title <!> (string >> label)
+               yield x.concentrations |> concentrations
+               yield x.content |> content
+               }
+      let dr = resource (Uri.fromtype<Electrolytes> (string id))
+
+      [dr s]
+       |> Assert.graph Graph.setupGraph
