@@ -569,3 +569,39 @@ module SectionsRdf =
 
       [dr s]
        |> Assert.graph Graph.setupGraph
+
+
+  type Graph with
+    static member fromparentalfeeding (ParenteralFeeding(id,en,pl)) =
+      let notes (EnergyNotes(sd)) = sd |> dita
+      let pack (Pack(sd)) =
+        blank (Uri.has<Pack>()) (optionlist {
+          yield a (Uri.TypeEntity<Pack>())
+          yield sd |> dita
+          })
+
+      let preparation (x:Preparation) =
+        blank (Uri.has x) (optionlist{
+          yield a (Uri.TypeEntity x)
+          yield x.title |> (string >> label)
+          yield x.manufacturer |> (dp "manufacturer")
+          yield x.nitrogen <!> (dp "nitrogen")
+          yield x.energy <!> (dp "energy")
+          yield x.potassium <!> (dp "potassium")
+          yield x.magnesium <!> (dp "magnesium")
+          yield x.sodium <!> (dp "sodium")
+          yield x.acetate <!> (dp "acetate")
+          yield x.chloride <!> (dp "acetate")
+          yield x.otherComponentsPerLitre <!> (dp "otherComponentsPerLitre")
+          yield x.adultOnly <!> (string >> dp "adultOnly")
+          yield! x.packs |> List.map pack
+          })
+
+      let s = optionlist {
+        yield en |> notes
+        yield! pl |> List.map preparation
+        }
+
+      let dr = resource (Uri.fromtype<ParenteralFeeding> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph
