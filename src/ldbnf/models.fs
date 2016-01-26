@@ -1109,11 +1109,13 @@ module Sections =
    | AdditionalCasesOestrogenOnly
    | AdditionalCasesCombined
 
-  type Indedences = | Incedences of Title * IncedencesType * Incedence list
+  type Incedences = | Incedences of Title * IncedencesType * Incedence list
 
-  type AgeRange = | AgeRange of string
+  type AgeRange =
+    | AgeRange of string
+    override __.ToString() = match __ with | AgeRange s -> s
 
-  type Group = | Group of AgeRange * Indedences list
+  type Group = | Group of AgeRange * Incedences list
 
   type Note = | Note of sectionProvider.Sectiondiv
 

@@ -605,3 +605,45 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<ParenteralFeeding> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+  type Graph with
+    static member fromhrtrisks (HrtRisks(id,note,risks)) =
+      let n (Note(sd)) = sd |> dita
+
+      let risk (Risk(title,note,groups)) =
+        let group (Group(ar,incedenceslist)) =
+          let incedences (Incedences(title,typ,incedencelist)) =
+            let incedence (Incedence(duration,count)) =
+              blank (Uri.has<Incedence>()) (optionlist{
+                yield duration |> (string >> dp "duration")
+                yield count |> (string >> dp "count")
+                })
+
+            blank (Uri.has<Incedences>()) (optionlist{
+              yield a (Uri.TypeEntity<Incedences>())
+              yield title |> (string >> label)
+              yield typ |> (toString >> dp "type")
+              yield! incedencelist |> List.map incedence
+              })
+
+          blank (Uri.has<Group>()) (optionlist{
+            yield a (Uri.TypeEntity<Group>())
+            yield ar |> (string >> dp "AgeRange")
+            yield! incedenceslist |> List.map incedences
+            })
+
+        blank (Uri.has<Risk>()) (optionlist{
+          yield a (Uri.TypeEntity<Risk>())
+          yield title |> (string >> label)
+          yield note <!> n
+          yield! groups |> List.map group
+          })
+
+      let s = optionlist {
+          yield note |> n
+          yield! risks |> List.map risk
+        }
+
+      let dr = resource (Uri.fromtype<HrtRisks> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph
