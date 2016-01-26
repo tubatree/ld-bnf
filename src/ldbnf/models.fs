@@ -1100,7 +1100,9 @@ module Sections =
 
 
 
-  type IncedenceDuration = | IncedenceDuration of string
+  type IncedenceDuration =
+    | IncedenceDuration of string
+    override __.ToString() = match __ with | IncedenceDuration s -> s
 
   type Incedence = | Incedence of IncedenceDuration * int
 
@@ -1202,10 +1204,16 @@ module Sections =
   type AgeGroup =
     | Adult of string
     | Child of string
+    override __.ToString() = match __ with
+                             | Adult s -> s
+                             | Child s -> s
+
   type Directions = | Directions of sectionProvider.P
 
   type PatientGroup = | PatientGroup of AgeGroup * Directions
-  type TakenInMonths = | TakenInMonths of string
+  type TakenInMonths =
+    | TakenInMonths of string
+    override __.ToString() = match __ with | TakenInMonths s -> s
 
   type Therapy = {
     therapyType:TherapyType;

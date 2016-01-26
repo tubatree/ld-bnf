@@ -678,3 +678,37 @@ module SectionsRdf =
 
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+
+  type Graph with
+    static member fromtbtreaments (AntiTuberculosisTreatments(id,title,therapies)) =
+      let therapy (x:Therapy) =
+        let patientgroup (PatientGroup(agegroup,directions)) =
+          let ag = function
+            | Adult s -> s |> dp "Adult"
+            | Child s -> s |> dp "Child"
+          let dir (Directions(p)) = p |> dita
+
+          blank (Uri.has<PatientGroup>()) (optionlist{
+            yield a (Uri.TypeEntity<PatientGroup>())
+            yield agegroup |> ag
+            yield directions |> dir
+            })
+
+        blank (Uri.has x) (optionlist{
+          yield a (Uri.TypeEntity a)
+          yield x.supervision |> (toString >> dp "supervision")
+          yield x.therapyType |> (toString >> dp "therapyType")
+          yield x.title |> (string >> label)
+          yield x.takenInMonths |> (string >> dp "takenInMonths")
+          yield! x.groups |> List.map patientgroup
+          })
+
+      let s = optionlist {
+        yield title <!> (string >> label)
+        yield! therapies |> List.map therapy
+        }
+
+      let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph
