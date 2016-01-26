@@ -615,6 +615,7 @@ module SectionsRdf =
           let incedences (Incedences(title,typ,incedencelist)) =
             let incedence (Incedence(duration,count)) =
               blank (Uri.has<Incedence>()) (optionlist{
+                yield a (Uri.TypeEntity<Incedence>())
                 yield duration |> (string >> dp "duration")
                 yield count |> (string >> dp "count")
                 })
@@ -650,4 +651,30 @@ module SectionsRdf =
 
   type Graph with
     static member frommnitoringstrips (BloodMonitoringStrips(id,title,strips)) =
-      ()
+      let strip (x:BloodMonitoringStrip) =
+        let compatibleStrip (x:CompatibleStrip) =
+          blank (Uri.has x) (optionlist{
+            yield a (Uri.TypeEntity x)
+            yield x.name |> (dp "name")
+            yield x.packSize |> (dp "packSize")
+            yield x.price |> (string >> dp "price")
+            })
+
+        blank (Uri.has x) (optionlist{
+          yield a (Uri.TypeEntity x)
+          yield x.meter |> dita
+          yield x.typeOfMonitoring |> (dp "typeOfMonitoring")
+          yield x.sensitivityRange |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasSensitivityRange"))
+          yield x.manufacturer |> (dp "manufacturer")
+          yield x.compatibleStrip |> compatibleStrip
+          })
+
+      let s = optionlist {
+        yield title <!> (string >> label)
+        yield! strips |> List.map strip
+        }
+
+      let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
+
+      [dr s]
+      |> Assert.graph Graph.setupGraph
