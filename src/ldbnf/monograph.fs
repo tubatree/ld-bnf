@@ -482,11 +482,11 @@ module DrugParser =
 
 
     type Classification with
-      static member from (x:drugProvider.Data) =
+      static member private from typ (x:drugProvider.Data) =
         let l = x.Datas |> Array.tryPick (Some >=> withname "drugClassification" >=> (fun d -> d.String >>= (Id >> Some)))
         let i = x.Datas |> Array.choose (Some >=> withname "inheritsFromClass" >=> InheritsFromClass.from) |> Array.toList
         match l with
-          | Some(l) -> Some( Classification(l,i, Primary))
+          | Some(l) -> Some( Classification(l,i, typ))
           | None -> None
 
       static member fromlist (x:drugProvider.Data) =
@@ -506,7 +506,7 @@ module DrugParser =
 
         //gather up the inherits from but only take the last classification id
         let folder (Classification(st_id,st_in,st_type)) (x:drugProvider.Data) =
-          let cl = Classification.from x
+          let cl = Classification.from st_type x
           match cl with
             | Some(Classification(id,inherits,typ)) -> Classification(id,st_in @ inherits,typ)
             | None -> Classification(st_id,st_in,st_type)
