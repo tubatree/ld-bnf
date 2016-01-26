@@ -647,3 +647,7 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<HrtRisks> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+  type Graph with
+    static member frommnitoringstrips (BloodMonitoringStrips(id,title,strips)) =
+      ()

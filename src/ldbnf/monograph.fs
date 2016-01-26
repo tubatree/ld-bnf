@@ -421,8 +421,14 @@ module DrugParser =
     let extractTitle (x:drugProvider.Sectiondiv) =
       x.Ps |> Array.choose (hasOutputclasso "title") |> Array.map Title.from |> Array.tryPick Some
 
+    let removeTitle (x:drugProvider.Sectiondiv) =
+      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.iter (fun p -> p.XElement.Remove())
+      x
+
     let addTitle (sp,s) =
-      extractTitle s,sp,s
+      let t = extractTitle s
+      let x = removeTitle s
+      t,sp,x
 
     type GeneralInformation with
       static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> GeneralInformation)
