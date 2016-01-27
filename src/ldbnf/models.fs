@@ -1303,7 +1303,9 @@ module Sections =
     regimen:string
     }
 
-  type Country = | Country of string
+  type Country =
+    | Country of string
+    override __.ToString() = match __ with | Country s -> s
 
   type MalariaProphylaxisRegimen = | MalariaProphylaxisRegimen of Country * MalariaRisk list
 

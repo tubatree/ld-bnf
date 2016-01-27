@@ -743,3 +743,26 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+  type Graph with
+    static member frommalaria (MalariaProphylaxisRegimens(id,title,regimens)) =
+      let regimen (MalariaProphylaxisRegimen(country,risks)) =
+        let risk (x:MalariaRisk) =
+          blank (Uri.has x) (optionlist {
+            yield a (Uri.TypeEntity x)
+            yield x.content |> (dp "content")
+            yield x.regimen |> (dp "regimen")
+            })
+        blank (Uri.has<MalariaProphylaxisRegimen>()) (optionlist{
+          yield a (Uri.TypeEntity<MalariaProphylaxisRegimen>())
+          yield country |> (string >> dp "country")
+          yield! risks |> List.map risk
+          })
+      let s = optionlist{
+        yield title <!> (string >> label)
+        yield! regimens |> List.map regimen
+        }
+
+      let dr = resource (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph
