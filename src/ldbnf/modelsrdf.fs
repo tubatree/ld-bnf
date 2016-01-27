@@ -712,3 +712,34 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+  type Graph with
+    static member fromhelio (HelicobacterPyloriRegimens(id,title,regimens)) =
+      let regimen (Regimen(title,drugs,course)) =
+        let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
+        let drug d =
+          let build s q = (optionlist{
+                       yield a  (Uri.TypeEntity<Drug>())
+                       yield s |> label
+                       yield q |> (dp "quntity")
+                       })
+          match d with
+                   | AcidSuppressant(s,Quantity(q))
+                     -> blank !!"nicebnf:hasAcidSuppressant" (build s q)
+                   | Antibacterial(s,Quantity(q))
+                     -> blank !!"nicebnf:hasAntibacterial" (build s q)
+        blank (Uri.has<Regimen>()) (optionlist{
+          yield a (Uri.TypeEntity<Regimen>())
+          yield title |> (string >> label)
+          yield course |> crse
+          yield! drugs |> List.map drug
+          })
+
+      let s = optionlist {
+        yield title <!> (string >> label)
+        yield! regimens |> List.map regimen
+        }
+
+      let dr = resource (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph
