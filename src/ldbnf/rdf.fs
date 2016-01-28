@@ -127,7 +127,7 @@ module RdfUris =
     static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
     static member BodySystemEntity = !!(Uri.nicebnfClass + "BodySystem")
 
-    static member TypeEntity o = !!(Uri.nicebnf + typename o)
+    static member TypeEntity o = !!(Uri.nicebnf + (typename o))
     static member TypeEntity<'a>() = !!(Uri.nicebnf + typeof<'a>.Name)
 
 module Rdf =
