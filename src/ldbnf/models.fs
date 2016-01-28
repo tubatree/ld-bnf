@@ -1323,4 +1323,3 @@ module Sections =
       let title = x.P.String <!> Title
       let regs = x |> unravelr ["malariaProphylaxisRegimen"] |> List.map regimen
       MalariaProphylaxisRegimens(Id(x.Id),title,regs)
-

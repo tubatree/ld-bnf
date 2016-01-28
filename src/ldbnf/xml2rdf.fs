@@ -38,6 +38,7 @@ open Bnf.BorderlineSubstanceTaxonomy
 open Bnf.BorderlineSubstanceTaxonomyParser
 open Bnf.Index
 open Bnf.IndexParser
+open Bnf.Sections
 open FSharp.RDF
 
 open resource
@@ -57,6 +58,7 @@ open Bnf.PublicationRdf
 open Bnf.MedicalDeviceRdf
 open Bnf.BorderlineSubstanceTaxonomyRdf
 open Bnf.IndexRdf
+open Bnf.SectionsRdf
 
 module Iterator =
 
@@ -125,6 +127,13 @@ module Iterator =
             | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
             | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
+            | "electrolytes" -> fi |> sectionProvider.Load |> Electrolytes.parse |> Graph.fromelectrolytes |> Done
+            | "parenteralFeeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromparentalfeeding |> Done
+            | "hrtRisks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromhrtrisks |> Done
+            | "bloodMonitoringStrips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.frommnitoringstrips |> Done
+            | "antiTuberculosisTreatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromtbtreaments |> Done
+            | "helicobacterPyloriRegimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromhelio |> Done
+            | "malariaProphylaxisRegimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.frommalaria |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with
