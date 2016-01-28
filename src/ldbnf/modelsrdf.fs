@@ -719,7 +719,6 @@ module SectionsRdf =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
         let drug d =
           let build s q = (optionlist{
-                       yield a  (Uri.TypeEntity<Drug>())
                        yield s |> label
                        yield q |> (dp "quntity")
                        })
