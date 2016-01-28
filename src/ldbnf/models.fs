@@ -1323,3 +1323,26 @@ module Sections =
       let title = x.P.String <!> Title
       let regs = x |> unravelr ["malariaProphylaxisRegimen"] |> List.map regimen
       MalariaProphylaxisRegimens(Id(x.Id),title,regs)
+
+  type DoseStatement = {
+    age:string
+    dose:string
+    volume:sectionProvider.P
+    note:string option
+    }
+
+  type IntramuscularAdrenalineEmergency =
+    | IntramuscularAdrenalineEmergency of Id * Title option * DoseStatement list
+    static member parse (x:sectionProvider.Section) =
+
+      let statement (x:sectionProvider.Sectiondiv) =
+        {
+          age = x.Ps |> Array.pick (p "age")
+          dose = x.Ps |> Array.pick (p "dose")
+          volume = x.Ps |> Array.pick (hasOutputclasso "volume")
+          note = x.Ps |> Array.tryPick (p "note")
+          }
+
+      let title = x.P.String <!> Title
+      let statements = x |> unravelr ["doses";"doseStatement"] |> List.map statement
+      IntramuscularAdrenalineEmergency(Id(x.Id),title,statements)

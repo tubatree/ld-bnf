@@ -766,3 +766,23 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
+
+  type Graph with
+    static member fromadrenaline (IntramuscularAdrenalineEmergency(id,title,statements)) =
+      let statement (x:DoseStatement) =
+        blank (Uri.has x) (optionlist{
+          yield a (Uri.TypeEntity x)
+          yield x.age |> (dp "age")
+          yield x.dose |> (dp "dose")
+          yield x.volume |> (string >> xsd.xmlliteral >> (dataProperty !!"bnfsite:hasVolume"))
+          yield x.note <!> (string >> dp "note")
+          })
+
+      let s = optionlist{
+        yield title <!> (string >> label)
+        yield! statements |> List.map statement
+        }
+
+      let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency> (string id))
+      [dr s]
+      |> Assert.graph Graph.setupGraph

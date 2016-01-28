@@ -134,6 +134,7 @@ module Iterator =
             | "antiTuberculosisTreatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromtbtreaments |> Done
             | "helicobacterPyloriRegimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromhelio |> Done
             | "malariaProphylaxisRegimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.frommalaria |> Done
+            | "intramuscularAdrenalineEmergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromadrenaline |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
     match m with
