@@ -159,8 +159,8 @@ module Iterator =
            Done(fn)
        | NotDone s -> NotDone s
      with
-       | :? Exception as ex -> NotDone (sprintf "%s failed with %s %s" f ex.Message ex.StackTrace)
- 
+       | ex -> NotDone (sprintf "%s failed with %s %s" f ex.Message ex.StackTrace)
+
   [<EntryPoint>]
   let main args = 
     let parser = ArgumentParser.Create<Arguments>()

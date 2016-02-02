@@ -1315,7 +1315,9 @@ module Sections =
       let regimen (x:sectionProvider.Sectiondiv) =
         let risks (x:sectionProvider.Sectiondiv) =
           x |> unravel ["risks";"risk"]
-            |> List.choose (fun sd -> match sd.Ps with | [|c;r|] -> Option.lift2 (fun c r -> {content = c;regimen = r}) c.String r.String)
+            |> List.choose (fun sd -> match sd.Ps with
+                                       | [|c;r|] -> Option.lift2 (fun c r -> {content = c;regimen = r}) c.String r.String
+                                       | _ -> None)
         let country = x.Ps |> Array.pick (p "country" >> Option.map Country)
         let rsks = x |> risks
         MalariaProphylaxisRegimen(country,rsks)

@@ -406,14 +406,6 @@ module DrugParser =
       let links = x.Xrefs |> Array.map MedicinalForm.from
       MedicinalForms(Id(x.Id),lvs,avs,links)
 
-    let inline optn t f x = Some (t (f x))
-
-    let inline opt t f x =
-        let y = f x
-        match y with
-          | Some(y) -> Some (t (y))
-          | None -> None
-
     type Title with
       static member from (x:drugProvider.P) =
         Title(Paragraph.from x) 
@@ -878,8 +870,7 @@ module DrugParser =
                                | None -> [||]
         let classifications = match x.Body with
                               | Some(b) -> b.Datas
-                                           |> Array.choose (hasName "classifications")
-                                           |> Array.map (fun cs -> Classification.fromlist cs)
+                                           |> Array.choose (hasName "classifications" >> Option.map Classification.fromlist)
                               | None -> [||]
 
         let vtmid = x.Body >>= (fun b ->  b.Datas |> Array.tryPick (Some >=> withname "vtmid" >=> Vtmid.from))
