@@ -63,7 +63,7 @@ open Bnf.SectionsRdf
 module Iterator =
 
   let private fileasync (fileName : string) = async { use! file = File.AsyncOpenText fileName
-                                                      return file.ReadToEnd() }
+                                                      return file }
   let private file (fn:string) = File.OpenText fn
 
   let private xmlFromFileSynch (fileName : string) =
@@ -96,14 +96,10 @@ module Iterator =
   type Work<'a,'b> =
     | Done of 'a
     | NotDone of 'b
-
-  let generate f =
-    //get the type from the filename, somehow
-    let t = Directory.GetParent(f).Name
-    use fi = file f
+ 
+  let tottl f t (fi:StreamReader) =
     let content n = fi |> genericProvider.Load |> Generic.parse |> (Graph.fromGeneric n) |> Done
-    //parse in different ways for differnt types
-    let m = match t with
+    match t with
             | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Done
             | "medicinalForm" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Done
             | "treatmentSummary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
@@ -137,14 +133,33 @@ module Iterator =
             | "intramuscularAdrenalineEmergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromadrenaline |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
+  let writettl graph path t =
+    let sb = new System.Text.StringBuilder()
+    use tw = toString sb
+    graph |> Graph.writeTtl tw |> ignore
+    let fn = Path.GetFileName path
+    let nfn = Path.ChangeExtension(fn,"ttl")
+    Done(sb.ToString(),nfn,t)
+
+  let gena f = async {
+       let t = Directory.GetParent(f).Name
+       let! fi = fileasync f
+       let m = tottl f t fi
+
+       return match m with
+              | Done graph -> writettl graph f t
+              | NotDone s -> NotDone s
+    }
+
+
+  let generate f =
+    //get the type from the filename, somehow
+    let t = Directory.GetParent(f).Name
+    use fi = file f
+    let m = tottl f t fi
+
     match m with
-        | Done graph ->
-          let sb = new System.Text.StringBuilder()
-          use tw = toString sb
-          graph |> Graph.writeTtl tw |> ignore
-          let fn = Path.GetFileName f
-          let nfn = Path.ChangeExtension(fn,"ttl")
-          Done(sb.ToString(),nfn,t)
+        | Done graph -> writettl graph f t
         | NotDone s -> NotDone s
 
   let apply o f =
@@ -161,6 +176,23 @@ module Iterator =
      with
        | ex -> NotDone (sprintf "%s failed with %s %s" f ex.Message ex.StackTrace)
 
+  let applya o f = async {
+      try
+        match (generate f) with
+         | Done(text,fn,t) ->
+           let dir = (o ++ t)
+           if (not(Directory.Exists(dir))) then
+             Directory.CreateDirectory(dir) |> ignore
+           let fn = (dir ++ fn)
+           do! toFile fn text
+           return Done(fn)
+         | NotDone s -> return NotDone s
+      with
+         | ex -> return NotDone (sprintf "%s failed with %s %s" f ex.Message ex.StackTrace)
+    }
+
+
+
   [<EntryPoint>]
   let main args = 
     let parser = ArgumentParser.Create<Arguments>()
@@ -170,13 +202,28 @@ module Iterator =
     printfn "%s" xmlDirectory
 
     let fs = Directory.EnumerateFiles(xmlDirectory,"*.*",SearchOption.AllDirectories)
-    fs |> Seq.map (apply outputDirectory)
-       //|> Seq.choose id
-    |> Seq.iter (function
-                  | Done _ -> ()
-                  | NotDone s -> s |>  printfn "%s unprocessed" )
+
+    let f = function
+            | Done _ -> ()
+            | NotDone s -> s |>  printfn "%s unprocessed"
+
+    let stopWatch = System.Diagnostics.Stopwatch.StartNew()
+
+    //fs |> Seq.map (apply outputDirectory)
+    //   |> Seq.iter f
+
+
     //AsyncSeq.ofSeq fs
-    //    |> AsyncSeq.map (apply outputDirectory)
-    //    |> AsyncSeq.iter (fun s -> printfn "%s" (Async.RunSynchronously s))
+    //    |> AsyncSeq.map (applya outputDirectory)
+    //    |> AsyncSeq.iter (fun s -> Async.RunSynchronously s |> f)
     //    |> Async.RunSynchronously
+
+    fs |> PSeq.map (apply outputDirectory)
+       |> PSeq.iter f
+
+    //fs |> PSeq.map (applya outputDirectory)
+    //   |> PSeq.iter (fun s -> Async.RunSynchronously s |> f)
+
+    stopWatch.Stop()
+    printfn "%f" stopWatch.Elapsed.TotalMilliseconds
     0
