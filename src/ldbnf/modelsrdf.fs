@@ -655,7 +655,7 @@ module SectionsRdf =
         let compatibleStrip (x:CompatibleStrip) =
           blank (Uri.has x) (optionlist{
             yield a (Uri.TypeEntity x)
-            yield x.name |> (dp "name")
+            yield x.name |> label
             yield x.packSize |> (dp "packSize")
             yield x.price |> (string >> dp "price")
             })
