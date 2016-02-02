@@ -696,7 +696,7 @@ module SectionsRdf =
             })
 
         blank (Uri.has x) (optionlist{
-          yield a (Uri.TypeEntity a)
+          yield a (Uri.TypeEntity x)
           yield x.supervision |> (toString >> dp "supervision")
           yield x.therapyType |> (toString >> dp "therapyType")
           yield x.title |> (string >> label)
@@ -709,7 +709,7 @@ module SectionsRdf =
         yield! therapies |> List.map therapy
         }
 
-      let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
+      let dr = resource (Uri.fromtype<AntiTuberculosisTreatments> (string id))
       [dr s]
       |> Assert.graph Graph.setupGraph
 
