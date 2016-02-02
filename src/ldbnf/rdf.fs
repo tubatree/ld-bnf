@@ -44,8 +44,8 @@ module RdfUris =
       let n = typeof<'a>.Name
       !!(sprintf "%s%s/%s" Uri.bnfsite n s)
 
-    static member has o = !!("bnfsite:has" + typename o)
-    static member has<'a>() = !!("bnfsite:has" + typeof<'a>.Name)
+    static member has o = !!("nicebnf:has" + typename o)
+    static member has<'a>() = !!("nicebnf:has" + typeof<'a>.Name)
 
     // BNF website entity identifiers
     static member from (x:Drug) = !!(Uri.bnfsite + "drug/" + string x.id )
