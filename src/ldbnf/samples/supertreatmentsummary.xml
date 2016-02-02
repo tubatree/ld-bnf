@@ -614,5 +614,7 @@
           <xref format="dita" href="PHP8427.xml" type="drug">Yellow fever vaccine, live</xref> is indicated for those travelling or living in areas where infection is endemic and for laboratory staff who handle the virus or who handle clinical material from suspected cases. Infants under 6 months of age should not be vaccinated because there is a small risk of encephalitis; infants aged 6–9 months should be vaccinated only if the risk of yellow fever is high and unavoidable (seek expert advice). The immunity which probably lasts for life is officially accepted for 10 years starting from 10 days after primary immunisation and for a further 10 years immediately after revaccination.</p>
       </sectiondiv>
     </section>
+    <xref href="PHP188.xml" rel="electrolytes"></xref>
+    <xref href="PHP188.xml" rel="electrolytes"></xref>
   </body>
 </topic>

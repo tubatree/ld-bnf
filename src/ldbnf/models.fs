@@ -323,11 +323,12 @@ module TreatmentSummary =
   type BodySystem = | BodySystem of string
 
   type Summary = {
-    title:Title;
-    doi:Doi option;
-    bodySystem:BodySystem option;
-    content:Content list;
+    title:Title
+    doi:Doi option
+    bodySystem:BodySystem option
+    content:Content list
     links:ContentLink seq
+    sublinks: tsProvider.Xref list
   }
 
   type Treatment =
@@ -366,7 +367,8 @@ module TreatmentSummaryParser =
       let d = x.Body.Datas |> Array.choose (withname "doi") |> Array.tryPick Doi.from
       let bs = x.Body.Datas |> Array.choose (withname "bodySystem") |> Array.tryPick BodySystem.from
       let c = x.Body.Sections |> Array.map Content.from |> Array.toList
-      Id(x.Id),{title = t; doi = d; bodySystem = bs; content = c; links = ls}
+    
+      Id(x.Id),{title = t; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
 
   type TreatmentSummary with
     static member from c (i,s) =

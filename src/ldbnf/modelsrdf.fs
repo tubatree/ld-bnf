@@ -274,12 +274,20 @@ module TreatmentSummaryRdf =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
     static member from (x:Summary) =
+      let xr (xref:tsProvider.Xref) =
+        let id = Id(xref.Href)
+        match xref.Rel with
+        | Some rel -> objectProperty !!("nicebnf:has" + (rel |> titleCase)) (Uri.totopic(rel,id)) |> Some
+        | None -> None
+
       optionlist {
         yield Graph.fromti x.title
         yield x.doi >>= (Graph.fromdoi >> Some)
         yield x.bodySystem >>= (Graph.frombs >> Some)
         yield! x.links |> Seq.map Graph.from |> Seq.toList
-        yield! x.content |> List.map Graph.fromcontent}
+        yield! x.content |> List.map Graph.fromcontent
+        yield! x.sublinks |> List.choose xr
+        }
 
     static member fromts (TreatmentSummary (_,x)) =
       match x with
@@ -505,12 +513,7 @@ module SectionsRdf =
   open DrugRdf
   open MedicinalFormRdf
 
-  let tc s =
-    let culture = System.Globalization.CultureInfo.GetCultureInfo("en-US")
-    culture.TextInfo.ToTitleCase s
-
-  let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> tc)))
-
+  let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
   type Graph with
     static member fromelectrolytes (x:Electrolytes) =

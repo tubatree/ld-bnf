@@ -85,6 +85,8 @@ module prelude =
 
     let inline (|HasOutputClasso|_|) (n:string) x = hasOutputclasso n x
 
-
+    let titleCase s =
+      let culture = System.Globalization.CultureInfo.GetCultureInfo("en-US")
+      culture.TextInfo.ToTitleCase s
 
 
