@@ -209,8 +209,8 @@ module Iterator =
 
     let stopWatch = System.Diagnostics.Stopwatch.StartNew()
 
-    fs |> Seq.map (apply outputDirectory)
-       |> Seq.iter f
+    //fs |> Seq.map (apply outputDirectory)
+    //   |> Seq.iter f
 
 
     //AsyncSeq.ofSeq fs
@@ -218,8 +218,8 @@ module Iterator =
     //    |> AsyncSeq.iter (fun s -> Async.RunSynchronously s |> f)
     //    |> Async.RunSynchronously
 
-    //fs |> PSeq.map (apply outputDirectory)
-    //   |> PSeq.iter f
+    fs |> PSeq.map (apply outputDirectory)
+       |> PSeq.iter f
 
     //fs |> PSeq.map (applya outputDirectory)
     //   |> PSeq.iter (fun s -> Async.RunSynchronously s |> f)
