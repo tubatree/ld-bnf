@@ -724,7 +724,7 @@ module SectionsRdf =
         let drug d =
           let build s q = (optionlist{
                        yield s |> label
-                       yield q |> (dp "quntity")
+                       yield q |> (dp "quantity")
                        })
           match d with
                    | AcidSuppressant(s,Quantity(q))
