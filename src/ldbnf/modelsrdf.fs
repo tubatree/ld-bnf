@@ -505,7 +505,11 @@ module SectionsRdf =
   open DrugRdf
   open MedicinalFormRdf
 
-  let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + n))
+  let tc s =
+    let culture = System.Globalization.CultureInfo.GetCultureInfo("en-US")
+    culture.TextInfo.ToTitleCase s
+
+  let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> tc)))
 
 
   type Graph with
