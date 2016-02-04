@@ -119,4 +119,5 @@ module prelude =
       let culture = System.Globalization.CultureInfo.GetCultureInfo("en-US")
       culture.TextInfo.ToTitleCase s
 
-
+    let firstupper (s:string) =
+      s.Substring(0,1).ToUpper() + s.Substring(1);

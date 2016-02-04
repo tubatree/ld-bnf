@@ -50,7 +50,7 @@ let string = new StringBuilderM ()
 //    } |> build
 
 
-let xml = drugProvider.GetSamples().[0].XElement.XPathSelectElements("//sectiondiv").Skip(1).First()
+let xml = drugProvider.GetSamples().[0].XElement.XPathSelectElements("//section[@outputclass='medicinalProduct']").First()
 
 let rec stringify (node:XNode) =
   match node with
@@ -61,3 +61,4 @@ let rec stringify (node:XNode) =
            if (element.Name.ToString() = "p") then
              yield "\n\n"
            } |> build
+    | _ -> ""

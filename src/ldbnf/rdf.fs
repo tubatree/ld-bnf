@@ -37,7 +37,7 @@ module RdfUris =
     static member nicebnfClass = "http://ld.nice.org.uk/ns/bnf/"
     static member bnfsite = "http://bnf.nice.org.uk/"
 
-    static member totopic (rel, id:Id) = !!(sprintf "%s%s/%s" Uri.bnfsite rel (string id))
+    static member totopic (rel, id:Id) = !!(sprintf "%s%s/%s" Uri.bnfsite (rel |> firstupper) (string id))
 
     static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o) s)
     static member fromtype<'a> s =
