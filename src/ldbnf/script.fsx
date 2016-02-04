@@ -44,12 +44,6 @@ type StringBuilderM () =
 let string = new StringBuilderM ()
 
 
-//let bytes2hex (bytes : byte []) =
-//    string {
-//        for byte in bytes -> sprintf "%02x" byte
-//    } |> build
-
-
 let xml = drugProvider.GetSamples().[0].XElement.XPathSelectElements("//section[@outputclass='medicinalProduct']").First()
 
 let rec stringify (node:XNode) =

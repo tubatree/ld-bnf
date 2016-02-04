@@ -367,7 +367,6 @@ module DrugRdf =
 
       let inline statements a g x = x |> Seq.map (a g) |> Seq.toList
 
-      //let inline statementsps g x = x |> Seq.map (addps g) |> Seq.toList
 
       let inline statement a g x =
         match x with

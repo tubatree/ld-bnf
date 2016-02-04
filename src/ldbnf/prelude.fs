@@ -39,6 +39,14 @@ module StringBuilder =
 
   let string = new StringBuilderM ()
 
+module Guid =
+  open System
+
+  let webguid () =
+    let guid = Guid.NewGuid()
+    let id = Convert.ToBase64String(guid.ToByteArray())
+    id.Replace("/", "_").Replace("+", "-").Substring(0, 22)
+
 
 module prelude = 
     let (|?) = defaultArg
