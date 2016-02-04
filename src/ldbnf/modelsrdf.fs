@@ -498,13 +498,13 @@ module MedicalDeviceTypeRdf =
       let ss = x.sections |> List.collect sec
       let mps = x.products |> List.map Graph.from
 
-      one !!"bnfsite:hasClinicalMedicalDeviceInformationGroup" (uri x.id) (s @ ss @ mps)
+      one !!"nicebnf:hasClinicalMedicalDeviceInformationGroup" (uri x.id) (s @ ss @ mps)
 
     static member fromdd uri (DeviceDescription(id,sd)) =
-      one !!"bnfsite:hasDeviceDescription" (uri id) [sd |> dita]
+      one !!"nicebnf:hasDeviceDescription" (uri id) [sd |> dita]
 
     static member fromcs uri (ComplicanceStandards(id,sd)) =
-      one !!"bnfsite:hasComplicanceStandards" (uri id) [sd |> dita]
+      one !!"nicebnf:hasComplicanceStandards" (uri id) [sd |> dita]
 
 module SectionsRdf =
   open Sections
@@ -786,7 +786,7 @@ module SectionsRdf =
           yield a (Uri.TypeEntity x)
           yield x.age |> (dp "age")
           yield x.dose |> (dp "dose")
-          yield x.volume |> (string >> xsd.xmlliteral >> (dataProperty !!"bnfsite:hasVolume"))
+          yield x.volume |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasVolume"))
           yield x.note <!> (string >> dp "note")
           })
 
