@@ -26,8 +26,10 @@ module DrugRdf =
   let subtype x l = (a !!("nicebnf:" + (toString x))) :: l
 
   let ph (ph:drugProvider.Ph) =
-    [ph.XElement.Value |> label
-     ph |> dita]
+     optionlist {
+       yield ph.XElement.Value |> label
+       yield! ph |> dita
+       }
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
@@ -180,7 +182,7 @@ module DrugRdf =
                   objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(pg.parentGroup))
                   a Uri.PatientGroupEntity]
           yield pg.Dosage |> label
-          yield pg.dosageXml |> dita
+          yield! pg.dosageXml |> dita
           yield a Uri.DosageEntity
           yield r >>= (Graph.fromsp >> Some)})
       pgs |> Seq.map patientGrp
@@ -189,17 +191,18 @@ module DrugRdf =
       match x with
         | TheraputicIndication (s,p) ->
            Some(one !!"nicebnf:hasIndication" (Uri.from x)
-             [a Uri.IndicationEntity
-              s |> label
-              p |> dita])
+             (optionlist {
+              yield a Uri.IndicationEntity
+              yield s |> label
+              yield! p |> dita
+             }))
 
     static member fromidg (IndicationsAndDose(tis,roas)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
 
     static member fromidgs (x:IndicationsAndDoseSection) =
-      let dp n s = [s |> dita
-                    (a !!("nicebnf:" + n))]
+      let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
       match x with
        | Pharmacokinetics s -> s |> dp "Pharmacokinetics"
        | DoseEquivalence s -> s |> dp "DoseEquivalence"
@@ -217,9 +220,9 @@ module DrugRdf =
         | PatientAdviceInPregnancy  (t,sp,s) -> (t,sp,s) |> pca p
         | PatientAdviceInConceptionAndContraception (t,sp,s) -> (t,sp,s) |> pca p
 
-    static member fromlvs (LicensingVariationStatement(p)) = [p |> dita]
+    static member fromlvs (LicensingVariationStatement(p)) = p |> dita
 
-    static member fromavs (AdditionalFormsStatement(p)) = [p |> dita]
+    static member fromavs (AdditionalFormsStatement(p)) = p |> dita
 
     static member frommfl (MedicinalForm(l)) =
       one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url)) [l.Title |> label]
@@ -233,7 +236,7 @@ module DrugRdf =
     static member frompair (sp,s:drugProvider.Sectiondiv) =
       optionlist {
         yield sp >>= (Graph.fromsp >> Some)
-        yield Graph.from s}
+        yield! Graph.from s}
 
     static member fromthree (t,sp,s) =
       optionlist {
@@ -291,7 +294,7 @@ module DrugRdf =
            yield one !!"nicebnf:hasFrequency" (Uri.fromfre f)
              [a !!"nicebnf:Frequency"
               f.label |> label]
-           yield p |> dita
+           yield! p |> dita
            yield! ses |> Seq.map Graph.fromse |> Seq.toList}
         match x with
           | GeneralSideEffects (f,p,ses) -> gf(f,p,ses) |> subtype x
@@ -301,7 +304,7 @@ module DrugRdf =
     static member fromcog (x:ContraindicationsGroup) =
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:ContraindicationsGroup"
-                         yield p |> dita
+                         yield! p |> dita
                          yield! (cs |> Seq.map Graph.fromcon |> Seq.toList)}
       match x with
         | GeneralContraindications (p,cs) -> (gen(p,cs)) |> subtype x
@@ -311,7 +314,7 @@ module DrugRdf =
     static member fromcg (x:CautionsGroup) =
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:CautionsGroup"
-                         yield p |> dita
+                         yield! p |> dita
                          yield! (cs |> List.map Graph.fromcau)}
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x
@@ -325,7 +328,7 @@ module DrugRdf =
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
           optionlist {
             yield sp >>= (Graph.fromsp >> Some)
-            yield s >>= (Graph.from >> Some)
+            return! s >>= (Graph.from >> Some)
             yield t >>= Graph.fromti
             yield fi >>= Graph.from} |> subtype x
 

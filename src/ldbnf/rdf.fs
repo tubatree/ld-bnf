@@ -27,10 +27,8 @@ module RdfUris =
 
   let inline dita x =
     let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
-    element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
-
-  let inline ditastr x =
-    x |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
+    [element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
+     element |> (stringify >> xsd.string >> (dataProperty !! "nicebnf:hasTextContent"))]
 
   type Uri with
     static member nicebnf = "http://ld.nice.org.uk/ns/bnf#"

@@ -18,7 +18,7 @@ module MedicalDeviceRdf =
       let s = optionlist {
         yield a Uri.MedicalDeviceEntity
         yield t |> (string >> label)
-        yield pdi >>= (ditastr >> Some)
+        return! pdi >>= (fun (PrescribingAndDispensingInformation(sd)) -> sd |> (dita >> Some))
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
       let dr = resource (Uri.frommd id)
@@ -34,7 +34,7 @@ module BorderlineSubstanceTaxonomyRdf =
       let s = optionlist {
         yield a Uri.BorderlineSubstanceTaxonomyEntity
         yield x.title |> (l >> label)
-        yield x.general >>= (ditastr >> Some)
+        return! x.general >>= (dita >> Some)
         yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
         yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
         }
@@ -74,7 +74,7 @@ module GenericRdf =
       blank !!"nicebnf:hasContent"
         (optionlist {
           yield ta >>= (Graph.fromta >> Some)
-          yield s |> dita})
+          yield! s |> dita})
 
     static member from (x:ContentLink) =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
@@ -118,8 +118,7 @@ module InteractionRdf =
   type Graph with
     static member from (InteractionList(id,t,il,ids,n)) =
       let note (Note(p,t)) = blank !!"nicebnf:hasNote"
-                              [t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")
-                               p |> dita]
+                              ((t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")) :: (p |> dita))
       let s = optionlist{
                 yield a Uri.InteractionListEntity
                 yield t.XElement.Value |> label
@@ -134,12 +133,14 @@ module InteractionRdf =
           | NotSet -> dataProperty !!"nicebnf:hasImportance" ("NotSet"^^xsd.string)
 
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
-                                 [a Uri.InteractionEntity
-                                  objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
-                                  importance i
-                                  i.message |> dita
-                                  i.message.XElement.Value |> (string >> label)
-                                  dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)]
+                                 (optionlist {
+                                   yield a Uri.InteractionEntity
+                                   yield objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
+                                   yield importance i
+                                   yield! i.message |> dita
+                                   yield i.message.XElement.Value |> (string >> label)
+                                   yield dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)
+                                  })
 
       let link = Uri.fromil >> objectProperty !!"nicebnf:hasInteractionList"
 
@@ -268,7 +269,7 @@ module TreatmentSummaryRdf =
       blank !!"nicebnf:hasContent"
        (optionlist {
          yield ta >>= (Graph.fromta >> Some)
-         yield s |> dita})
+         yield! s |> dita})
 
     static member from (x:ContentLink) =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
@@ -330,7 +331,7 @@ module MedicinalFormRdf =
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
       blank !!"nicebnf:hasCautionaryAdvisoryLabel"
                (optionlist {
-                 yield p |> dita
+                 yield! p |> dita
                  yield ln >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasLabelNumber") >> Some)})
 
     static member fromcals (CautionaryAdvisoryLabels(_,cals)) =
@@ -344,7 +345,7 @@ module MedicinalFormRdf =
       let s = optionlist {
                yield m >>= Graph.fromman
                yield bt >>= Graph.frombt
-               yield t |> dita}
+               yield! t |> dita}
       blank !!"nicebnf:hasMedicinalProductTitle" s |> Some
 
     static member fromexc (Excipients e) =
@@ -445,7 +446,7 @@ module WoundManagementRdf =
       blank !!"nicebnf:hasWoundType"
         (optionlist {
             yield t |> dp "TypeOfWound"
-            yield d >>= (Graph.fromDescription >> Some)
+            return! d >>= (Graph.fromDescription >> Some)
             yield! wes |> List.map Graph.fromExudate
           })
 
@@ -459,7 +460,7 @@ module WoundManagementRdf =
       blank !!"nicebnf:hasProductGroup"
         (optionlist {
             yield t |>  Graph.fromTitle
-            yield d >>= (Graph.fromDescription >> Some)
+            return! d >>= (Graph.fromDescription >> Some)
             yield! pl |> List.map Graph.fromProduct
             })
 
@@ -501,10 +502,10 @@ module MedicalDeviceTypeRdf =
       one !!"nicebnf:hasClinicalMedicalDeviceInformationGroup" (uri x.id) (s @ ss @ mps)
 
     static member fromdd uri (DeviceDescription(id,sd)) =
-      one !!"nicebnf:hasDeviceDescription" (uri id) [sd |> dita]
+      one !!"nicebnf:hasDeviceDescription" (uri id) (sd |> dita)
 
     static member fromcs uri (ComplicanceStandards(id,sd)) =
-      one !!"nicebnf:hasComplicanceStandards" (uri id) [sd |> dita]
+      one !!"nicebnf:hasComplicanceStandards" (uri id) (sd |> dita)
 
 module SectionsRdf =
   open Sections
@@ -584,7 +585,7 @@ module SectionsRdf =
       let pack (Pack(sd)) =
         blank (Uri.has<Pack>()) (optionlist {
           yield a (Uri.TypeEntity<Pack>())
-          yield sd |> dita
+          yield! sd |> dita
           })
 
       let preparation (x:Preparation) =
@@ -605,7 +606,7 @@ module SectionsRdf =
           })
 
       let s = optionlist {
-        yield en |> notes
+        yield! en |> notes
         yield! pl |> List.map preparation
         }
 
@@ -643,12 +644,12 @@ module SectionsRdf =
         blank (Uri.has<Risk>()) (optionlist{
           yield a (Uri.TypeEntity<Risk>())
           yield title |> (string >> label)
-          yield note <!> n
+          return! note <!> n
           yield! groups |> List.map group
           })
 
       let s = optionlist {
-          yield note |> n
+          yield! note |> n
           yield! risks |> List.map risk
         }
 
@@ -669,7 +670,7 @@ module SectionsRdf =
 
         blank (Uri.has x) (optionlist{
           yield a (Uri.TypeEntity x)
-          yield x.meter |> dita
+          yield! x.meter |> dita
           yield x.typeOfMonitoring |> (dp "typeOfMonitoring")
           yield x.sensitivityRange |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasSensitivityRange"))
           yield x.manufacturer |> (dp "manufacturer")
@@ -705,7 +706,7 @@ module SectionsRdf =
           blank (Uri.has<Dosage>()) (optionlist{
             yield a (Uri.TypeEntity<Dosage>())
             yield agegroup |> grp
-            yield dosage |> dir
+            yield! dosage |> dir
             })
 
         blank (Uri.has x) (optionlist{

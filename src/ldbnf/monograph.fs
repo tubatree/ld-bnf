@@ -26,6 +26,19 @@ module Shared =
           None
       x.XPathSelectElements("//xref") |> Seq.choose build |> Seq.toList
 
+  open StringBuilder
+
+  let rec stringify (node:XNode) =
+   match node with
+    | :? XText as text -> text.Value
+    | :? XElement as element ->
+      string {
+        for node in element.Nodes() -> stringify node
+        if (element.Name.ToString() = "p") then
+          yield "\n\n"
+        } |> build
+    | _ -> ""
+
   //sensible compromise to reference the types provided to avoid replication
   type drugProvider = XmlProvider<"./samples/SuperDrug.xml", Global=true, SampleIsList=true>
 
