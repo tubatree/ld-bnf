@@ -84,7 +84,12 @@ module Drug =
 
     type TheraputicIndication = | TheraputicIndication of string * drugProvider.P
 
-    type PatientGroup = {Group:string; Dosage:string; dosageXml:drugProvider.P;}
+    type PatientGroup = {
+      parentGroup: string
+      Group:string
+      Dosage:string
+      dosageXml:drugProvider.P
+      }
 
     type Route =
       | Route of string
@@ -347,9 +352,12 @@ module DrugParser =
 
     type PatientGroup with
       static member from (x:drugProvider.Li) =
-        match x.Ps with
-          |[| g; p |] -> {Group = g.Value |? ""; Dosage = p.Value |? ""; dosageXml = p} |> Some
-          | _ -> None
+        match x.Outputclass,x.Ps with
+          | Some("patientGroup adult"),[| g; p |] ->
+              {parentGroup = "adult" ;Group = g.Value |? ""; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup child"),[| g; p |] ->
+              {parentGroup = "child" ;Group = g.Value |? ""; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | _,_ -> None
 
     type TheraputicIndication with
       static member from (x:Paragraph) =

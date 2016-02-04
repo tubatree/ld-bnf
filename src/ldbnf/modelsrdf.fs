@@ -254,7 +254,7 @@ module TreatmentSummaryRdf =
        dr p] |> Assert.graph (empty())
 
     static member fromti (Title s) = s |> label
-    static member fromdoi (Shared.Doi s) =
+    static member fromdoi (Shared.Doi s)=
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
     static member frombs (BodySystem x) =
         one !!"nicebnf:hasBodySystem" (Uri.frombs x) (optionlist {
@@ -277,7 +277,7 @@ module TreatmentSummaryRdf =
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
-        | Some rel -> objectProperty !!("nicebnf:has" + (rel |> titleCase)) (Uri.totopic(rel,id)) |> Some
+        | Some rel -> objectProperty !!("nicebnf:has" + (rel)) (Uri.totopic(rel,id)) |> Some
         | None -> None
 
       optionlist {
@@ -690,16 +690,22 @@ module SectionsRdf =
   type Graph with
     static member fromtbtreaments (AntiTuberculosisTreatments(id,title,therapies)) =
       let therapy (x:Therapy) =
-        let patientgroup (PatientGroup(agegroup,directions)) =
-          let ag = function
-            | Adult s -> s |> dp "Adult"
-            | Child s -> s |> dp "Child"
-          let dir (Directions(p)) = p |> dita
+        let patientgroup (PatientGroup(agegroup,dosage)) =
+          //swap to have the dosage with a group
+          let grp (x:AgeGroup) =
+            let g s a = one !!"nicebnf:hasPatientGroup" (Uri.fromgrp s)
+                         [s |> label
+                          objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(a))]
+            match x with
+              | Adult s -> g s "adult"
+              | Child s -> g s "child"
 
-          blank (Uri.has<PatientGroup>()) (optionlist{
-            yield a (Uri.TypeEntity<PatientGroup>())
-            yield agegroup |> ag
-            yield directions |> dir
+          let dir (Dosage(p)) = p |> dita
+
+          blank (Uri.has<Dosage>()) (optionlist{
+            yield a (Uri.TypeEntity<Dosage>())
+            yield agegroup |> grp
+            yield dosage |> dir
             })
 
         blank (Uri.has x) (optionlist{

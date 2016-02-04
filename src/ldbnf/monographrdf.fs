@@ -177,6 +177,7 @@ module DrugRdf =
          (optionlist {
           yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
                  [pg.Group |> label
+                  objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(pg.parentGroup))
                   a Uri.PatientGroupEntity]
           yield pg.Dosage |> label
           yield pg.dosageXml |> dita

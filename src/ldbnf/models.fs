@@ -1210,12 +1210,14 @@ module Sections =
                              | Adult s -> s
                              | Child s -> s
 
-  type Directions = | Directions of sectionProvider.P
+  type Dosage = | Dosage of sectionProvider.P
 
-  type PatientGroup = | PatientGroup of AgeGroup * Directions
+  type PatientGroup = | PatientGroup of AgeGroup * Dosage
   type TakenInMonths =
     | TakenInMonths of string
     override __.ToString() = match __ with | TakenInMonths s -> s
+
+  //type PatientGroup = {Group:string; Dosage:string; dosageXml:drugProvider.P;}
 
   type Therapy = {
     therapyType:TherapyType;
@@ -1234,9 +1236,9 @@ module Sections =
         let group (x:sectionProvider.Li) =
           let ageGroup,regimen = match x.Outputclass,x.Ps with
                                  | "patientGroup adult",[|p;r|] ->
-                                     p.String <!> Adult, r |> Directions |> Some
+                                     p.String <!> Adult, r |> Dosage |> Some
                                  | "patientGroup child",[|p;r|] ->
-                                     p.String <!> Child, r |> Directions |> Some
+                                     p.String <!> Child, r |> Dosage |> Some
                                  | _ -> None,None
           Option.lift2 (fun a b -> PatientGroup(a,b)) ageGroup regimen
 
