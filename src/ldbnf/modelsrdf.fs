@@ -47,15 +47,19 @@ module PublicationRdf =
   open Bnf.Publication
 
   type Graph with
-    static member fromPublication (Publication(d,wmid)) =
+    static member fromPublication (Publication(d,wmid,BorderlineSubstanceTaxonomyId(bsid))) =
       let dto = (System.DateTimeOffset d)^^xsd.datetime
 
       let wm wmid = one !!"nicebnf:hasWoundManagement" (Uri.fromwm wmid)
                       [a !!(Uri.nicebnfClass + "WoundManagementRoot")]
 
+      let bs (bsid:Id) = one !!"nicebnf:hasBorderlineSubstanceTaxonomyRoot" (Uri.frombsc bsid)
+                          [a !!(Uri.nicebnfClass + "BorderlineSubstanceTaxonomyRoot")]
+
       let s = [a !!(Uri.nicebnf + "Publication")
                dto |> (dataProperty !!"nicebnf:hasPublicationDate")
-               wmid |> wm]
+               wmid |> wm
+               bsid |> bs]
 
       let dr = resource !!(Uri.bnfsite + "publication")
       [dr s]

@@ -916,13 +916,14 @@ module Publication =
   open prelude
 
   type WoundManagmentId = | WoundManagmentId of Id
+  type BorderlineSubstanceTaxonomyId = | BorderlineSubstanceTaxonomyId of Id
 
   let name (n:string) (x:drugProvider.Data) = 
     if x.Name = n then Some x
     else None
 
   type Publication =
-    | Publication of System.DateTime * WoundManagmentId
+    | Publication of System.DateTime * WoundManagmentId * BorderlineSubstanceTaxonomyId
     static member parse (x:drugProvider.Topic) =
       let value (d:drugProvider.Data) = d.Number >>= (int32 >> Some)
       let number n ds  = ds |> Array.tryPick (fun x -> (name n x) >>= value)
@@ -940,4 +941,7 @@ module Publication =
                | None -> failwith "Missing Body"
       let wmid (xref:drugProvider.Xref) = xref.Href |> Id |> WoundManagmentId |> Some
       let id = x.Xrefs |> Array.filter (fun xref -> xref.Rel = Some "woundManagement") |> Array.pick wmid
-      Publication(d,id)
+
+      let bsid (xref:drugProvider.Xref) = xref.Href |> Id |> BorderlineSubstanceTaxonomyId |> Some
+      let bsid' = x.Xrefs |> Array.filter (fun xref -> xref.Rel = Some "borderlineSubstanceTaxonomy") |> Array.pick bsid
+      Publication(d,id,bsid')
