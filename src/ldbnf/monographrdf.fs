@@ -349,22 +349,21 @@ module DrugRdf =
 
       //take the list, add hasSubject and type
       let add' p f x (sub,uri) =
-        let name o = match o.GetType().BaseType.Name, o.GetType().Name with
-                      | "Object", n -> n
-                      | n, _ -> n
-        let s = f x
-        let n = name x
+        let s = f x //generate the properties
+        let n = typename x
+        //add a type and a subject
         let s' = [a !!("nicebnf:" + n)
                   one !!"nicebnf:hasSubject" uri
                     [a !!("nicebnf:" + sub)]]
         one !!(p n) !!("bnfsite:monographSection/" + webguid()) (s @ s')
 
       let add f x (sub,uri) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri)
+      //an alternate version that ignores the type name
       let addps f x (sub,uri) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,uri)
 
       let inline sec n i stf =
-        let fs = stf |> List.collect id
-        fs |> applyTo (n,i)
+        let fs = stf |> List.collect id //take list of functions to create statements
+        fs |> applyTo (n,i) //apply the functions with a name and a uri
 
 
       let inline statements a g x = x |> Seq.map (a g) |> Seq.toList
