@@ -12,6 +12,7 @@ module DrugRdf =
   open Shared
   open Rdf
   open RdfUris
+  open guid
 
   //shoudl replace these with tostring
   let getlabeld (DrugName n) = string n.Value.Value
@@ -338,6 +339,7 @@ module DrugRdf =
         | TheraputicDrugMonitoring (t,sp,s) -> Graph.fromthree (t,sp,s) |> subtype x
         | MonitoringOfPatientParameters (t,sp,s) -> Graph.fromthree (t,sp,s) |> subtype x
 
+
     static member fromsec sid (x:MonographSection) =
 
       let rec applyTo a xs = 
@@ -355,7 +357,7 @@ module DrugRdf =
         let s' = [a !!("nicebnf:" + n)
                   one !!"nicebnf:hasSubject" uri
                     [a !!("nicebnf:" + sub)]]
-        blank !!(p n) (s @ s')
+        one !!(p n) !!("bnfsite:monographSection/" + webguid()) (s @ s')
 
       let add f x (sub,uri) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri)
       let addps f x (sub,uri) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,uri)

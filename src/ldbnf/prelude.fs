@@ -39,7 +39,7 @@ module StringBuilder =
 
   let string = new StringBuilderM ()
 
-module Guid =
+module guid =
   open System
 
   let webguid () =
