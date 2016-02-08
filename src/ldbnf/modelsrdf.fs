@@ -18,7 +18,7 @@ module MedicalDeviceRdf =
       let s = optionlist {
         yield a Uri.MedicalDeviceEntity
         yield t |> (string >> label)
-        return! pdi >>= (fun (PrescribingAndDispensingInformation(sd)) -> sd |> (dita >> Some))
+        yield! pdi <!> (fun (PrescribingAndDispensingInformation(sd)) -> sd |> (dita)) |> unwrap
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
       let dr = resource (Uri.frommd id)
@@ -34,7 +34,7 @@ module BorderlineSubstanceTaxonomyRdf =
       let s = optionlist {
         yield a Uri.BorderlineSubstanceTaxonomyEntity
         yield x.title |> (l >> label)
-        return! x.general >>= (dita >> Some)
+        yield! x.general <!> dita |> unwrap
         yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
         yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
         }
@@ -390,9 +390,9 @@ module MedicinalFormRdf =
     static member frompack(Pack(pi,nii,dti)) =
       blank !!"nicebnf:hasPack"
         (optionlist {
-          return! pi >>= (Graph.frompackinfo >> Some)
-          return! nii >>= (Graph.fromnhsii >> Some)
-          return! dti >>= (Graph.fromdti >> Some)
+          yield! pi <!> Graph.frompackinfo |> unwrap
+          yield! nii <!> Graph.fromnhsii |> unwrap
+          yield! dti <!> Graph.fromdti |> unwrap
           yield a !!"nicebnf:Pack"})
 
     static member from (x:MedicinalProduct) =
@@ -446,7 +446,7 @@ module WoundManagementRdf =
       blank !!"nicebnf:hasWoundType"
         (optionlist {
             yield t |> dp "TypeOfWound"
-            return! d >>= (Graph.fromDescription >> Some)
+            yield! d <!> Graph.fromDescription |> unwrap
             yield! wes |> List.map Graph.fromExudate
           })
 
@@ -460,7 +460,7 @@ module WoundManagementRdf =
       blank !!"nicebnf:hasProductGroup"
         (optionlist {
             yield t |>  Graph.fromTitle
-            return! d >>= (Graph.fromDescription >> Some)
+            yield! d <!> Graph.fromDescription |> unwrap
             yield! pl |> List.map Graph.fromProduct
             })
 
@@ -644,7 +644,7 @@ module SectionsRdf =
         blank (Uri.has<Risk>()) (optionlist{
           yield a (Uri.TypeEntity<Risk>())
           yield title |> (string >> label)
-          return! note <!> n
+          yield! note <!> n |> unwrap
           yield! groups |> List.map group
           })
 

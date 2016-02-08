@@ -72,9 +72,13 @@ module prelude =
         member this.Yield(x:'a option) = match x with | Some x -> [x] | None -> [] //collapse None into an empty list
         member this.Yield(x:'a) = [x]
         member this.YieldFrom(x:'a list) = x
-        member this.ReturnFrom(x:'a list option) = match x with | Some x -> x | None -> []  //naughty but convenient
         member this.Combine (a,b) = List.concat [a;b]
         member this.Delay(f) = f()
+
+    let unwrap (x:'a list option) =
+      match x with
+        | Some x -> x
+        | None -> []
 
     open Microsoft.FSharp.Reflection
 

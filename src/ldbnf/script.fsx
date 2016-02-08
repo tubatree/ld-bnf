@@ -56,3 +56,7 @@ let rec stringify (node:XNode) =
              yield "\n\n"
            } |> build
     | _ -> ""
+
+open Bnf.DrugParser
+
+let bob = Drug.parse

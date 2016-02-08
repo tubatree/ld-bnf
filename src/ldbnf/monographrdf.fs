@@ -328,10 +328,10 @@ module DrugRdf =
         | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subtype x
         | NiceTechnologyAppraisals(fi,t,sp,s) ->
           optionlist {
-            yield sp >>= (Graph.fromsp >> Some)
-            return! s >>= (Graph.from >> Some)
+            yield sp <!> Graph.fromsp
+            yield! s <!> Graph.from |> unwrap
             yield t >>= Graph.fromti
-            yield fi >>= Graph.from} |> subtype x
+            yield fi >>= Graph.from } |> subtype x
 
     static member frommon (x:MonitoringRequirement) =
       match x with
