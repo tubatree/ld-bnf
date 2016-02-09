@@ -30,6 +30,46 @@ namespace splitter
         // <VTMIDDT>2008-08-08</VTMIDDT>
         //</VTM>
 
+        public class LookupInfo
+        {
+            public string BnfId { get; set; }
+            public string Type { get; set; }
+            public string Slug { get; set; }
+        }
+
+        static readonly Slugger Slugger = new Slugger();
+
+        public static LookupInfo GetInfo(XElement e)
+        {
+            var title = e.Element("title");
+            var bnfid = e.Attribute("id").Value;
+            var type = GetTopicType(e);
+            var slug = bnfid;
+            if (title != null && TypesToSlug.Contains(type))
+                slug = Slugger.For(title.Value,false);
+
+            return new LookupInfo
+            {
+                BnfId = bnfid,
+                Type = GetTopicType(e),
+                Slug = slug
+            };
+        }
+
+        static readonly List<string> TypesToSlug = new List<string>
+        {
+			"borderlineSubstance",
+			"woundManagement",
+			"treatmentSummary",
+			"drugClassifications",
+			"drug",
+			"drugClass",
+			"medicalDevice",
+			"medicalDeviceType",
+			"clinicalMedicinalProductInformation",
+			"interaction"
+        };
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -50,18 +90,36 @@ namespace splitter
             var doc = XDocument.Load(filename);
 
             var lookup = doc.XPathSelectElements("//topic[@id]")
-                .Select(e => new {id = e.Attribute("id").Value, type = GetTopicType(e)})
-                .ToDictionary(i => i.id, i => i.type);
+                .Select(GetInfo)
+                .ToDictionary(i => i.BnfId, i => i);
 
             foreach (var xref in doc.XPathSelectElements("//xref").ToList())
             {
                 var href = xref.Attribute("href");
                 if (href == null) continue;
                 var id = href.Value.Replace(".xml", "").Replace("#","");
-                if (lookup.ContainsKey(id))
-                    xref.SetAttributeValue("rel",lookup[id].ToLower());
+                
+                if (!lookup.ContainsKey(id)) continue;
+
+                //alter the href to point at the new id, stash the old one
+                xref.SetAttributeValue("rel", lookup[id].Type.ToLower());
+
+                if (!TypesToSlug.Contains(lookup[id].Type)) continue;
+                xref.SetAttributeValue("href", lookup[id].Type + "/" + lookup[id].Slug + ".xml");
+                xref.SetAttributeValue("bnfid",id);
             }
 
+            foreach (var topic in doc.XPathSelectElements("//topic").ToList())
+            {
+                var id = topic.Attribute("id").Value;
+                id = id.Replace(".xml", "").Replace("#", "");
+
+                if (!lookup.ContainsKey(id) || !TypesToSlug.Contains(lookup[id].Type)) continue;
+                //move the old id to a bnfid attribute, change the id to a slug
+                topic.SetAttributeValue("id", lookup[id].Slug);
+                topic.SetAttributeValue("bnfid", lookup[id].BnfId);
+            }
+            
             var fragments = ProcessWithId(doc.Root);
 
             foreach (var fragment in fragments.Where(process))
@@ -191,10 +249,10 @@ namespace splitter
         {
             if (!topic.HasAttributes) return "";
 
-            var id = topic.GetAttributeValue("id").Trim();
+            var bnfid = topic.GetAttributeValue("bnfid").Trim();
             var outputclass = topic.GetAttributeValue("outputclass").Trim();
 
-            if ((id == "" || id.StartsWith("PHP") || id.StartsWith("bnf_")) && outputclass != "")
+            if ((bnfid == "" || bnfid.StartsWith("PHP") || bnfid.StartsWith("bnf_")) && outputclass != "")
             {
                 var types = outputclass.Contains(" ") ? outputclass.Split(new[] { ' ' }) : new[] { outputclass };
                 if (types.Length > 1 && new[] { "about", "guidance" }.Contains(types[1]))
@@ -202,11 +260,11 @@ namespace splitter
 
                 return types[0];
             }
-            if (id.StartsWith("bnf_"))
+            if (bnfid.StartsWith("bnf_"))
             {
                 return "drugInterction";
             }
-            return "#" + id;
+            return "#" + bnfid;
         }
     }
 
