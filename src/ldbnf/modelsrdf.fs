@@ -279,10 +279,15 @@ module TreatmentSummaryRdf =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
     static member from (x:Summary) =
+      let se (s) =
+        match s with
+        | "electrolytes" -> "FluidAndElectrolytes"
+        | _ -> s |> firstupper
+
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
-        | Some rel -> objectProperty !!("nicebnf:has" + (rel)) (Uri.totopic(rel,id)) |> Some
+        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.totopic((se rel),id)) |> Some
         | None -> None
 
       optionlist {
@@ -577,7 +582,7 @@ module SectionsRdf =
                yield x.concentrations |> concentrations
                yield x.content |> content
                }
-      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string id))
+      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string(id)))
 
       [dr s]
        |> Assert.graph Graph.setupGraph
