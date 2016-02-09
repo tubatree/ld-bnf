@@ -510,10 +510,7 @@ module BorderlineSubstanceParser =
     x.String >>= (c >> Some)
 
   type UnitOfMeasure with
-    static member from (x:bsProvider.Ph) =
-      match x.String with
-        | Some(s) -> UnitOfMeasure s |> Some
-        | None -> None 
+    static member from (x:bsProvider.Ph) = x.String <!> UnitOfMeasure
 
   type PackInfo with
     static member from (x:bsProvider.P) =
@@ -787,7 +784,7 @@ module GenericParser =
       let ls = x.XElement |> ContentLink.from
       {id=Id(x.Id); title = Title(x.Title); content = c; links = ls}
 
-module Index = 
+module Index =
   type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>
 
   type Index = | Index of Id * Id list
@@ -923,7 +920,7 @@ module Sections =
           |> Array.toList
           |> List.collect (unravel tail)
 
-  type Electrolytes = {
+  type FluidAndElectrolytes = {
     id:Id
     title:Title option
     concentrations:ElectrolyteConcentrations
@@ -1055,7 +1052,7 @@ module Sections =
 
   type Incedence = | Incedence of IncedenceDuration * int
 
-  type IncedencesType = 
+  type IncedencesType =
    | BackgroundIncidences
    | AdditionalCasesOestrogenOnly
    | AdditionalCasesCombined
