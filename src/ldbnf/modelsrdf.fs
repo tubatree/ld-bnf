@@ -521,7 +521,7 @@ module SectionsRdf =
   let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
   type Graph with
-    static member fromElectrolytes (x:Electrolytes) =
+    static member fromFluidAndElectrolytes (x:FluidAndElectrolytes) =
       let concentrations (ElectrolyteConcentrations(t,npv,iis)) =
         let normalplasmavalues (x:NormalPlasmaValues) =
           let intravenous (x:IntravenousInfusion) =
@@ -577,7 +577,7 @@ module SectionsRdf =
                yield x.concentrations |> concentrations
                yield x.content |> content
                }
-      let dr = resource (Uri.fromtype<Electrolytes> (string id))
+      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string id))
 
       [dr s]
        |> Assert.graph Graph.setupGraph

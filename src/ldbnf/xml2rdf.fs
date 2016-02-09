@@ -123,7 +123,7 @@ module Iterator =
             | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
             | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
-            | "electrolytes" -> fi |> sectionProvider.Load |> Electrolytes.parse |> Graph.fromElectrolytes |> Done
+            | "electrolytes" -> fi |> sectionProvider.Load |> FluidAndElectrolytes.parse |> Graph.fromFluidAndElectrolytes |> Done
             | "parenteralFeeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromParenteralFeeding |> Done
             | "hrtRisks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromHrtRisks |> Done
             | "bloodMonitoringStrips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.fromBloodMonitoringStrips |> Done
