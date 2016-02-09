@@ -582,7 +582,7 @@ module SectionsRdf =
                yield x.concentrations |> concentrations
                yield x.content |> content
                }
-      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string(id)))
+      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string x.id))
 
       [dr s]
        |> Assert.graph Graph.setupGraph
