@@ -38,9 +38,7 @@ module RdfUris =
     static member totopic (rel, id:Id) = !!(sprintf "%s%s/%s" Uri.bnfsite (rel |> firstupper) (string id))
 
     static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o) s)
-    static member fromtype<'a> s =
-      let n = typeof<'a>.Name
-      !!(sprintf "%s%s/%s" Uri.bnfsite n s)
+    static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite typeof<'a>.Name s)
 
     static member has o = !!("nicebnf:has" + typename o)
     static member has<'a>() = !!("nicebnf:has" + typeof<'a>.Name)
@@ -76,7 +74,7 @@ module RdfUris =
     static member fromiwl (iw:InteractsWith) = !!(Uri.bnfsite + "interactions/" + iw.interactswith.url.Replace(".xml", ""))
     static member fromiw id (iw:InteractsWith) = !!(Uri.bnfsite + "interactions/" +  string id + "#" + string iw.id)
 
-    // ontology individuals
+    // Ontology Taxonomy individuals
     static member from (Route s) = !!(Uri.nicebnfClass + "Route#" + (NameUtils.niceCamelName s))
     static member fromr (s:string) = !!(Uri.nicebnfClass + "Route#" + (NameUtils.niceCamelName s))
     static member from (Indication s) = !!(Uri.nicebnfClass + "Indication#" + (NameUtils.niceCamelName s))
@@ -94,7 +92,10 @@ module RdfUris =
     static member fromfre (f:Frequency) = !!(Uri.nicebnfClass + "Frequency#" + (NameUtils.niceCamelName f.frequencyid))
     static member frombs (s:string) = !!(Uri.nicebnfClass + "BodySystem#" + (NameUtils.niceCamelName s))
 
-    // ontotlogy Classes
+    // Ontology Entity Classes
+    static member TypeEntity o = !!(Uri.nicebnf + (typename o))
+    static member TypeEntity<'a>() = !!(Uri.nicebnf + typeof<'a>.Name)
+
     static member DrugEntity = !!(Uri.nicebnf + "Drug")
     static member ConstituentDrugEntity = !!(Uri.nicebnf + "ConstituentDrug")
     static member DrugClassEntity = !!(Uri.nicebnf + "DrugClass")
@@ -112,6 +113,11 @@ module RdfUris =
     static member InteractionListEntity = !!(Uri.nicebnf + "InteractionList")
     static member DosageEntity = !!(Uri.nicebnf + "Dosage")
 
+    // Ontology Taxonomy Classes
+
+    static member TypeEntityClass o = !!(Uri.nicebnfClass + (typename o))
+    static member TypeEntityClass<'a>() = !!(Uri.nicebnfClass + typeof<'a>.Name)
+
     static member ClassificationEntity = !!(Uri.nicebnfClass + "Classification")
     static member RouteEntity = !!(Uri.nicebnfClass + "Route")
     static member DomainOfEffectEntity = !!(Uri.nicebnfClass + "DomainOfEffect")
@@ -124,9 +130,6 @@ module RdfUris =
     static member ContraindicationEntity = !!(Uri.nicebnfClass + "Contraindication")
     static member CautionEntity = !!(Uri.nicebnfClass + "Caution")
     static member BodySystemEntity = !!(Uri.nicebnfClass + "BodySystem")
-
-    static member TypeEntity o = !!(Uri.nicebnf + (typename o).ToLower())
-    static member TypeEntity<'a>() = !!(Uri.nicebnf + typeof<'a>.Name.ToLower())
 
 module Rdf =
   open prelude

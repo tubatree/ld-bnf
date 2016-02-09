@@ -96,7 +96,7 @@ module Iterator =
   type Work<'a,'b> =
     | Done of 'a
     | NotDone of 'b
- 
+
   let tottl f t (fi:StreamReader) =
     let content n = fi |> genericProvider.Load |> Generic.parse |> (Graph.fromGeneric n) |> Done
     match t with
@@ -123,14 +123,14 @@ module Iterator =
             | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
             | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
-            | "electrolytes" -> fi |> sectionProvider.Load |> Electrolytes.parse |> Graph.fromelectrolytes |> Done
-            | "parenteralFeeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromparentalfeeding |> Done
-            | "hrtRisks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromhrtrisks |> Done
-            | "bloodMonitoringStrips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.frommnitoringstrips |> Done
-            | "antiTuberculosisTreatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromtbtreaments |> Done
-            | "helicobacterPyloriRegimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromhelio |> Done
-            | "malariaProphylaxisRegimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.frommalaria |> Done
-            | "intramuscularAdrenalineEmergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromadrenaline |> Done
+            | "electrolytes" -> fi |> sectionProvider.Load |> Electrolytes.parse |> Graph.fromElectrolytes |> Done
+            | "parenteralFeeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromParenteralFeeding |> Done
+            | "hrtRisks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromHrtRisks |> Done
+            | "bloodMonitoringStrips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.fromBloodMonitoringStrips |> Done
+            | "antiTuberculosisTreatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromAntiTuberculosisTreatments |> Done
+            | "helicobacterPyloriRegimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromHelicobacterPyloriRegimens |> Done
+            | "malariaProphylaxisRegimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.fromMalariaProphylaxisRegimens |> Done
+            | "intramuscularAdrenalineEmergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromIntramuscularAdrenalineEmergency |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
   let writettl graph path t =
@@ -163,7 +163,7 @@ module Iterator =
         | NotDone s -> NotDone s
 
   let apply o f =
-    try 
+    try
       match (generate f) with
        | Done(text,fn,t) ->
            let dir = (o ++ t)
@@ -194,7 +194,7 @@ module Iterator =
 
 
   [<EntryPoint>]
-  let main args = 
+  let main args =
     let parser = ArgumentParser.Create<Arguments>()
     let results = parser.ParseCommandLine(args,errorHandler=ProcessExiter())
     let xmlDirectory = results.GetResult <@ XmlDirectory @>
