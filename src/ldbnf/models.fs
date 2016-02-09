@@ -126,22 +126,16 @@ module MedicinalFormParser =
     x.String >>= (c >> Some)
 
   type UnitOfMeasure with
-    static member from (x:drugProvider.Ph) =
-      match x.String with
-        | Some(s) -> UnitOfMeasure s |> Some
-        | None -> None
+    static member from (x:drugProvider.Ph) = x.String <!> UnitOfMeasure
 
   type LegalCategory with
     static member from (x:drugProvider.Ph) =
-      match x.String with
-        | Some(s) -> match s with
-                     | "POM" -> Some(POM)
-                     | "P" -> Some(P)
-                     | "GSL" -> Some(GSL)
-                     | _ ->
-                       printfn "Unknown LegalCatgory %s" s
-                       None
-        | None -> None
+      let tolc = function
+                 | "POM" -> Some POM
+                 | "P" -> Some P
+                 | "GSL" -> Some GSL
+                 | _ -> None
+      x.String >>= tolc
 
   type PackInfo with
     static member from (x:drugProvider.P) =
@@ -186,9 +180,9 @@ module MedicinalFormParser =
     static member from (x:drugProvider.Ul) =
       x.Lis |> Array.map Pack.from
     static member from (x:drugProvider.Li) =
-      let pi = x.Ps |> Array.tryPick (withoco "packInfo") >>= (PackInfo.from >> Some)
-      let nio = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") >>= (NhsIndicativeInfo.from >> Some)
-      let dti = x.Ps |> Array.tryPick (withoco "drugTariffInfo") >>= (DrugTariffInfo.from >> Some)
+      let pi = x.Ps |> Array.tryPick (withoco "packInfo") <!> PackInfo.from
+      let nio = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") <!> NhsIndicativeInfo.from
+      let dti = x.Ps |> Array.tryPick (withoco "drugTariffInfo") <!> DrugTariffInfo.from
       Pack(pi,nio,dti)
 
   type MedicinalProduct with
@@ -196,13 +190,11 @@ module MedicinalFormParser =
       let t = match x.Title with
                | Some t -> MedicinalProductTitle.from t
                | None -> failwith "MedicinalProduct must have a Title"
-      let str = x.Ps |> Array.choose (withoco "strengthOfActiveIngredient")
-                     |> Array.map StrengthOfActiveIngredient
+      let str = x.Ps |> Array.choose (withoco "strengthOfActiveIngredient" >> Option.map StrengthOfActiveIngredient)
                      |> Array.toList
-      let con = x.Ps |> Array.choose (withoco "controlledDrugs")
-                     |> Array.map ControlledDrug
+      let con = x.Ps |> Array.choose (withoco "controlledDrugs" >> Option.map ControlledDrug)
                      |> Array.toList
-      let ps = x.Uls |> Array.map Pack.from |> Array.collect id |> Array.toList
+      let ps = x.Uls |> Array.collect Pack.from |> Array.toList
       let a = match x.Data with
               | Some d -> Ampid.from d
               | None -> failwith "MedicinalProduct must have an Ampid"
@@ -223,25 +215,18 @@ module MedicinalFormParser =
               | Some(v) -> Some(Title v)
               | None -> None
       let cals = x |> sections
-               |> Array.choose (withoco "cautionaryAndAdvisoryLabels")
-               |> Array.map (CautionaryAdvisoryLabels.from >> Some)
-               |> Array.tryPick id
+                   |> Array.tryPick (withoco "cautionaryAndAdvisoryLabels" >> Option.map CautionaryAdvisoryLabels.from)
       let mps = x |> sections
-               |> Array.choose (withoco "medicinalProduct")
-               |> Array.map MedicinalProduct.from
-               |> Array.toList
+                  |> Array.choose (withoco "medicinalProduct" >> Option.map MedicinalProduct.from)
+                  |> Array.toList
       let ex = x |> sections
-               |> Array.choose (withoco "excipients")
-               |> Array.map (Excipients >> Some)
-               |> Array.tryPick id
+                 |> Array.tryPick (withoco "excipients" >> Option.map Excipients)
       let el = x |> sections
-               |> Array.choose (withoco "electrolytes")
-               |> Array.map (Electrolytes >> Some)
-               |> Array.tryPick id
+                 |> Array.tryPick (withoco "electrolytes" >> Option.map Electrolytes)
       let cmpis = x |> sections
-               |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
-               |> Array.collect ClinicalMedicinalProductInformation.list
-               |> Array.toList
+                    |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
+                    |> Array.collect ClinicalMedicinalProductInformation.list
+                    |> Array.toList
       {id = Id(x.Id); title = t; excipients=ex; electrolytes=el; cautionaryAdvisoryLabels = cals; medicinalProducts = mps; cmpis = cmpis;}
 
 module MedicalDeviceType =
