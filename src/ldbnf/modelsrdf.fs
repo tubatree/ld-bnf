@@ -43,7 +43,7 @@ module BorderlineSubstanceTaxonomyRdf =
       [dr s]
       |> Assert.graph (empty())
 
-module PublicationRdf = 
+module PublicationRdf =
   open Bnf.Publication
 
   type Graph with
@@ -65,7 +65,7 @@ module PublicationRdf =
       [dr s]
       |> Assert.graph (empty())
 
-module GenericRdf = 
+module GenericRdf =
   open Bnf.Generic
 
   type Graph with
@@ -97,7 +97,7 @@ module GenericRdf =
       [dr s]
       |> Assert.graph (empty())
 
-module IndexRdf = 
+module IndexRdf =
   open Bnf.Index
 
   type Graph with
@@ -279,10 +279,15 @@ module TreatmentSummaryRdf =
       objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
 
     static member from (x:Summary) =
+      let se (s) =
+        match s with
+        | "electrolytes" -> "FluidAndElectrolytes"
+        | _ -> s |> firstupper
+
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
-        | Some rel -> objectProperty !!("nicebnf:has" + (rel)) (Uri.totopic(rel,id)) |> Some
+        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.totopic((se rel),id)) |> Some
         | None -> None
 
       optionlist {
@@ -521,7 +526,7 @@ module SectionsRdf =
   let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
   type Graph with
-    static member fromelectrolytes (x:Electrolytes) =
+    static member fromFluidAndElectrolytes (x:FluidAndElectrolytes) =
       let concentrations (ElectrolyteConcentrations(t,npv,iis)) =
         let normalplasmavalues (x:NormalPlasmaValues) =
           let intravenous (x:IntravenousInfusion) =
@@ -577,14 +582,14 @@ module SectionsRdf =
                yield x.concentrations |> concentrations
                yield x.content |> content
                }
-      let dr = resource (Uri.fromtype<Electrolytes> (string id))
+      let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string x.id))
 
       [dr s]
        |> Assert.graph Graph.setupGraph
 
 
   type Graph with
-    static member fromparentalfeeding (ParenteralFeeding(id,en,pl)) =
+    static member fromParenteralFeeding (ParenteralFeeding(id,en,pl)) =
       let notes (EnergyNotes(sd)) = sd |> dita
       let pack (Pack(sd)) =
         blank (Uri.has<Pack>()) (optionlist {
@@ -619,7 +624,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member fromhrtrisks (HrtRisks(id,note,risks)) =
+    static member fromHrtRisks (HrtRisks(id,note,risks)) =
       let n (Note(sd)) = sd |> dita
 
       let risk (Risk(title,note,groups)) =
@@ -662,7 +667,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member frommnitoringstrips (BloodMonitoringStrips(id,title,strips)) =
+    static member fromBloodMonitoringStrips (BloodMonitoringStrips(id,title,strips)) =
       let strip (x:BloodMonitoringStrip) =
         let compatibleStrip (x:CompatibleStrip) =
           blank (Uri.has x) (optionlist{
@@ -693,7 +698,7 @@ module SectionsRdf =
 
 
   type Graph with
-    static member fromtbtreaments (AntiTuberculosisTreatments(id,title,therapies)) =
+    static member fromAntiTuberculosisTreatments (AntiTuberculosisTreatments(id,title,therapies)) =
       let therapy (x:Therapy) =
         let patientgroup (PatientGroup(agegroup,dosage)) =
           //swap to have the dosage with a group
@@ -732,7 +737,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member fromhelio (HelicobacterPyloriRegimens(id,title,regimens)) =
+    static member fromHelicobacterPyloriRegimens (HelicobacterPyloriRegimens(id,title,regimens)) =
       let regimen (Regimen(title,drugs,course)) =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
         let drug d =
@@ -762,7 +767,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member frommalaria (MalariaProphylaxisRegimens(id,title,regimens)) =
+    static member fromMalariaProphylaxisRegimens (MalariaProphylaxisRegimens(id,title,regimens)) =
       let regimen (MalariaProphylaxisRegimen(country,risks)) =
         let risk (x:MalariaRisk) =
           blank (Uri.has x) (optionlist {
@@ -785,7 +790,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member fromadrenaline (IntramuscularAdrenalineEmergency(id,title,statements)) =
+    static member fromIntramuscularAdrenalineEmergency (IntramuscularAdrenalineEmergency(id,title,statements)) =
       let statement (x:DoseStatement) =
         blank (Uri.has x) (optionlist{
           yield a (Uri.TypeEntity x)

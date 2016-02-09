@@ -66,11 +66,11 @@ module MedicinalForm =
 
   type DrugTariffPrice = | DrugTariffPrice of decimal
 
-  type DrugTariffInfo = | DrugTariffInfo of Option<DrugTarrif> * Option<PriceText> * Option<DrugTariffPrice>
+  type DrugTariffInfo = | DrugTariffInfo of DrugTarrif option * PriceText option * DrugTariffPrice option
 
   type ControlledDrug = | ControlledDrug of drugProvider.P
 
-  type Pack = | Pack of Option<PackInfo> * Option<NhsIndicativeInfo> * Option<DrugTariffInfo>
+  type Pack = | Pack of PackInfo option * NhsIndicativeInfo option * DrugTariffInfo option
 
   type ClinicalMedicinalProductInformation = | ClinicalMedicinalProductInformation of Id
 
@@ -102,46 +102,37 @@ module MedicinalFormParser =
   let inline withoco n x =
     let oc = (^a : (member Outputclass : Option<string>) x)
     match oc with
-      | Some s ->
-        if (s = n) then Some (x) else None
+      | Some s when s = n -> Some x
       | _ -> None
 
   type CautionaryAdvisoryLabel with
     static member from (x:drugProvider.P) =
-      let ln = x.Phs.[0].Number >>= (LabelNumber >> Some)
+      let ln = x.Phs.[0].Number <!> LabelNumber
       CautionaryAdvisoryLabel(ln,x)
 
   type CautionaryAdvisoryLabels with
     static member from (x:drugProvider.Section) =
       let ls = x.Ps |> Array.map CautionaryAdvisoryLabel.from
       let t = match x.Title with
-                | Some t -> t.Value >>= (CautionaryAndAdvisoryLabelsTitle >> Some)
+                | Some t -> t.Value <!> CautionaryAndAdvisoryLabelsTitle
                 | None -> failwith "CautionaryAdvisoryLabels must have a Title"
       CautionaryAdvisoryLabels(t,ls)
 
-  let fromphn c (x:drugProvider.Ph) =
-    x.Number >>= (c >> Some)
+  let fromphn c (x:drugProvider.Ph) = x.Number <!> c
 
-  let fromphs c (x:drugProvider.Ph) =
-    x.String >>= (c >> Some)
+  let fromphs c (x:drugProvider.Ph) = x.String <!> c
 
   type UnitOfMeasure with
-    static member from (x:drugProvider.Ph) =
-      match x.String with
-        | Some(s) -> UnitOfMeasure s |> Some
-        | None -> None
+    static member from (x:drugProvider.Ph) = x.String <!> UnitOfMeasure
 
   type LegalCategory with
     static member from (x:drugProvider.Ph) =
-      match x.String with
-        | Some(s) -> match s with
-                     | "POM" -> Some(POM)
-                     | "P" -> Some(P)
-                     | "GSL" -> Some(GSL)
-                     | _ ->
-                       printfn "Unknown LegalCatgory %s" s
-                       None
-        | None -> None
+      let tolc = function
+                 | "POM" -> Some POM
+                 | "P" -> Some P
+                 | "GSL" -> Some GSL
+                 | _ -> None
+      x.String >>= tolc
 
   type PackInfo with
     static member from (x:drugProvider.P) =
@@ -186,9 +177,9 @@ module MedicinalFormParser =
     static member from (x:drugProvider.Ul) =
       x.Lis |> Array.map Pack.from
     static member from (x:drugProvider.Li) =
-      let pi = x.Ps |> Array.tryPick (withoco "packInfo") >>= (PackInfo.from >> Some)
-      let nio = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") >>= (NhsIndicativeInfo.from >> Some)
-      let dti = x.Ps |> Array.tryPick (withoco "drugTariffInfo") >>= (DrugTariffInfo.from >> Some)
+      let pi = x.Ps |> Array.tryPick (withoco "packInfo") <!> PackInfo.from
+      let nio = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") <!> NhsIndicativeInfo.from
+      let dti = x.Ps |> Array.tryPick (withoco "drugTariffInfo") <!> DrugTariffInfo.from
       Pack(pi,nio,dti)
 
   type MedicinalProduct with
@@ -196,13 +187,11 @@ module MedicinalFormParser =
       let t = match x.Title with
                | Some t -> MedicinalProductTitle.from t
                | None -> failwith "MedicinalProduct must have a Title"
-      let str = x.Ps |> Array.choose (withoco "strengthOfActiveIngredient")
-                     |> Array.map StrengthOfActiveIngredient
+      let str = x.Ps |> Array.choose (withoco "strengthOfActiveIngredient" >> Option.map StrengthOfActiveIngredient)
                      |> Array.toList
-      let con = x.Ps |> Array.choose (withoco "controlledDrugs")
-                     |> Array.map ControlledDrug
+      let con = x.Ps |> Array.choose (withoco "controlledDrugs" >> Option.map ControlledDrug)
                      |> Array.toList
-      let ps = x.Uls |> Array.map Pack.from |> Array.collect id |> Array.toList
+      let ps = x.Uls |> Array.collect Pack.from |> Array.toList
       let a = match x.Data with
               | Some d -> Ampid.from d
               | None -> failwith "MedicinalProduct must have an Ampid"
@@ -219,29 +208,21 @@ module MedicinalFormParser =
         | Some (b) -> b.Sections
         | _ -> failwith "body is required"
 
-      let t = match x.Title.Value with
-              | Some(v) -> Some(Title v)
-              | None -> None
+      let t = x.Title.Value <!> Title
+
       let cals = x |> sections
-               |> Array.choose (withoco "cautionaryAndAdvisoryLabels")
-               |> Array.map (CautionaryAdvisoryLabels.from >> Some)
-               |> Array.tryPick id
+                   |> Array.tryPick (withoco "cautionaryAndAdvisoryLabels" >> Option.map CautionaryAdvisoryLabels.from)
       let mps = x |> sections
-               |> Array.choose (withoco "medicinalProduct")
-               |> Array.map MedicinalProduct.from
-               |> Array.toList
+                  |> Array.choose (withoco "medicinalProduct" >> Option.map MedicinalProduct.from)
+                  |> Array.toList
       let ex = x |> sections
-               |> Array.choose (withoco "excipients")
-               |> Array.map (Excipients >> Some)
-               |> Array.tryPick id
+                 |> Array.tryPick (withoco "excipients" >> Option.map Excipients)
       let el = x |> sections
-               |> Array.choose (withoco "electrolytes")
-               |> Array.map (Electrolytes >> Some)
-               |> Array.tryPick id
+                 |> Array.tryPick (withoco "electrolytes" >> Option.map Electrolytes)
       let cmpis = x |> sections
-               |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
-               |> Array.collect ClinicalMedicinalProductInformation.list
-               |> Array.toList
+                    |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
+                    |> Array.collect ClinicalMedicinalProductInformation.list
+                    |> Array.toList
       {id = Id(x.Id); title = t; excipients=ex; electrolytes=el; cautionaryAdvisoryLabels = cals; medicinalProducts = mps; cmpis = cmpis;}
 
 module MedicalDeviceType =
@@ -283,10 +264,10 @@ module MedicalDeviceTypeParser =
     c(Id(x.Id),sd.[0])
 
   type DeviceDescription with
-    static member from  = firstsd DeviceDescription >> Some
+    static member from  = firstsd DeviceDescription
 
   type ComplicanceStandards with
-    static member from = firstsd ComplicanceStandards >> Some
+    static member from = firstsd ComplicanceStandards
 
   type ClinicalMedicalDeviceInformationGroup with
     static member list (x:drugProvider.Topic) =
@@ -301,8 +282,8 @@ module MedicalDeviceTypeParser =
                  |> Array.map MedicinalProduct.from
                  |> Array.toList
 
-      let des = x.Topics |> Array.tryPick (withoc "deviceDescription") >>= DeviceDescription.from
-      let com = x.Topics |> Array.tryPick (withoc "complianceStandards") >>= ComplicanceStandards.from
+      let des = x.Topics |> Array.tryPick (withoc "deviceDescription") <!> DeviceDescription.from
+      let com = x.Topics |> Array.tryPick (withoc "complianceStandards") <!> ComplicanceStandards.from
 
       {id=Id(x.Id); title=Title(x.Title.Value.Value); sections=mss; products=mps; description = des; complicance = com;}
 
@@ -348,10 +329,10 @@ module TreatmentSummaryParser =
   let withname = (|HasName|_|)
 
   type Doi with
-    static member from (x:tsProvider.Data) = Doi(x.Value) |> Some
+    static member from (x:tsProvider.Data) = Doi(x.Value)
 
   type BodySystem with
-    static member from (x:tsProvider.Data) = BodySystem(x.Value) |> Some
+    static member from (x:tsProvider.Data) = BodySystem(x.Value)
 
   type Content with
     static member from (x:tsProvider.Section) =
@@ -364,15 +345,14 @@ module TreatmentSummaryParser =
     static member from (x:tsProvider.Topic) =
       let ls = x.XElement |> ContentLink.from
       let t = Title(x.Title)
-      let d = x.Body.Datas |> Array.choose (withname "doi") |> Array.tryPick Doi.from
-      let bs = x.Body.Datas |> Array.choose (withname "bodySystem") |> Array.tryPick BodySystem.from
+      let d = x.Body.Datas |> Array.tryPick (withname "doi" >> Option.map Doi.from)
+      let bs = x.Body.Datas |> Array.tryPick (withname "bodySystem" >> Option.map BodySystem.from)
       let c = x.Body.Sections |> Array.map Content.from |> Array.toList
-    
+
       Id(x.Id),{title = t; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
 
   type TreatmentSummary with
-    static member from c (i,s) =
-      TreatmentSummary(i, c s)
+    static member from c (i,s) = TreatmentSummary(i, c s)
 
   type TreatmentSummary with
     static member parse (x:tsProvider.Topic) =
@@ -405,8 +385,7 @@ module DrugClassificationParser =
 
   type DrugClassifications with
     static member parse (x:dcProvider.Topic) =
-      let cs = x.Body.Sections |> Array.map Classification.from |> Array.toList
-      DrugClassifications(cs)
+      x.Body.Sections |> Array.map Classification.from |> Array.toList |> DrugClassifications
 
 module BorderlineSubstance =
 
@@ -502,30 +481,6 @@ module BorderlineSubstance =
 module BorderlineSubstanceParser =
   open BorderlineSubstance
 
-  let inline withoc n x =
-    let oc = (^a : (member Outputclass : string) x)
-    if (oc = n) then Some (x)
-    else None
-
-  let inline withoco n x =
-    let oc = (^a : (member Outputclass : Option<string>) x)
-    match oc with
-      | Some s ->
-        if (s = n) then Some (x) else None
-      | _ -> None
-
-  let inline (|HasOutputClass|_|) (n:string) x =
-    let oc = (^a : (member Outputclass : string) x)
-    if oc = n then Some(x)
-    else None
-
-  let inline (|HasOutputClasso|_|) (n:string) x =
-    let oc = (^a : (member Outputclass : Option<string>) x)
-    match oc with
-      | Some s -> if s = n then Some(x)
-                  else None
-      | None -> None
-
   type IntroductionNote with
     static member from (x:bsProvider.P) =
       match x with
@@ -555,31 +510,26 @@ module BorderlineSubstanceParser =
     x.String >>= (c >> Some)
 
   type UnitOfMeasure with
-    static member from (x:bsProvider.Ph) =
-      match x.String with
-        | Some(s) -> UnitOfMeasure s |> Some
-        | None -> None
-
- 
+    static member from (x:bsProvider.Ph) = x.String <!> UnitOfMeasure
 
   type PackInfo with
     static member from (x:bsProvider.P) =
-      let ps = x.Phs |> Array.tryPick (withoc "packSize") >>= (fromphn PackSize)
-      let uom = x.Phs |> Array.tryPick (withoc "unitOfMeasure") >>= UnitOfMeasure.from
-      let acbs = x.Phs |> Array.tryPick (withoc "acbs") >>= (fromphs PackAcbs)
+      let ps = x.Phs |> Array.tryPick (hasOutputclass "packSize") >>= (fromphn PackSize)
+      let uom = x.Phs |> Array.tryPick (hasOutputclass "unitOfMeasure") >>= UnitOfMeasure.from
+      let acbs = x.Phs |> Array.tryPick (hasOutputclass "acbs") >>= (fromphs PackAcbs)
       PackInfo(ps,uom,acbs)
 
   type NhsIndicativeInfo with
     static member from (x:bsProvider.P) =
-      let nhsi = x.Phs |> Array.tryPick (withoc "nhsIndicative") >>= (fromphs NhsIndicative)
-      let pt = x.Phs |> Array.tryPick (withoc "priceText") >>= (fromphs PriceText)
-      let nhsip = x.Phs |> Array.tryPick (withoc "nhsIndicativePrice") >>= (fromphn NhsIndicativePrice)
+      let nhsi = x.Phs |> Array.tryPick (hasOutputclass "nhsIndicative") >>= (fromphs NhsIndicative)
+      let pt = x.Phs |> Array.tryPick (hasOutputclass "priceText") >>= (fromphs PriceText)
+      let nhsip = x.Phs |> Array.tryPick (hasOutputclass "nhsIndicativePrice") >>= (fromphn NhsIndicativePrice)
       NhsIndicativeInfo(nhsi,pt,nhsip)
 
   type PackSizePriceTariff with
     static member from (x:bsProvider.Li) =
-      let pi = x.Ps |> Array.tryPick (withoco "packInfo") >>= (PackInfo.from >> Some)
-      let nhs = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") >>= (NhsIndicativeInfo.from >> Some)
+      let pi = x.Ps |> Array.tryPick (hasOutputclasso "packInfo") >>= (PackInfo.from >> Some)
+      let nhs = x.Ps |> Array.tryPick (hasOutputclasso "nhsIndicativeInfo") >>= (NhsIndicativeInfo.from >> Some)
       PackSizePriceTariff(pi,nhs)
 
   type BorderlineSubstancePrep with
@@ -611,7 +561,7 @@ module BorderlineSubstanceParser =
       let ds = match x with
                | HasOutputClass "details" s ->
                  s.Ps |> Array.choose Detail.from |> Array.toList
-                 | _ -> []
+               | _ -> []
       let bsps = match x.Sectiondiv with
                   | Some sd ->  sd.Sectiondivs |> Array.map BorderlineSubstancePrep.from |> Array.toList
                   | None -> []
@@ -665,8 +615,8 @@ module InteracitonParser =
       let t = x.Title
       let p,l = match x.Body.P with
                 | Some p ->
-                  let ds = p.Phs |> Array.filter (fun p -> p.Outputclass = "drug")
-                  let l = match ds.[1].Xref with
+                  let ds = p.Phs |> Array.pick (hasOutputclass "drug")
+                  let l = match ds.Xref with
                           | Some x -> {url=x.Href;label=x.Value}
                           | None -> failwith "cant find the link"
                   p,l
@@ -686,7 +636,7 @@ module InteracitonParser =
 
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
       let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      let n = x.Body.Note >>= (note >> Some)
+      let n = x.Body.Note <!> note
       InteractionList(Id(x.Id),x.Title,is,ids, n)
 
 
@@ -735,7 +685,7 @@ module WoundManagementParser =
   let desc = Array.tryPick (hasOutputclasso "description" >> Option.map Description)
 
   type Title with
-    static member from (x:wmProvider.P) = x.Value >>= (Title >> Some)
+    static member from (x:wmProvider.P) = x.Value <!> Title
 
   type WoundManagementLink with
     static member from (x:wmProvider.Xref) =
@@ -750,7 +700,7 @@ module WoundManagementParser =
       WoundExudate(r,ls)
 
   type TypeOfWound with
-    static member from (x:wmProvider.P) = x.Value >>= (TypeOfWound >> Some)
+    static member from (x:wmProvider.P) = x.Value <!> TypeOfWound
 
   type WoundType with
     static member list (x:wmProvider.Section) =
@@ -772,10 +722,7 @@ module WoundManagementParser =
         | _ -> failwith "missing part of the product"
 
     static member from (x:wmProvider.Sectiondiv) =
-      let p = x.Ps |> Array.tryPick (hasOutputclasso "product")
-      match p with
-        | Some p -> p |> Product.from |> Some
-        | None -> None
+      x.Ps |> Array.tryPick (hasOutputclasso "product") <!> Product.from
 
     static member list (x:wmProvider.Sectiondiv[]) =
       x |> Array.choose Product.from |> Array.toList
@@ -827,10 +774,7 @@ module GenericParser =
 
   type Content with
     static member from (x:genericProvider.Section) =
-      let ta = match x.Outputclass with
-               | Some x -> TargetAudience x |> Some
-               | None -> None
-      Content(x,ta)
+      Content(x,x.Outputclass <!> TargetAudience)
 
   type Generic with
     static member parse (x:genericProvider.Topic) =
@@ -840,7 +784,7 @@ module GenericParser =
       let ls = x.XElement |> ContentLink.from
       {id=Id(x.Id); title = Title(x.Title); content = c; links = ls}
 
-module Index = 
+module Index =
   type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>
 
   type Index = | Index of Id * Id list
@@ -976,7 +920,7 @@ module Sections =
           |> Array.toList
           |> List.collect (unravel tail)
 
-  type Electrolytes = {
+  type FluidAndElectrolytes = {
     id:Id
     title:Title option
     concentrations:ElectrolyteConcentrations
@@ -1108,7 +1052,7 @@ module Sections =
 
   type Incedence = | Incedence of IncedenceDuration * int
 
-  type IncedencesType = 
+  type IncedencesType =
    | BackgroundIncidences
    | AdditionalCasesOestrogenOnly
    | AdditionalCasesCombined
