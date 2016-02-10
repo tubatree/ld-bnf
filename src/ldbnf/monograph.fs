@@ -315,10 +315,10 @@ module DrugParser =
         Paragraph(x.Value |? "",Some x)
 
     type Paragraphs with
-        static member from (x:Option<drugProvider.Sectiondiv>) =
+        static member from (x:drugProvider.Sectiondiv option) =
           match x with
             | Some(x) -> Paragraphs.fromsd x
-            | None -> Paragraphs Array.empty<Paragraph>
+            | None -> Paragraphs [||]
         static member fromsd (x:drugProvider.Sectiondiv) =
           x.Ps |> Seq.map Paragraph.from |> Paragraphs
         static member froms (x:drugProvider.Section) =

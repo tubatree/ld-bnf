@@ -247,13 +247,15 @@ module TreatmentSummaryRdf =
     static member from (x:TreatmentSummary) =
       let isa  (TreatmentSummary (_,x)) =
         match x with
-          | Generic _ ->  a Uri.TreatmentSummaryEntity
-          | _ -> a !!(Uri.nicebnf + (toString x))
+          | Generic _ ->  [a Uri.TreatmentSummaryEntity]
+          | About _ | Guidance _ -> [a !!(Uri.nicebnf + (toString x))]
+          | _ -> [a !!(Uri.nicebnf + (toString x))
+                  a Uri.TreatmentSummaryEntity]
 
       let s = optionlist {
-               yield isa x}
+               yield! isa x}
 
-      let p = Graph.fromts x
+      let p = Graph.fromts (Uri.from x) x
       let dr r = resource (Uri.from x) r
       [dr s
        dr p] |> Assert.graph (empty())
@@ -275,10 +277,11 @@ module TreatmentSummaryRdf =
          yield ta >>= (Graph.fromta >> Some)
          yield! s |> dita})
 
-    static member from (x:ContentLink) =
-      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+    static member fromlink url (x:ContentLink) =
+      one !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+        [objectProperty !!"nicebnf:isLinkedFrom" url] //create a back link at the same time
 
-    static member from (x:Summary) =
+    static member fromsummary url (x:Summary) =
       let se (s) =
         match s with
         | "electrolytes" -> "FluidAndElectrolytes"
@@ -294,20 +297,20 @@ module TreatmentSummaryRdf =
         yield Graph.fromti x.title
         yield x.doi >>= (Graph.fromdoi >> Some)
         yield x.bodySystem >>= (Graph.frombs >> Some)
-        yield! x.links |> Seq.map Graph.from |> Seq.toList
+        yield! x.links |> Seq.map (Graph.fromlink url) |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent
         yield! x.sublinks |> List.choose xr
         }
 
-    static member fromts (TreatmentSummary (_,x)) =
+    static member fromts url (TreatmentSummary (_,x)) =
       match x with
-        | ComparativeInformation s -> Graph.from s
-        | ManagementOfConditions s -> Graph.from s
-        | MedicalEmergenciesBodySystems s -> Graph.from s
-        | TreatmentOfBodySystems s -> Graph.from s
-        | About s -> Graph.from s
-        | Guidance s -> Graph.from s
-        | Generic s -> Graph.from s
+        | ComparativeInformation s -> Graph.fromsummary url s
+        | ManagementOfConditions s -> Graph.fromsummary url s
+        | MedicalEmergenciesBodySystems s -> Graph.fromsummary url s
+        | TreatmentOfBodySystems s -> Graph.fromsummary url s
+        | About s -> Graph.fromsummary url s
+        | Guidance s -> Graph.fromsummary url s
+        | Generic s -> Graph.fromsummary url s
 
 module MedicinalFormRdf =
   open Bnf.Drug
