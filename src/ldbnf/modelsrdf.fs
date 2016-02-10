@@ -401,8 +401,7 @@ module MedicinalFormRdf =
         (optionlist {
           yield! pi <!> Graph.frompackinfo |> unwrap
           yield! nii <!> Graph.fromnhsii |> unwrap
-          yield! dti <!> Graph.fromdti |> unwrap
-          yield a !!"nicebnf:Pack"})
+          yield! dti <!> Graph.fromdti |> unwrap})
 
     static member from (x:MedicinalProduct) =
       one !!"nicebnf:hasMedicinalProduct" (Uri.from x)
@@ -531,7 +530,7 @@ module SectionsRdf =
         let normalplasmavalues (x:NormalPlasmaValues) =
           let intravenous (x:IntravenousInfusion) =
             blank (Uri.has x) (optionlist {
-              yield a (Uri.TypeEntity x)
+              //yield a (Uri.TypeEntity x)
               yield x.title |> (string >> label)
               yield x.sodium <!> (dp "sodium")
               yield x.potassium <!> (dp "potassium")
@@ -542,7 +541,7 @@ module SectionsRdf =
               })
 
           blank (Uri.has x) (optionlist {
-            yield a (Uri.TypeEntity x)
+            //yield a (Uri.TypeEntity x)
             yield x.title |> (string >> label)
             yield x.sodium |> (dp "sodium")
             yield x.potassium |> (dp "potassium")
@@ -553,7 +552,7 @@ module SectionsRdf =
             })
 
         blank (Uri.has<ElectrolyteConcentrations>()) (optionlist {
-            yield a (Uri.TypeEntity<ElectrolyteConcentrations>())
+            //yield a (Uri.TypeEntity<ElectrolyteConcentrations>())
             yield t |> (string >> label)
             yield npv |> normalplasmavalues
           })
@@ -561,7 +560,7 @@ module SectionsRdf =
       let content (ElectrolyteContent(title,fluids)) =
         let fluid (x:TypeOfFluid) =
           blank (Uri.has x) (optionlist {
-            yield a (Uri.TypeEntity x)
+            //yield a (Uri.TypeEntity x)
             yield x.title |> (string >> label)
             yield x.hydrogen <!> (dp "hydrogen")
             yield x.sodium <!> (dp "sodium")
@@ -571,7 +570,7 @@ module SectionsRdf =
             })
 
         blank (Uri.has<ElectrolyteContent>()) (optionlist{
-          yield a (Uri.TypeEntity<ElectrolyteContent>())
+          //yield a (Uri.TypeEntity<ElectrolyteContent>())
           yield title |> (string >> label)
           yield! fluids |> List.map fluid
           })
@@ -593,13 +592,13 @@ module SectionsRdf =
       let notes (EnergyNotes(sd)) = sd |> dita
       let pack (Pack(sd)) =
         blank (Uri.has<Pack>()) (optionlist {
-          yield a (Uri.TypeEntity<Pack>())
+          //yield a (Uri.TypeEntity<Pack>())
           yield! sd |> dita
           })
 
       let preparation (x:Preparation) =
         blank (Uri.has x) (optionlist{
-          yield a (Uri.TypeEntity x)
+          //yield a (Uri.TypeEntity x)
           yield x.title |> (string >> label)
           yield x.manufacturer |> (dp "manufacturer")
           yield x.nitrogen <!> (dp "nitrogen")
@@ -632,26 +631,26 @@ module SectionsRdf =
           let incedences (Incedences(title,typ,incedencelist)) =
             let incedence (Incedence(duration,count)) =
               blank (Uri.has<Incedence>()) (optionlist{
-                yield a (Uri.TypeEntity<Incedence>())
+                //yield a (Uri.TypeEntity<Incedence>())
                 yield duration |> (string >> dp "duration")
                 yield count |> (string >> dp "count")
                 })
 
             blank (Uri.has<Incedences>()) (optionlist{
-              yield a (Uri.TypeEntity<Incedences>())
+              //yield a (Uri.TypeEntity<Incedences>())
               yield title |> (string >> label)
               yield typ |> (toString >> dp "type")
               yield! incedencelist |> List.map incedence
               })
 
           blank (Uri.has<Group>()) (optionlist{
-            yield a (Uri.TypeEntity<Group>())
+            //yield a (Uri.TypeEntity<Group>())
             yield ar |> (string >> dp "AgeRange")
             yield! incedenceslist |> List.map incedences
             })
 
         blank (Uri.has<Risk>()) (optionlist{
-          yield a (Uri.TypeEntity<Risk>())
+          //yield a (Uri.TypeEntity<Risk>())
           yield title |> (string >> label)
           yield! note <!> n |> unwrap
           yield! groups |> List.map group
@@ -671,14 +670,14 @@ module SectionsRdf =
       let strip (x:BloodMonitoringStrip) =
         let compatibleStrip (x:CompatibleStrip) =
           blank (Uri.has x) (optionlist{
-            yield a (Uri.TypeEntity x)
+            //yield a (Uri.TypeEntity x)
             yield x.name |> label
             yield x.packSize |> (dp "packSize")
             yield x.price |> (string >> dp "price")
             })
 
         blank (Uri.has x) (optionlist{
-          yield a (Uri.TypeEntity x)
+          //yield a (Uri.TypeEntity x)
           yield! x.meter |> dita
           yield x.typeOfMonitoring |> (dp "typeOfMonitoring")
           yield x.sensitivityRange |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasSensitivityRange"))
@@ -713,13 +712,13 @@ module SectionsRdf =
           let dir (Dosage(p)) = p |> dita
 
           blank (Uri.has<Dosage>()) (optionlist{
-            yield a (Uri.TypeEntity<Dosage>())
+            //yield a (Uri.TypeEntity<Dosage>())
             yield agegroup |> grp
             yield! dosage |> dir
             })
 
         blank (Uri.has x) (optionlist{
-          yield a (Uri.TypeEntity x)
+          //yield a (Uri.TypeEntity x)
           yield x.supervision |> (toString >> dp "supervision")
           yield x.therapyType |> (toString >> dp "therapyType")
           yield x.title |> (string >> label)
@@ -751,7 +750,7 @@ module SectionsRdf =
                    | Antibacterial(s,Quantity(q))
                      -> blank !!"nicebnf:hasAntibacterial" (build s q)
         blank (Uri.has<Regimen>()) (optionlist{
-          yield a (Uri.TypeEntity<Regimen>())
+          //yield a (Uri.TypeEntity<Regimen>())
           yield title |> (string >> label)
           yield course |> crse
           yield! drugs |> List.map drug
@@ -771,12 +770,12 @@ module SectionsRdf =
       let regimen (MalariaProphylaxisRegimen(country,risks)) =
         let risk (x:MalariaRisk) =
           blank (Uri.has x) (optionlist {
-            yield a (Uri.TypeEntity x)
+            //yield a (Uri.TypeEntity x)
             yield x.content |> (dp "content")
             yield x.regimen |> (dp "regimen")
             })
         blank (Uri.has<MalariaProphylaxisRegimen>()) (optionlist{
-          yield a (Uri.TypeEntity<MalariaProphylaxisRegimen>())
+          //yield a (Uri.TypeEntity<MalariaProphylaxisRegimen>())
           yield country |> (string >> dp "country")
           yield! risks |> List.map risk
           })
@@ -793,7 +792,7 @@ module SectionsRdf =
     static member fromIntramuscularAdrenalineEmergency (IntramuscularAdrenalineEmergency(id,title,statements)) =
       let statement (x:DoseStatement) =
         blank (Uri.has x) (optionlist{
-          yield a (Uri.TypeEntity x)
+          //yield a (Uri.TypeEntity x)
           yield x.age |> (dp "age")
           yield x.dose |> (dp "dose")
           yield x.volume |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasVolume"))
