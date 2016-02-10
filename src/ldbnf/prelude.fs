@@ -133,3 +133,6 @@ module prelude =
 
     let firstupper (s:string) =
       s.Substring(0,1).ToUpper() + s.Substring(1);
+
+    let splitCamelCase (s:string)=
+      System.Text.RegularExpressions.Regex.Replace(s, "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))", "$1-").ToLower()

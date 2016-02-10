@@ -184,7 +184,6 @@ module DrugRdf =
                   a Uri.PatientGroupEntity]
           yield pg.Dosage |> label
           yield! pg.dosageXml |> dita
-          yield a Uri.DosageEntity
           yield r >>= (Graph.fromsp >> Some)})
       pgs |> Seq.map patientGrp
 

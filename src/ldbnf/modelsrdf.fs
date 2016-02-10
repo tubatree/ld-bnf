@@ -81,7 +81,7 @@ module GenericRdf =
           yield! s |> dita})
 
     static member from (x:ContentLink) =
-      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.id))
 
     static member fromGeneric n (x:Generic) =
       let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
@@ -278,7 +278,7 @@ module TreatmentSummaryRdf =
          yield! s |> dita})
 
     static member fromlink url (x:ContentLink) =
-      one !!"nicebnf:hasLink" (Uri.totopic (x.rel,x.id))
+      one !!"nicebnf:hasLink" (Uri.totopic (x.id))
         [objectProperty !!"nicebnf:isLinkedFrom" url] //create a back link at the same time
 
     static member fromsummary url (x:Summary) =
@@ -290,13 +290,13 @@ module TreatmentSummaryRdf =
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
-        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.totopic((se rel),id)) |> Some
+        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.totopic id) |> Some
         | None -> None
 
       optionlist {
         yield Graph.fromti x.title
-        yield x.doi >>= (Graph.fromdoi >> Some)
-        yield x.bodySystem >>= (Graph.frombs >> Some)
+        yield x.doi <!> Graph.fromdoi
+        yield x.bodySystem <!> Graph.frombs
         yield! x.links |> Seq.map (Graph.fromlink url) |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent
         yield! x.sublinks |> List.choose xr
