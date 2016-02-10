@@ -16,6 +16,14 @@ namespace splitter
         public string Type { get; set; }
     }
 
+    public static class StringExtensions
+    {
+        public static string SplitCamel(this string s)
+        {
+            return System.Text.RegularExpressions.Regex.Replace(s, "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))", "$1-").ToLower();
+        }
+    }
+
     class Program
     {
         //<VTM>
@@ -38,6 +46,7 @@ namespace splitter
         }
 
         static readonly Slugger Slugger = new Slugger();
+
 
         public static LookupInfo GetInfo(XElement e)
         {
@@ -105,7 +114,7 @@ namespace splitter
                 xref.SetAttributeValue("rel", lookup[id].Type.ToLower());
 
                 if (!TypesToSlug.Contains(lookup[id].Type)) continue;
-                xref.SetAttributeValue("href", lookup[id].Type + "/" + lookup[id].Slug + ".xml");
+                xref.SetAttributeValue("href", lookup[id].Type.SplitCamel() + "/" + lookup[id].Slug + ".xml");
                 xref.SetAttributeValue("bnfid",id);
             }
 
@@ -124,7 +133,7 @@ namespace splitter
 
             foreach (var fragment in fragments.Where(process))
             {
-                var typeDir = Path.Combine(outputdir, fragment.Type.Replace("#",""));
+                var typeDir = Path.Combine(outputdir, fragment.Type.Replace("#", "")).SplitCamel();
                 if (!Directory.Exists(typeDir))
                     Directory.CreateDirectory(typeDir);
                 var path = Path.Combine(typeDir, fragment.Id + ".xml");
