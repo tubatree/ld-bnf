@@ -133,7 +133,12 @@ namespace splitter
 
             foreach (var fragment in fragments.Where(process))
             {
-                var typeDir = Path.Combine(outputdir, fragment.Type.Replace("#", "")).SplitCamel();
+                var type = fragment.Type.Replace("#", "");
+                if (TypesToSlug.Contains(type))
+                    type = type.SplitCamel();
+
+                var typeDir = Path.Combine(outputdir, type);
+                
                 if (!Directory.Exists(typeDir))
                     Directory.CreateDirectory(typeDir);
                 var path = Path.Combine(typeDir, fragment.Id + ".xml");
