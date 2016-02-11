@@ -263,10 +263,11 @@ module TreatmentSummaryRdf =
     static member fromti (Title s) = s |> label
     static member fromdoi (Shared.Doi s)=
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
-    static member frombs (BodySystem x) =
+    static member frombs url (BodySystem x) =
         one !!"nicebnf:hasBodySystem" (Uri.frombs x) (optionlist {
           yield a Uri.BodySystemEntity
           yield dataProperty !!"rdfs:label" (x^^xsd.string)
+          yield objectProperty !!"nicebnf:isBodySystemOf" url
           })
 
     static member fromta (TargetAudience s) =
@@ -296,7 +297,7 @@ module TreatmentSummaryRdf =
       optionlist {
         yield Graph.fromti x.title
         yield x.doi <!> Graph.fromdoi
-        yield x.bodySystem <!> Graph.frombs
+        yield x.bodySystem <!> (Graph.frombs url)
         yield! x.links |> Seq.map (Graph.fromlink url) |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent
         yield! x.sublinks |> List.choose xr

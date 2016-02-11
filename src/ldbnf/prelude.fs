@@ -112,7 +112,7 @@ module prelude =
     let inline outputclass arg =
         ( ^a : (member Outputclass : string) arg) 
 
-    let overlap s (o:string) x = 
+    let overlap s (o:string) x =
       if (o.Split [|' '|] |> Array.exists (fun  c -> c = s)) then Some(x)
       else None
 

@@ -86,7 +86,7 @@ module DrugRdf =
 
       [dr s
        dr sdoe
-       dr (x.classifications |> Seq.map Graph.fromcl |> Seq.toList |> List.collect id)
+       dr (x.classifications |> Seq.map (Graph.fromcl (Uri.from x)) |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)
@@ -99,14 +99,19 @@ module DrugRdf =
       one !!"nicebnf:inheritsFromClass" (Uri.fromdc c) [a Uri.DrugClassEntity]
 
     //the label for this is in another part of the feed so will be created elsewhere
-    static member fromcl (Classification(id,ifcs,typ)) =
+    static member fromcl drugurl (Classification(id,ifcs,typ)) =
       let pname = function
                       | Primary -> !!"nicebnf:hasPrimaryClassification"
                       | Secondary -> !!"nicebnf:hasSecondaryClassification"
 
       let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
-      let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc) [(a Uri.ClassificationEntity)]
-      cl :: ifs
+
+      let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc)
+                   [(a Uri.ClassificationEntity)]
+      let c = one !!"nicebnf:hasClassification" (Classification(id,ifcs,typ) |> Uri.fromc)
+                   [(a Uri.ClassificationEntity)
+                    objectProperty !!"nicebnf:isClassificationOf" drugurl]
+      c :: cl :: ifs
 
     static member fromil (i:InteractionLink) =
       one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionListEntity]
