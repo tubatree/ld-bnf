@@ -102,14 +102,14 @@ module Iterator =
     match t with
             | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Done
             | "medicinalForm" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Done
-            | "treatmentSummary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
-            | "drugClassifications" -> fi |> dcProvider.Load |> DrugClassifications.parse |> Graph.from |> Done
-            | "drugClass" -> fi |> drugProvider.Load |> DrugClass.parse |> Graph.from |> Done
-            | "clinicalMedicinalProductInformation" -> fi |> drugProvider.Load |> CMPI.parse |> Graph.from |> Done
-            | "borderlineSubstance" -> fi |> bsProvider.Load |> BorderlineSubstance.parse |> Graph.from |> Done
+            | "treatment-summary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
+            | "drug-classifications" -> fi |> dcProvider.Load |> DrugClassifications.parse |> Graph.from |> Done
+            | "drug-class" -> fi |> drugProvider.Load |> DrugClass.parse |> Graph.from |> Done
+            | "clinical-medicinal-product-information" -> fi |> drugProvider.Load |> CMPI.parse |> Graph.from |> Done
+            | "borderline-substance" -> fi |> bsProvider.Load |> BorderlineSubstance.parse |> Graph.from |> Done
             | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Done
-            | "medicalDeviceType" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
-            | "woundManagement" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
+            | "medical-device-type" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
+            | "wound-management" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
             | "PHP101868" -> content "DentalPractitionersFormulary"
             | "PHP101869" -> content "NursePrescribersFormulary"
             | "borderlineSubstanceAcbs" -> content "BorderlineSubstanceAcbs"
@@ -119,7 +119,7 @@ module Iterator =
             | "labels" -> content "Labels"
             | "cautionaryAndAdvisoryLabels" -> content "CautionaryAndAdvisoryLabels"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
-            | "medicalDevice" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
+            | "medical-device" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
             | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
             | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
