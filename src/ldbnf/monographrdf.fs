@@ -230,7 +230,7 @@ module DrugRdf =
     static member fromavs (AdditionalFormsStatement(p)) = p |> dita
 
     static member frommfl (MedicinalForm(l)) =
-      one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + "medicinalform/" + l.Url)) [l.Title |> label]
+      one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + l.Url)) [l.Title |> label]
 
     static member fromcsc (AllergyAndCrossSensitivityContraindications (t,sp,s)) = Graph.fromthree (t,sp,s)
 
