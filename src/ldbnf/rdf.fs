@@ -37,8 +37,8 @@ module RdfUris =
 
     static member totopic (id:Id) = !!(sprintf "%s%s" Uri.bnfsite (string id))
 
-    static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o) s)
-    static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite typeof<'a>.Name s)
+    static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o |> splitCamelCase) s)
+    static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite (typeof<'a>.Name |> splitCamelCase) s)
 
     static member has o = !!("nicebnf:has" + typename o)
     static member has<'a>() = !!("nicebnf:has" + typeof<'a>.Name)
