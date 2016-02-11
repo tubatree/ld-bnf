@@ -5,7 +5,13 @@ open prelude
 module Shared =
   type Id =
     | Id of string
-    override __.ToString () = match __ with | Id x -> x.Replace(".xml","").Replace("#","")
+    override __.ToString () = match __ with
+                               | Id x ->
+                                  let parts = x.Split [|'/'|]
+                                  match parts with
+                                   | [|id|] -> id.Replace(".xml","").Replace("#","")
+                                   | [|_;id|] -> id.Replace(".xml","").Replace("#","")
+                                   | _ -> failwith "to may parts"
 
   type Doi =
     | Doi of string
