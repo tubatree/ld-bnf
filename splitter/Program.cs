@@ -43,6 +43,7 @@ namespace splitter
             public string BnfId { get; set; }
             public string Type { get; set; }
             public string Slug { get; set; }
+            public string Href { get; set; }
         }
 
         static readonly Slugger Slugger = new Slugger();
@@ -51,9 +52,10 @@ namespace splitter
         public static LookupInfo GetInfo(XElement e)
         {
             var title = e.Element("title");
-            var bnfid = e.Attribute("id").Value;
+            var bnfid = e.Attribute("id").Value.Replace(".xml", "").Replace("#", "");
             var type = GetTopicType(e);
             var slug = bnfid;
+
             if (title != null && TypesToSlug.Contains(type))
                 slug = Slugger.For(title.Value,false);
 
@@ -61,7 +63,8 @@ namespace splitter
             {
                 BnfId = bnfid,
                 Type = GetTopicType(e),
-                Slug = slug
+                Slug = slug,
+                Href = type.SplitCamel() + "/" + slug + ".xml"
             };
         }
 
@@ -76,7 +79,7 @@ namespace splitter
 			"medicalDevice",
 			"medicalDeviceType",
 			"clinicalMedicinalProductInformation",
-			"interaction"
+			"interaction",
         };
 
         static void Main(string[] args)
@@ -98,7 +101,7 @@ namespace splitter
 
             var doc = XDocument.Load(filename);
 
-            var lookup = doc.XPathSelectElements("//topic[@id]")
+            var lookup = doc.XPathSelectElements("//topic[@id] | //section[@id]")
                 .Select(GetInfo)
                 .ToDictionary(i => i.BnfId, i => i);
 
@@ -112,19 +115,17 @@ namespace splitter
 
                 //alter the href to point at the new id, stash the old one
                 xref.SetAttributeValue("rel", lookup[id].Type.ToLower());
-
-                if (!TypesToSlug.Contains(lookup[id].Type)) continue;
-                xref.SetAttributeValue("href", lookup[id].Type.SplitCamel() + "/" + lookup[id].Slug + ".xml");
-                xref.SetAttributeValue("bnfid",id);
+                xref.SetAttributeValue("href", lookup[id].Href);
+                xref.SetAttributeValue("bnfid", lookup[id].BnfId);
             }
 
-            foreach (var topic in doc.XPathSelectElements("//topic").ToList())
+            foreach (var topic in doc.XPathSelectElements("//topic | //section").ToList())
             {
-                var id = topic.Attribute("id").Value;
-                id = id.Replace(".xml", "").Replace("#", "");
+                var idatt = topic.Attribute("id");
+                if (idatt == null) continue;
+             
+                var id = idatt.Value.Replace(".xml", "").Replace("#", "");
 
-                if (!lookup.ContainsKey(id) || !TypesToSlug.Contains(lookup[id].Type)) continue;
-                //move the old id to a bnfid attribute, change the id to a slug
                 topic.SetAttributeValue("id", lookup[id].Slug);
                 topic.SetAttributeValue("bnfid", lookup[id].BnfId);
             }
@@ -134,8 +135,7 @@ namespace splitter
             foreach (var fragment in fragments.Where(process))
             {
                 var type = fragment.Type.Replace("#", "");
-                if (TypesToSlug.Contains(type))
-                    type = type.SplitCamel();
+                type = type.SplitCamel();
 
                 var typeDir = Path.Combine(outputdir, type);
                 
@@ -174,6 +174,13 @@ namespace splitter
                         FindAllAddressableChildren(e));
         }
 
+        static string CreateLink(XElement child)
+        {
+            var file = DeriveId(child) + ".xml";
+            var type = GetTopicType(child).SplitCamel();
+            return type + "/" + file;
+        }
+
         static XElement CreateLinks(XElement element)
         {
             var copy = new XElement(element);
@@ -182,7 +189,7 @@ namespace splitter
             {
                 var title = addressableChild.Descendants("title").Select(e => e.Value).FirstOrDefault() ?? "";
                 addressableChild.ReplaceWith(new XElement("xref", title,
-                    new XAttribute("href", DeriveId(addressableChild) + ".xml"),
+                    new XAttribute("href", CreateLink(addressableChild)),
                     new XAttribute("rel",
                         addressableChild.Attribute("outputclass") != null
                             ? addressableChild.Attribute("outputclass").Value
