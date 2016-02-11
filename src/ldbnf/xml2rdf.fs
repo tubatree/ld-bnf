@@ -101,7 +101,7 @@ module Iterator =
     let content n = fi |> genericProvider.Load |> Generic.parse |> (Graph.fromGeneric n) |> Done
     match t with
             | "drug" -> fi |> drugProvider.Load |> Drug.parse |> Graph.from |> Done
-            | "medicinalForm" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Done
+            | "medicinal-form" -> fi |> drugProvider.Load |> MedicinalForm.parse |> Graph.from |> Done
             | "treatment-summary" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "drug-classifications" -> fi |> dcProvider.Load |> DrugClassifications.parse |> Graph.from |> Done
             | "drug-class" -> fi |> drugProvider.Load |> DrugClass.parse |> Graph.from |> Done
@@ -110,27 +110,27 @@ module Iterator =
             | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Done
             | "medical-device-type" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
             | "wound-management" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
-            | "PHP101868" -> content "DentalPractitionersFormulary"
-            | "PHP101869" -> content "NursePrescribersFormulary"
-            | "borderlineSubstanceAcbs" -> content "BorderlineSubstanceAcbs"
+            | "php101868" -> content "DentalPractitionersFormulary"
+            | "php101869" -> content "NursePrescribersFormulary"
+            | "borderline-substance-acbs" -> content "BorderlineSubstanceAcbs"
             | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "interactions" -> content "InteractionsIntroduction"
             | "labels" -> content "Labels"
-            | "cautionaryAndAdvisoryLabels" -> content "CautionaryAndAdvisoryLabels"
+            | "cautionary-and-advisory-labels" -> content "CautionaryAndAdvisoryLabels"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | "medical-device" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
-            | "borderlineSubstanceTaxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
-            | "medicalDevices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
-            | "borderlineSubstances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
+            | "borderline-substance-taxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
+            | "medical-devices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
+            | "borderline-substances" -> fi |> indexProvider.Load |> Index.parse |> Graph.fromindex "BorderlineSubstance" |> Done
             | "electrolytes" -> fi |> sectionProvider.Load |> FluidAndElectrolytes.parse |> Graph.fromFluidAndElectrolytes |> Done
-            | "parenteralFeeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromParenteralFeeding |> Done
-            | "hrtRisks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromHrtRisks |> Done
-            | "bloodMonitoringStrips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.fromBloodMonitoringStrips |> Done
-            | "antiTuberculosisTreatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromAntiTuberculosisTreatments |> Done
-            | "helicobacterPyloriRegimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromHelicobacterPyloriRegimens |> Done
-            | "malariaProphylaxisRegimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.fromMalariaProphylaxisRegimens |> Done
-            | "intramuscularAdrenalineEmergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromIntramuscularAdrenalineEmergency |> Done
+            | "parenteral-feeding" -> fi |> sectionProvider.Load |> ParenteralFeeding.parse |> Graph.fromParenteralFeeding |> Done
+            | "hrt-risks" -> fi |> sectionProvider.Load |> HrtRisks.parse |> Graph.fromHrtRisks |> Done
+            | "blood-monitoring-strips" -> fi |> sectionProvider.Load |> BloodMonitoringStrips.parse |> Graph.fromBloodMonitoringStrips |> Done
+            | "anti-tuberculosis-treatments" -> fi |> sectionProvider.Load |> AntiTuberculosisTreatments.parse |> Graph.fromAntiTuberculosisTreatments |> Done
+            | "helicobacter-pylori-regimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromHelicobacterPyloriRegimens |> Done
+            | "malaria-prophylaxis-regimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.fromMalariaProphylaxisRegimens |> Done
+            | "intramuscular-adrenaline-emergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromIntramuscularAdrenalineEmergency |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
   let writettl graph path t =
