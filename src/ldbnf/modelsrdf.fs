@@ -157,7 +157,7 @@ module InteractionRdf =
 module BorderlineSubstanceRdf =
   open Bnf.BorderlineSubstance
 
-  let inline dpo n x = x >>= (string >> xsd.string >> (dataProperty !!("nicebnf:has" + n)) >> Some)
+  let inline dpo n x = x <!> (string >> xsd.string >> (dataProperty !!("nicebnf:has" + n)))
 
   type Graph with
     static member from (x:BorderlineSubstance) =
@@ -167,8 +167,8 @@ module BorderlineSubstanceRdf =
                 yield a Uri.BorderlineSubstanceEntity
                 yield x.title |> (l >> label)
                 yield x.title |> (string >> title)
-                yield x.category |> (string >> Uri.frombst >> (objectProperty !!"nicebnf:hasCategory"))
-                yield x.intro >>= (string >> xsd.string >> (dataProperty !!"nicebnf:hasIntroductoryNote") >> Some)}
+                yield x.category |> (string >> Uri.frombst >> objectProperty !!"nicebnf:hasCategory")
+                yield x.intro <!> (string >> xsd.string >> dataProperty !!"nicebnf:hasIntroductoryNote")}
 
       let ds = x.details |> List.map Graph.fromdetails
 
