@@ -16,7 +16,7 @@ module Shared =
   type Href =
     | Href of string
     override __.ToString() = match __ with
-                              | Href x -> x
+                              | Href x -> x.Replace(".xml","").Replace("#","")
 
   type Doi =
     | Doi of string
