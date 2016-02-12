@@ -17,6 +17,8 @@ module Shared =
     | Href of string
     override __.ToString() = match __ with
                               | Href x -> x.Replace(".xml","").Replace("#","")
+    member __.ToId() =  match __ with
+                              | Href x -> Id(x)
 
   type Doi =
     | Doi of string
@@ -82,7 +84,7 @@ module Drug =
     type Paragraphs = | Paragraphs of Paragraph seq
     type Title = | Title of Paragraph
 
-    type Link = {Title:string; Url:string}
+    type Link = {Title:string; Href:Href}
 
     type InteractionLink = | InteractionLink of Link
 
@@ -342,7 +344,7 @@ module DrugParser =
 
     type Link with
       static member from (r:drugProvider.Xref) =
-        {Url = r.Href; Title = r.Value |? ""}
+        {Href = Href r.Href; Title = r.Value |? ""}
       static member from (x:drugProvider.P) =
         x.Xrefs |> Array.map Link.from |> Array.tryPick Some
       static member from (x:drugProvider.Sectiondiv) =
@@ -366,13 +368,13 @@ module DrugParser =
       extractSpecificity x, x
 
     type InteractionLink with
-        static member from (x:drugProvider.Xref) = InteractionLink {Url = x.Href.Replace(".xml", "") ; Title = x.Value |? ""}
+        static member from (x:drugProvider.Xref) = InteractionLink {Href = Href x.Href ; Title = x.Value |? ""}
 
     type ConstituentDrug with
-        static member from (x:drugProvider.Xref)= ConstituentDrug {Url = x.Href.Replace(".xml", ""); Title = x.Value |? ""}
+        static member from (x:drugProvider.Xref)= ConstituentDrug {Href = Href x.Href; Title = x.Value |? ""}
 
     type MedicinalForm with
-        static member from (x:drugProvider.Xref) = MedicinalForm {Url = x.Href.Replace(".xml", ""); Title = x.Value |? ""}
+        static member from (x:drugProvider.Xref) = MedicinalForm {Href = Href x.Href; Title = x.Value |? ""}
 
     type PatientGroup with
       static member from (x:drugProvider.Li) =
@@ -744,14 +746,14 @@ module DrugParser =
     //build function to create the funding identifier
     type FundingIdentifier with
       static member from l (x:drugProvider.P) =
-        let fi v = FundingIdentifier {Title=v;Url=l}
+        let fi v = FundingIdentifier {Title=v;Href=l}
         x.Value >>= (fi >> Some)
 
     type FundingDecision with
       static member from (x:drugProvider.Sectiondiv) =
         let buildTa (s1:drugProvider.Sectiondiv) =
           let fid = function
-            | HasOutputClasso "fundingIdentifier" p -> p |> FundingIdentifier.from s1.Xref.Value.Value.Value
+            | HasOutputClasso "fundingIdentifier" p -> p |> FundingIdentifier.from (Href s1.Xref.Value.Value.Value)
             | _ -> None
           let fi = s1.Ps |> Array.tryPick fid
           match s1.Sectiondivs with

@@ -585,7 +585,7 @@ module BorderlineSubstanceParser =
 module Interaction =
   type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true, SampleIsList=true>
 
-  type Link = {url: string; label: string;}
+  type Link = {href: Href; label: string;}
 
   type NoteType = | Note
 
@@ -617,7 +617,7 @@ module InteracitonParser =
                 | Some p ->
                   let ds = p.Phs |> Array.pick (hasOutputclass "drug")
                   let l = match ds.Xref with
-                          | Some x -> {url=x.Href;label=x.Value}
+                          | Some x -> {href= Href x.Href;label=x.Value}
                           | None -> failwith "cant find the link"
                   p,l
                 | None -> failwith "cant find paragraph"

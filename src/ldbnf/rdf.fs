@@ -46,7 +46,7 @@ module RdfUris =
 
     // BNF website entity identifiers
     static member from (x:Drug) = !!(Uri.bnfsite + "drug/" + string x.id )
-    static member from (ConstituentDrug (l)) = !!(Uri.bnfsite + "drug/" + l.Url.Replace(".xml",""))
+    static member from (ConstituentDrug (l)) = !!(Uri.bnfsite + "drug/" + (l.Href.ToId() |> string))
     static member fromsec (x:Drug) (Id i) = !!(Uri.bnfsite + "drug/" + string x.id + "#" + i)
     static member from (x:DrugClass) = !!(Uri.bnfsite + "drug-class/" + string x.id )
     static member fromdc (s:string) = !!(Uri.bnfsite + "drug-class/"  + s)
@@ -74,10 +74,11 @@ module RdfUris =
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medical-device-type/" + string x.id)
     static member frommdt (x:Id) = !!(Uri.bnfsite + "medical-device-type/" + string x)
     static member fromcmdig (x:MedicalDeviceType) id = !!(Uri.bnfsite + "medical-device-type/" + string x.id + "#" + string id)
-    static member from (InteractionLink (l)) = !!(Uri.bnfsite + string l.Url)
-    static member fromil id = !!(Uri.bnfsite + "interactions/" + string id)
-    static member fromiwl (iw:InteractsWith) = !!(Uri.bnfsite + "interactions/" + iw.interactswith.url.Replace(".xml", ""))
-    static member fromiw id (iw:InteractsWith) = !!(Uri.bnfsite + "interactions/" +  string id + "#" + string iw.id)
+
+    static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interaction/" + (l.Href.ToId() |> string ))
+    static member fromil id = !!(Uri.bnfsite + "interaction/" + string id)
+    static member fromiwl (iw:InteractsWith) = !!(Uri.bnfsite + "interaction/" + (iw.interactswith.href.ToId() |> string))
+    static member fromiw id (iw:InteractsWith) = !!(Uri.bnfsite + "interaction/" +  string id + "#" + string iw.id)
 
     // Ontology Taxonomy individuals
     static member from (Route s) = !!(Uri.nicebnfClass + "Route#" + (NameUtils.niceCamelName s))
@@ -87,7 +88,7 @@ module RdfUris =
     static member from (TheraputicIndication (s,_)) = !!(Uri.nicebnfClass + "Indication#" + (NameUtils.niceCamelName s))
     static member fromc (Classification (Id s,_,_)) = !!(Uri.nicebnfClass + "Classification#" + s)
     static member froms (s:string) = !!(Uri.nicebnfClass + "Specificity#" + (NameUtils.niceCamelName s))
-    static member fromfi (FundingIdentifier s) = !!("http://" + s.Url.Replace(".xml",""))
+    static member fromfi (FundingIdentifier s) = !!("http://" + (string s.Href))
     static member fromgrp (s:string) = !!(Uri.nicebnfClass + "PatientGroup#" + (NameUtils.niceCamelName s))
     static member from (TheraputicUse (s,_)) = !!(Uri.nicebnfClass + "TheraputicUse#" + (NameUtils.niceCamelName s))
     static member from (DomainOfEffect (s,_,_)) = !!(Uri.nicebnfClass + "DomainOfEffect#" + (NameUtils.niceCamelName (s.Value.Trim())))
@@ -114,7 +115,7 @@ module RdfUris =
     static member MedicalDeviceEntity = !!(Uri.nicebnf + "MedicalDevice")
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnf + "ClinicalMedicalDeviceInformationGroup")
     static member WoundManagementEntity = !!(Uri.nicebnf + "WoundManagement")
-    static member InteractionEntity = !!(Uri.nicebnf + "Interaction")
+    static member InteractionEntity = !!(Uri.nicebnf + "InteractionMessage")
     static member InteractionListEntity = !!(Uri.nicebnf + "InteractionList")
     static member DosageEntity = !!(Uri.nicebnf + "Dosage")
 
