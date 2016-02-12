@@ -648,8 +648,6 @@ module WoundManagement =
     | Title of string
     override __.ToString () = match __ with | Title x -> x
 
-  type General = | General of wmProvider.Section
-
   type TypeOfWound = | TypeOfWound of string
 
   type Description = | Description of wmProvider.Sectiondiv
@@ -672,7 +670,7 @@ module WoundManagement =
   type WoundManagement = {
     id: Id;
     title: Title;
-    general: General option;
+    general: wmProvider.Section option;
     dressingChoices: WoundType list;
     links: WoundManagementLink list;
     //products: Product list; //need to check if they exist in isolation
@@ -739,7 +737,7 @@ module WoundManagementParser =
   type WoundManagement with
     static member parse (x:wmProvider.Topic) =
       let t = Title x.Title
-      let gen = x.Body.Sections |> Array.tryPick (hasOutputclass "general" >> Option.map General)
+      let gen = x.Body.Sections |> Array.tryPick (hasOutputclass "general")
       let dcs = x.Body.Sections
                 |> Array.choose (hasOutputclass "dressingChoices")
                 |> Array.collect WoundType.list

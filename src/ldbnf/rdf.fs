@@ -36,6 +36,7 @@ module RdfUris =
     static member bnfsite = "http://bnf.nice.org.uk/"
 
     static member totopic (id:Id) = !!(sprintf "%s%s" Uri.bnfsite (string id))
+    static member totopic (href:Href) = !!(sprintf "%s%s" Uri.bnfsite (string href))
 
     static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o |> splitCamelCase) s)
     static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite (typeof<'a>.Name |> splitCamelCase) s)
@@ -64,7 +65,11 @@ module RdfUris =
     static member from (x:WoundManagementLink) = !!(Uri.bnfsite + "wound-management/" + string x.id )
     static member fromwm (WoundManagmentId(id)) = !!(Uri.bnfsite + "wound-management/" + string id )
     static member from (x:Product) = !!(Uri.bnfsite + "wound-management-product" + string x.ampid)
-    static member from (x:TreatmentSummary) = match x with | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatment-summary/" + string i)
+    static member from (x:TreatmentSummary) =
+      match x with
+      | TreatmentSummary (i,About(_)) -> !!(Uri.bnfsite + "about/" + string i)
+      | TreatmentSummary (i,Guidance(_)) -> !!(Uri.bnfsite + "about/" + string i)
+      | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatment-summary/" + string i)
     static member frommd (x:Id) = !!(Uri.bnfsite + "medical-device/" + string x)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medical-device-type/" + string x.id)
     static member frommdt (x:Id) = !!(Uri.bnfsite + "medical-device-type/" + string x)

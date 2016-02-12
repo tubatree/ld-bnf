@@ -81,7 +81,7 @@ module GenericRdf =
           yield! s |> dita})
 
     static member from (x:ContentLink) =
-      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.id))
+      objectProperty !!"nicebnf:hasLink" (Uri.totopic (x.href))
 
     static member fromGeneric n (x:Generic) =
       let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
@@ -279,7 +279,7 @@ module TreatmentSummaryRdf =
          yield! s |> dita})
 
     static member fromlink url (x:ContentLink) =
-      one !!"nicebnf:hasLink" (Uri.totopic (x.id))
+      one !!"nicebnf:hasLink" (Uri.totopic (x.href))
         [objectProperty !!"nicebnf:isLinkedFrom" url] //create a back link at the same time
 
     static member fromsummary url (x:Summary) =
@@ -433,7 +433,7 @@ module WoundManagementRdf =
     static member from (x:WoundManagement) =
       let s = optionlist {
                yield a Uri.WoundManagementEntity
-               yield x.general >>= (string >> (dp "General") >> Some)
+               yield x.general <!> (string >> dp "General")
                yield x.title |> Graph.fromTitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup

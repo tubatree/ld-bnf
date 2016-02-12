@@ -5,13 +5,18 @@ open prelude
 module Shared =
   type Id =
     | Id of string
-    override __.ToString () = match __ with
+    override __.ToString() = match __ with
                                | Id x ->
                                   let parts = x.Split [|'/'|]
                                   match parts with
                                    | [|id|] -> id.Replace(".xml","").Replace("#","")
                                    | [|_;id|] -> id.Replace(".xml","").Replace("#","")
-                                   | _ -> failwith "to may parts"
+                                   | _ -> failwith "to many parts"
+
+  type Href =
+    | Href of string
+    override __.ToString() = match __ with
+                              | Href x -> x
 
   type Doi =
     | Doi of string
@@ -20,14 +25,14 @@ module Shared =
   open System.Xml.Linq
   open System.Xml.XPath
 
-  type ContentLink = {id:Id;label:string;rel:string;format:string;} with
+  type ContentLink = {href:Href;label:string;rel:string;format:string;} with
     static member from (x:XElement) =
       let build (x:XElement) =
         let href = x.Attribute(XName.Get "href").Value
         let format = x.Attribute(XName.Get "format")
         let rel = x.Attribute(XName.Get "rel")
         if (rel <> null && format <> null && format.Value = "dita") then
-         {id = Id(href); label = x.Value; rel = rel.Value; format = format.Value} |> Some
+         {href = Href(href); label = x.Value; rel = rel.Value; format = format.Value} |> Some
         else
           None
       x.XPathSelectElements("//xref") |> Seq.choose build |> Seq.toList
