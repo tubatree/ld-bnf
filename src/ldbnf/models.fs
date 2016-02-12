@@ -615,10 +615,13 @@ module InteracitonParser =
       let t = x.Title
       let p,l = match x.Body.P with
                 | Some p ->
-                  let ds = p.Phs |> Array.pick (hasOutputclass "drug")
-                  let l = match ds.Xref with
-                          | Some x -> {href= Href x.Href;label=x.Value}
-                          | None -> failwith "cant find the link"
+                  let ds = p.Phs |> Array.choose (hasOutputclass "drug")
+                  let l = match ds with
+                          | [|_;too|] ->
+                             match too.Xref with
+                             | Some x -> {href= Href x.Href;label=x.Value}
+                             | None -> failwith "cant find the link"
+                          | _ -> failwith "cant find the link"
                   p,l
                 | None -> failwith "cant find paragraph"
       let i = match x.Importance with
