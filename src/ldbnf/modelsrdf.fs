@@ -103,7 +103,7 @@ module IndexRdf =
   type Graph with
     static member fromindex n (Index(id,ids)) =
 
-      let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite n (string id))
+      let uri n id = !!(sprintf "%s%s/%s" Uri.bnfsite (splitCamelCase n) (string id))
 
       let s = optionlist {
         yield a !!(sprintf "%s%ss" Uri.nicebnf n)
