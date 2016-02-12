@@ -827,7 +827,9 @@ module BorderlineSubstanceTaxonomyParser =
       {id=Id(x.Id);title=title;general=general;substances=ids;categories=cats}
 
 module MedicalDevice =
-  type Title = | Title of string
+  type Title =
+    | Title of string
+    override __.ToString() = match __ with | Title x -> x
 
   type PrescribingAndDispensingInformation = | PrescribingAndDispensingInformation of drugProvider.Sectiondiv
 
