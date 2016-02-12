@@ -433,7 +433,7 @@ module WoundManagementRdf =
     static member from (x:WoundManagement) =
       let s = optionlist {
                yield a Uri.WoundManagementEntity
-               yield x.general <!> (string >> dp "General")
+               yield x.general <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasGeneral")
                yield x.title |> Graph.fromTitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup

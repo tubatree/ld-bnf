@@ -64,7 +64,7 @@ module RdfUris =
     static member from (x:WoundManagement) = !!(Uri.bnfsite + "wound-management/" + string x.id )
     static member from (x:WoundManagementLink) = !!(Uri.bnfsite + "wound-management/" + string x.id )
     static member fromwm (WoundManagmentId(id)) = !!(Uri.bnfsite + "wound-management/" + string id )
-    static member from (x:Product) = !!(Uri.bnfsite + "wound-management-product" + string x.ampid)
+    static member from (x:Product) = !!(Uri.bnfsite + "wound-management-product/" + string x.ampid)
     static member from (x:TreatmentSummary) =
       match x with
       | TreatmentSummary (i,About(_)) -> !!(Uri.bnfsite + "about/" + string i)
