@@ -291,7 +291,7 @@ module TreatmentSummaryRdf =
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
-        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.totopic id) |> Some
+        | Some rel -> objectProperty !!("nicebnf:has" + (se rel)) (Uri.fromhref rel id) |> Some
         | None -> None
 
       optionlist {

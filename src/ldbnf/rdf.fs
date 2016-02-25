@@ -37,6 +37,7 @@ module RdfUris =
 
     static member totopic (id:Id) = !!(sprintf "%s%s" Uri.bnfsite (string id))
     static member totopic (href:Href) = !!(sprintf "%s%s" Uri.bnfsite (string href))
+    static member fromhref rel (id:Id) = !!(sprintf "%s%s/%s" Uri.bnfsite (rel |> splitCamelCase) (string id))
 
     static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o |> splitCamelCase) s)
     static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite (typeof<'a>.Name |> splitCamelCase) s)
