@@ -352,22 +352,22 @@ module DrugRdf =
          | x::xs -> x a::applyTo a xs
 
       //take the list, add hasSubject and type
-      let add' p f x (sub,uri) =
+      let add' p f x (sub,urif,id) =
         let s = f x //generate the properties
         let n = typename x
         //add a type and a subject
         let s' = [a !!("nicebnf:" + n)
-                  one !!"nicebnf:hasSubject" uri
+                  one !!"nicebnf:hasSubject" (urif id)
                     [a !!("nicebnf:" + sub)]]
-        one !!(p n) !!("bnfsite:monographSection/" + webguid()) (s @ s')
+        one !!(p n) (webguid() |> Id |> urif) (s @ s')
 
-      let add f x (sub,uri) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri)
+      let add f x (sub,uri,sid) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri,sid)
       //an alternate version that ignores the type name
-      let addps f x (sub,uri) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,uri)
+      let addps f x (sub,urif,sid) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,urif,sid)
 
-      let inline sec n i stf =
+      let inline sec n i sid stf =
         let fs = stf |> List.collect id //take list of functions to create statements
-        fs |> applyTo (n,i) //apply the functions with a name and a uri
+        fs |> applyTo (n,i,sid) //apply the functions with a name and a uri
 
 
       let inline statements a g x = x |> Seq.map (a g) |> Seq.toList
@@ -379,47 +379,48 @@ module DrugRdf =
         | None -> []
 
       match x with
-        | Pregnancy (i,gs,das,amps) -> sec "Pregnancy" (sid i) [statements addps Graph.fromgi gs
-                                                                statements addps Graph.fromda das
-                                                                statements addps Graph.fromamp amps]
-        | BreastFeeding (i,gs,ambfs,das) -> sec "BreastFeeding" (sid i) [statements addps Graph.fromgi gs
-                                                                         statements addps Graph.fromambf ambfs
-                                                                         statements addps Graph.fromda das]
-        | HepaticImpairment (i,gs,das,amhis) -> sec "HepaticImpairment" (sid i) [statements addps Graph.fromgi gs
-                                                                                 statements addps Graph.fromda das
-                                                                                 statements addps Graph.fromamhi amhis]
-        | RenalImpairment (i,gs,amri,das) -> sec "RenalImpairment" (sid i) [statements addps Graph.fromgi gs
-                                                                            statements addps Graph.fromamri amri
-                                                                            statements addps Graph.fromda das]
-        | IndicationsAndDoseGroup (i,g,gss) -> sec "IndicationAndDosageInformation" (sid i) [statements add Graph.fromidg g
-                                                                                             statements addps Graph.fromidgs gss]
-        | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" (sid i) [statements addps Graph.frompca pcas]
-        | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" (sid i) [statement addps Graph.fromlvs lvs
-                                                                                  statement addps Graph.fromavs avs]
-        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivity" (sid i) [ statements addps Graph.fromcsc csc
-                                                                                                statements addps Graph.fromcscs cscs]
-        | ExceptionsToLegalCategory (i,es) -> sec "ExceptionsToLegalCategory" (sid i) [statements addps Graph.fromexc es]
-        | ProfessionSpecificInformation (i,dps,adps) -> sec "ProfessionSpecificInformation" (sid i) [statements addps Graph.fromden dps
-                                                                                                     statements addps Graph.fromadp adps]
-        | EffectOnLaboratoryTests (i,elts) -> sec "EffectsOnLaboratoryTests" (sid i) [statements addps Graph.fromelt elts]
-        | PreTreatmentScreenings (i,ptss) -> sec "PreTreatmentScreeningInformation" (sid i) [statements addps Graph.frompts ptss]
-        | LessSuitableForPrescribings (i,lsfps) -> sec "LessSuitableForPrescribings" (sid i) [statements addps Graph.fromlsfp lsfps]
-        | HandlingAndStorages (i,hass) -> sec "HandlingAndStorageInformation" (sid i) [statements addps Graph.fromhas hass]
-        | TreatmentCessations (i,tcs) -> sec "TreatmentCessationInformation" (sid i) [statements addps Graph.fromtc tcs]
-        | DrugActions (i,das) -> sec "DrugActions" (sid i) [statements addps Graph.fromdac das]
-        | SideEffects (i,fres,seas,ods) -> sec "SideEffects" (sid i) [statements add Graph.fromfre fres
-                                                                      statements addps Graph.fromsea seas
-                                                                      statements addps Graph.fromod ods]
-        | Contraindications (i,cogs,ias,ciri) -> sec "ContraIndications" (sid i) [statements add Graph.fromcog cogs
-                                                                                  statements addps Graph.fromia ias
-                                                                                  statements addps Graph.fromciri ciri]
-        | Cautions (i,cgs,ias) -> sec "Cautions" (sid i) [statements add Graph.fromcg cgs
-                                                          statements addps Graph.fromia ias]
-        | PrescribingAndDispensingInformations (i,padi) -> sec "PrescribingAndDispensingInformations" (sid i) [statements addps Graph.frompadi padi]
-        | UnlicencedUses (i,ulus) -> sec "UnlicencedUsageInformation" (sid i) [statements addps Graph.fromulu ulus]
-        | ConceptionAndContraceptions (i,cacs) -> sec "ConceptionAndContraception" (sid i) [statements addps Graph.fromcac cacs]
-        | ImportantSafetyInformations (i,isis) -> sec "ImportantSafetyInformations" (sid i) [statements addps Graph.fromisi isis]
-        | DirectionsForAdministration (i,dfas) -> sec "DirectionsForAdministration" (sid i) [statements addps Graph.fromdfa dfas]
-        | NationalFunding (i,fds) -> sec "NationalFunding" (sid i) [statements add Graph.fromfd fds]
-        | InteractionStatements (i,is) -> sec "Interactions" (sid i) [statements addps Graph.frominter is]
-        | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" (sid i) [statements addps Graph.frommon mons]
+        | Pregnancy (i,gs,das,amps) -> sec "Pregnancy" sid i [statements addps Graph.fromgi gs
+                                                              statements addps Graph.fromda das
+                                                              statements addps Graph.fromamp amps]
+
+        | BreastFeeding (i,gs,ambfs,das) -> sec "BreastFeeding" sid i [statements addps Graph.fromgi gs
+                                                                       statements addps Graph.fromambf ambfs
+                                                                       statements addps Graph.fromda das]
+        | HepaticImpairment (i,gs,das,amhis) -> sec "HepaticImpairment" sid i [statements addps Graph.fromgi gs
+                                                                               statements addps Graph.fromda das
+                                                                               statements addps Graph.fromamhi amhis]
+        | RenalImpairment (i,gs,amri,das) -> sec "RenalImpairment" sid i [statements addps Graph.fromgi gs
+                                                                          statements addps Graph.fromamri amri
+                                                                          statements addps Graph.fromda das]
+        | IndicationsAndDoseGroup (i,g,gss) -> sec "IndicationAndDosageInformation" sid i [statements add Graph.fromidg g
+                                                                                           statements addps Graph.fromidgs gss]
+        | PatientAndCarerAdvices (i, pcas) -> sec "PatientAndCarerAdvice" sid i [statements addps Graph.frompca pcas]
+        | MedicinalForms (i,lvs,avs,_) -> sec "MedicinalFormInformation" sid i [statement addps Graph.fromlvs lvs
+                                                                                statement addps Graph.fromavs avs]
+        | AllergyAndCrossSensitivity (i,csc,cscs) -> sec "AllergyAndCrossSensitivity" sid i [statements addps Graph.fromcsc csc
+                                                                                             statements addps Graph.fromcscs cscs]
+        | ExceptionsToLegalCategory (i,es) -> sec "ExceptionsToLegalCategory" sid i [statements addps Graph.fromexc es]
+        | ProfessionSpecificInformation (i,dps,adps) -> sec "ProfessionSpecificInformation" sid i [statements addps Graph.fromden dps
+                                                                                                   statements addps Graph.fromadp adps]
+        | EffectOnLaboratoryTests (i,elts) -> sec "EffectsOnLaboratoryTests" sid i [statements addps Graph.fromelt elts]
+        | PreTreatmentScreenings (i,ptss) -> sec "PreTreatmentScreeningInformation" sid i [statements addps Graph.frompts ptss]
+        | LessSuitableForPrescribings (i,lsfps) -> sec "LessSuitableForPrescribings" sid i  [statements addps Graph.fromlsfp lsfps]
+        | HandlingAndStorages (i,hass) -> sec "HandlingAndStorageInformation" sid i [statements addps Graph.fromhas hass]
+        | TreatmentCessations (i,tcs) -> sec "TreatmentCessationInformation" sid i [statements addps Graph.fromtc tcs]
+        | DrugActions (i,das) -> sec "DrugActions" sid i [statements addps Graph.fromdac das]
+        | SideEffects (i,fres,seas,ods) -> sec "SideEffects" sid i [statements add Graph.fromfre fres
+                                                                    statements addps Graph.fromsea seas
+                                                                    statements addps Graph.fromod ods]
+        | Contraindications (i,cogs,ias,ciri) -> sec "ContraIndications" sid i [statements add Graph.fromcog cogs
+                                                                                statements addps Graph.fromia ias
+                                                                                statements addps Graph.fromciri ciri]
+        | Cautions (i,cgs,ias) -> sec "Cautions" sid i [statements add Graph.fromcg cgs
+                                                        statements addps Graph.fromia ias]
+        | PrescribingAndDispensingInformations (i,padi) -> sec "PrescribingAndDispensingInformations" sid i [statements addps Graph.frompadi padi]
+        | UnlicencedUses (i,ulus) -> sec "UnlicencedUsageInformation" sid i [statements addps Graph.fromulu ulus]
+        | ConceptionAndContraceptions (i,cacs) -> sec "ConceptionAndContraception" sid i [statements addps Graph.fromcac cacs]
+        | ImportantSafetyInformations (i,isis) -> sec "ImportantSafetyInformations" sid i [statements addps Graph.fromisi isis]
+        | DirectionsForAdministration (i,dfas) -> sec "DirectionsForAdministration" sid i [statements addps Graph.fromdfa dfas]
+        | NationalFunding (i,fds) -> sec "NationalFunding" sid i [statements add Graph.fromfd fds]
+        | InteractionStatements (i,is) -> sec "Interactions" sid i [statements addps Graph.frominter is]
+        | MonitoringRequirements (i,mons) -> sec "MonitoringRequirements" sid i [statements addps Graph.frommon mons]
