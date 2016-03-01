@@ -1057,14 +1057,14 @@ module Sections =
     | IncedenceDuration of string
     override __.ToString() = match __ with | IncedenceDuration s -> s
 
-  type Incedence = | Incedence of IncedenceDuration * int
+  type Incedence = | Incedence of IncedenceDuration * string
 
   type IncedencesType =
    | BackgroundIncidences
    | AdditionalCasesOestrogenOnly
    | AdditionalCasesCombined
 
-  type Incedences = | Incedences of Title * IncedencesType * Incedence list
+  type Incedences = | Incedences of Title option * IncedencesType * Incedence list
 
   type AgeRange =
     | AgeRange of string
@@ -1083,17 +1083,20 @@ module Sections =
       let risk (x:sectionProvider.Sectiondiv) =
         let group (x:sectionProvider.Sectiondiv) =
           let incedences (x:sectionProvider.Sectiondiv) =
-            let incedence  (x:sectionProvider.Sectiondiv) =
+            let incidence (x:sectionProvider.Sectiondiv) =
               let duration = x.Ps |> Array.pick (p "incidenceDuration" >> Option.map IncedenceDuration)
-              let count = x.Ps |> Array.pick (p "incedence" >> Option.map int)
+              let count = x.Ps |> Array.pick (p "incidence")
               Incedence(duration,count)
             let itype = match x.Outputclass with
                         | "backgroundIncidences" -> BackgroundIncidences
                         | "additionalCasesOestrogenOnly" -> AdditionalCasesOestrogenOnly
                         | "additionalCasesCombined" -> AdditionalCasesCombined
                         | _ -> failwith "type not matched"
-            let title = x.Ps |> Array.pick xmltitle
-            let incedences = x |> unravel ["incedences";"incedence"] |> List.map incedence
+            let title = x.Ps |> Array.tryPick xmltitle
+            let incedences = x.Sectiondivs
+                             |> Array.collect (fun s -> s.Sectiondivs)
+                             |> Array.map incidence
+                             |> Array.toList
             Incedences(title,itype,incedences)
           let ar = x.Ps |> Array.pick (p "ageRange" >> Option.map AgeRange)
           let is = x.Sectiondivs |> Array.map incedences |> Array.toList

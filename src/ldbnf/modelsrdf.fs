@@ -631,17 +631,16 @@ module SectionsRdf =
 
       let risk (Risk(title,note,groups)) =
         let group (Group(ar,incedenceslist)) =
-          let incedences (Incedences(title,typ,incedencelist)) =
-            let incedence (Incedence(duration,count)) =
-              blank (Uri.has<Incedence>()) (optionlist{
+          let incedences (Incedences(_,typ,incedencelist)) =
+            let incedence name (Incedence(duration,count)) =
+              blank !!( "nicebnf:has" + (firstupper name)) (optionlist{
                 yield duration |> (string >> dp "duration")
-                yield count |> (string >> dp "count")
+                yield count |> (dp "count")
                 })
 
             blank (Uri.has<Incedences>()) (optionlist{
-              yield! title |> ti
               yield typ |> (toString >> dp "type")
-              yield! incedencelist |> List.map incedence
+              yield! incedencelist |> List.map (incedence ( typ |> toString ))
               })
 
           blank (Uri.has<Group>()) (optionlist{
