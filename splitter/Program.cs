@@ -101,6 +101,13 @@ namespace splitter
 
             var doc = XDocument.Load(filename);
 
+            // <data name="inheritsFromClass">PHP34650</data>
+            foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass']"))
+            {
+                data.Name = "xref";
+                data.SetAttributeValue("href",data.Value);
+            }
+
             var lookup = doc.XPathSelectElements("//topic[@id] | //section[@id]")
                 .Select(GetInfo)
                 .ToDictionary(i => i.BnfId, i => i);
