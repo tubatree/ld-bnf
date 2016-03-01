@@ -501,16 +501,12 @@ module DrugParser =
     let withclass = (|HasOutputClasso|_|)
 
     type InheritsFromClass with
-      static member from (x:drugProvider.Data) =
-        match x.String with
-          | Some(s) -> InheritsFromClass s |> Some
-          | None -> None
-
+      static member from (x:drugProvider.Xref) = x.Href |> InheritsFromClass |> Some
 
     type Classification with
       static member private from typ (x:drugProvider.Data) =
         let l = x.Datas |> Array.tryPick (Some >=> withname "drugClassification" >=> (fun d -> d.String >>= (Id >> Some)))
-        let i = x.Datas |> Array.choose (Some >=> withname "inheritsFromClass" >=> InheritsFromClass.from) |> Array.toList
+        let i = x.Xrefs |> Array.choose InheritsFromClass.from |> Array.toList
         match l with
           | Some(l) -> Some( Classification(l,i, typ))
           | None -> None

@@ -11,6 +11,7 @@
         <data name="classification">
           <data name="drugClassification">_322611837</data>
           <xref name="inheritsFromClass" href="PHP34650.xml">PHP34650</xref>
+          <xref name="inheritsFromClass" href="PHP34650.xml">PHP34650</xref>
         </data>
       </data>
       <data name="primaryDomainOfEffect">
