@@ -82,11 +82,6 @@ namespace splitter
 			"interaction",
         };
 
-        static readonly Dictionary<string,string> TypesToAlter = new Dictionary<string, string>
-        {
-            {"electrolytes","fluids-electrolytes"}
-        };  
-
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -105,6 +100,11 @@ namespace splitter
             }
 
             var doc = XDocument.Load(filename);
+
+            foreach (var section in doc.XPathSelectElements("//section[@outputclass='electrolytes']"))
+            {
+                section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
+            }
 
             // <data name="inheritsFromClass">PHP34650</data>
             foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass']"))
@@ -147,9 +147,7 @@ namespace splitter
             foreach (var fragment in fragments.Where(process))
             {
                 var type = fragment.Type.Replace("#", "");
-                if (TypesToAlter.ContainsKey(type))
-                    type = TypesToAlter[type];
-
+                
                 type = type.SplitCamel();
 
                 var typeDir = Path.Combine(outputdir, type);
@@ -193,9 +191,6 @@ namespace splitter
         {
             var file = DeriveId(child) + ".xml";
             var type = GetTopicType(child).SplitCamel();
-
-            if (TypesToAlter.ContainsKey(type))
-                return TypesToAlter[type] + "/" + file;
 
             return type + "/" + file;
         }
@@ -271,7 +266,7 @@ namespace splitter
             "bloodMonitoringStrips",
             "hrtRisks",
             "parenteralFeeding",
-            "electrolytes"
+            "fluidAndElectrolytes"
         };
 
 
