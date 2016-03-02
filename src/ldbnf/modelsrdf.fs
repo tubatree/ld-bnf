@@ -447,7 +447,7 @@ module WoundManagementRdf =
       objectProperty !!"nicebnf:hasWoundManagement" (Uri.from x)
 
     static member fromExudate (WoundExudate(s,wmls)) =
-      blank !!"nicebnf:WoundExudate"
+      blank !!"nicebnf:hasWoundExudate"
         (dataProperty !!"nicebnf:hasRate" (s^^xsd.string) :: (wmls |> List.map Graph.fromwml))
 
     static member fromWoundType (WoundType(TypeOfWound(t),d,wes)) =
