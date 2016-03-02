@@ -634,14 +634,15 @@ module SectionsRdf =
                 yield count |> (dp "count")
                 })
 
-            blank (Uri.has<Incedences>()) (optionlist{
-              yield typ |> (toString >> dp "type")
-              yield! incedencelist |> List.map (incedence ( typ |> toString ))
-              })
+            incedencelist |> List.map (incedence ( typ |> toString ))
+
+            //blank (Uri.has<Incedences>()) (optionlist{
+            //  yield! incedencelist |> List.map (incedence ( typ |> toString ))
+            //  })
 
           blank (Uri.has<Group>()) (optionlist{
             yield ar |> (string >> dp "AgeRange")
-            yield! incedenceslist |> List.map incedences
+            yield! incedenceslist |> List.collect incedences
             })
 
         blank (Uri.has<Risk>()) (optionlist{
