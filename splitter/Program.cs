@@ -82,6 +82,11 @@ namespace splitter
 			"interaction",
         };
 
+        static readonly Dictionary<string,string> TypesToAlter = new Dictionary<string, string>
+        {
+            {"electrolytes","fluids-electrolytes"}
+        };  
+
         static void Main(string[] args)
         {
             if (args.Length < 2)
@@ -142,6 +147,9 @@ namespace splitter
             foreach (var fragment in fragments.Where(process))
             {
                 var type = fragment.Type.Replace("#", "");
+                if (TypesToAlter.ContainsKey(type))
+                    type = TypesToAlter[type];
+
                 type = type.SplitCamel();
 
                 var typeDir = Path.Combine(outputdir, type);
@@ -185,6 +193,10 @@ namespace splitter
         {
             var file = DeriveId(child) + ".xml";
             var type = GetTopicType(child).SplitCamel();
+
+            if (TypesToAlter.ContainsKey(type))
+                return TypesToAlter[type] + "/" + file;
+
             return type + "/" + file;
         }
 
