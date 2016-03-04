@@ -672,7 +672,7 @@ module WoundManagement =
 
   type WoundManagement = {
     id: Id;
-    title: Title;
+    title: wmProvider.Title;
     general: wmProvider.Section option;
     dressingChoices: WoundType list;
     links: WoundManagementLink list;

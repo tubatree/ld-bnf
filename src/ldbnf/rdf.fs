@@ -25,6 +25,11 @@ module RdfUris =
   let label = fettle >> xsd.string >> (dataProperty !!"rdfs:label")
   let title = xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle")
 
+  let inline xtitle x =
+    let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
+    [element |> (string >> title)
+     element.Value |> label]
+
   let inline dita x =
     let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
     [element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))

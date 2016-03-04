@@ -430,7 +430,7 @@ module WoundManagementRdf =
       let s = optionlist {
                yield a Uri.WoundManagementEntity
                yield x.general <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasGeneral")
-               yield x.title |> Graph.fromTitle
+               yield! x.title |> xtitle
                yield! x.dressingChoices |> List.map Graph.fromWoundType
                yield! x.productGroups |> List.map Graph.fromProductGroup
                yield! x.links |> List.map Graph.fromwml
@@ -526,9 +526,7 @@ module SectionsRdf =
 
   let ti  = function
              | TextTitle s -> [s |> label]
-             | XmlTitle p ->
-               [p.XElement.Value |> label
-                p |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasTitle"))]
+             | XmlTitle p -> p |> xtitle
 
   type Graph with
     static member fromFluidAndElectrolytes (x:FluidAndElectrolytes) =

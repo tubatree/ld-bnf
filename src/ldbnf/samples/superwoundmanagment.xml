@@ -143,7 +143,7 @@
   <xref href="PHP101075.xml" rel="woundManagement">Paraffin Gauze Dressing</xref>
 </topic>
 <topic id="PHP101076" outputclass="woundManagement">
-  <title>Knitted polyester primary dressing</title>
+  <title>Knitted polyester primary <span>dressing</span></title>
   <body>
     <section outputclass="productGroups">
       <sectiondiv outputclass="productGroup">
