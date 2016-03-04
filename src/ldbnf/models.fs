@@ -298,13 +298,12 @@ open System.Xml.XPath
 module TreatmentSummary =
   type tsProvider = XmlProvider<"./samples/supertreatmentsummary.xml", Global=true>
 
-  type Title = | Title of string
   type TargetAudience = | TargetAudience of string
   type Content = | Content of tsProvider.Section * TargetAudience option
   type BodySystem = | BodySystem of string
 
   type Summary = {
-    title:Title
+    title:tsProvider.Title
     doi:Doi option
     bodySystem:BodySystem option
     content:Content list
@@ -344,12 +343,11 @@ module TreatmentSummaryParser =
   type Summary with
     static member from (x:tsProvider.Topic) =
       let ls = x.XElement |> ContentLink.from
-      let t = Title(x.Title)
       let d = x.Body.Datas |> Array.tryPick (withname "doi" >> Option.map Doi.from)
       let bs = x.Body.Datas |> Array.tryPick (withname "bodySystem" >> Option.map BodySystem.from)
       let c = x.Body.Sections |> Array.map Content.from |> Array.toList
 
-      Id(x.Id),{title = t; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
+      Id(x.Id),{title = x.Title; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
 
   type TreatmentSummary with
     static member from c (i,s) = TreatmentSummary(i, c s)

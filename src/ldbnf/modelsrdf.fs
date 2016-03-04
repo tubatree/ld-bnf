@@ -260,7 +260,6 @@ module TreatmentSummaryRdf =
       [dr s
        dr p] |> Assert.graph (empty())
 
-    static member fromti (Title s) = s |> label
     static member fromdoi (Shared.Doi s)=
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
     static member frombs url (BodySystem x) =
@@ -291,7 +290,7 @@ module TreatmentSummaryRdf =
         | None -> None
 
       optionlist {
-        yield Graph.fromti x.title
+        yield! x.title |> xtitle
         yield x.doi <!> Graph.fromdoi
         yield x.bodySystem <!> (Graph.frombs url)
         yield! x.links |> Seq.map (Graph.fromlink url) |> Seq.toList
