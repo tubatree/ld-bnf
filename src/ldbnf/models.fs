@@ -827,14 +827,11 @@ module BorderlineSubstanceTaxonomyParser =
       {id=Id(x.Id);title=title;general=general;substances=ids;categories=cats}
 
 module MedicalDevice =
-  type Title =
-    | Title of string
-    override __.ToString() = match __ with | Title x -> x
 
   type PrescribingAndDispensingInformation = | PrescribingAndDispensingInformation of drugProvider.Sectiondiv
 
   type MedicalDevice =
-    | MedicalDevice of Id * Title * PrescribingAndDispensingInformation option * Id list
+    | MedicalDevice of Id * drugProvider.Title * PrescribingAndDispensingInformation option * Id list
 
 
 module MedicalDeviceParser =
@@ -842,7 +839,6 @@ module MedicalDeviceParser =
 
   type MedicalDevice with
     static member parse (x:drugProvider.Topic) =
-      let title = Title(x.Title.Value |? "")
       let padi = x |> topics "prescribingAndDispensingInformation"
                    |> Array.collect allsections
                    |> Array.tryPick (PrescribingAndDispensingInformation >> Some)
@@ -852,7 +848,7 @@ module MedicalDeviceParser =
       let ids = x |> topics "medicalDeviceTypes"
                   |> Array.collect links
                   |> Array.toList
-      MedicalDevice(Id(x.Id),title,padi,ids)
+      MedicalDevice(Id(x.Id),x.Title,padi,ids)
 
 
 module Sections =

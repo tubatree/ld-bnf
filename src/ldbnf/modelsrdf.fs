@@ -17,7 +17,7 @@ module MedicalDeviceRdf =
     static member frommedicaldevice(MedicalDevice(id,t,pdi,ids)) =
       let s = optionlist {
         yield a Uri.MedicalDeviceEntity
-        yield t |> (string >> label)
+        yield! t |> xtitle
         yield! pdi <!> (fun (PrescribingAndDispensingInformation(sd)) -> sd |> (dita)) |> unwrap
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
