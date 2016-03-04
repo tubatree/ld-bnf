@@ -235,7 +235,7 @@ module MedicalDeviceType =
 
   type ClinicalMedicalDeviceInformationGroup ={
      id:Id;
-     title:Title;
+     title:drugProvider.Title;
      sections:MonographSection list;
      products:MedicinalProduct list;
      description:DeviceDescription option;
@@ -285,7 +285,7 @@ module MedicalDeviceTypeParser =
       let des = x.Topics |> Array.tryPick (withoc "deviceDescription") <!> DeviceDescription.from
       let com = x.Topics |> Array.tryPick (withoc "complianceStandards") <!> ComplicanceStandards.from
 
-      {id=Id(x.Id); title=Title(x.Title.Value.Value); sections=mss; products=mps; description = des; complicance = com;}
+      {id=Id(x.Id); title=x.Title; sections=mss; products=mps; description = des; complicance = com;}
 
   type MedicalDeviceType with
     static member parse (x:drugProvider.Topic) =

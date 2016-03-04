@@ -498,7 +498,7 @@ module MedicalDeviceTypeRdf =
     static member fromcmdig uri (x:ClinicalMedicalDeviceInformationGroup) =
       let s =  optionlist {
                 yield a Uri.ClinicalMedicalDeviceInformationGroupEntity
-                yield x.title |> (string >> label)
+                yield! x.title |> xtitle
                 yield x.description <!> (Graph.fromdd uri)
                 yield x.complicance <!> (Graph.fromcs uri)}
 
