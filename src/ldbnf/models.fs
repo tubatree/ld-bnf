@@ -739,7 +739,6 @@ module WoundManagementParser =
 
   type WoundManagement with
     static member parse (x:wmProvider.Topic) =
-      let t = Title x.Title
       let gen = x.Body.Sections |> Array.tryPick (hasOutputclass "general")
       let dcs = x.Body.Sections
                 |> Array.choose (hasOutputclass "dressingChoices")
@@ -750,7 +749,7 @@ module WoundManagementParser =
                 |> Array.choose (hasOutputclass "productGroups")
                 |> Array.collect ProductGroup.list
                 |> Array.toList
-      {id=Id(x.Id);title=t;general=gen;dressingChoices=dcs;links=ls;productGroups=pgs}
+      {id=Id(x.Id);title=x.Title;general=gen;dressingChoices=dcs;links=ls;productGroups=pgs}
 
 
 
