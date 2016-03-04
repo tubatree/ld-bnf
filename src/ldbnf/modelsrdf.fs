@@ -482,8 +482,9 @@ module MedicalDeviceTypeRdf =
 
   type Graph with
     static member from (x:MedicalDeviceType) =
-      let s = [a Uri.MedicalDeviceTypeEntity
-               x.title |> (string >> label)]
+      let s = optionlist {
+               yield a Uri.MedicalDeviceTypeEntity
+               yield! x.title |> xtitle}
 
       let uri = Uri.fromcmdig x
 

@@ -243,7 +243,7 @@ module MedicalDeviceType =
 
   type MedicalDeviceType = {
      id:Id;
-     title:Title;
+     title:drugProvider.Title;
      groups:ClinicalMedicalDeviceInformationGroup list;
     }
 
@@ -290,7 +290,7 @@ module MedicalDeviceTypeParser =
   type MedicalDeviceType with
     static member parse (x:drugProvider.Topic) =
       let gs = x.Topics |> Array.collect ClinicalMedicalDeviceInformationGroup.list |> Array.toList
-      {id=Id(x.Id); title=Title(x.Title.Value.Value); groups=gs}
+      {id=Id(x.Id); title=x.Title; groups=gs}
 
 open System.Xml.Linq
 open System.Xml.XPath
