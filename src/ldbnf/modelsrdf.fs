@@ -793,6 +793,6 @@ module SectionsRdf =
         yield x.note <!> (dp "note")
         }
 
-      let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency> (string id))
+      let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency>(string(x.id)))
       [dr s]
       |> Assert.graph Graph.setupGraph
