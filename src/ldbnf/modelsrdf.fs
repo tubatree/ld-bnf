@@ -524,6 +524,8 @@ module SectionsRdf =
 
   let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
+  let inline xdp n = string >> xsd.xmlliteral >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
+
   let ti  = function
              | TextTitle s -> [s |> label]
              | XmlTitle p -> p |> xtitle
@@ -605,7 +607,7 @@ module SectionsRdf =
           yield x.sodium <!> (dp "sodium")
           yield x.acetate <!> (dp "acetate")
           yield x.chloride <!> (dp "chloride")
-          yield x.otherComponentsPerLitre <!> (dp "otherComponentsPerLitre")
+          yield x.otherComponentsPerLitre <!> (xdp "otherComponentsPerLitre")
           yield x.adultOnly <!> (string >> dp "adultOnly")
           yield! x.packs |> List.map pack
           })

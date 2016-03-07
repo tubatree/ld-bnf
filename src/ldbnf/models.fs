@@ -994,7 +994,7 @@ module Sections =
     sodium:string option;
     acetate:string option;
     chloride:string option;
-    otherComponentsPerLitre:string option;
+    otherComponentsPerLitre:sectionProvider.P option;
     adultOnly:bool option;
     packs:Pack list;
     }
@@ -1027,7 +1027,7 @@ module Sections =
           sodium = x.Ps |> Array.tryPick (p "sodium")
           acetate = x.Ps |> Array.tryPick (p "acetate")
           chloride = x.Ps |> Array.tryPick (p "chloride")
-          otherComponentsPerLitre = x.Ps |> Array.tryPick (p "otherComponentsPerLitre")
+          otherComponentsPerLitre = x.Ps |> Array.tryPick (hasOutputclasso "otherComponentsPerLitre")
           adultOnly = x.Data |> Option.map (fun d -> d.Value)
           packs = x.Sectiondivs
                     |> Array.choose (hasOutputclass "packs")
