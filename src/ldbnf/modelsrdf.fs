@@ -604,7 +604,7 @@ module SectionsRdf =
           yield x.magnesium <!> (dp "magnesium")
           yield x.sodium <!> (dp "sodium")
           yield x.acetate <!> (dp "acetate")
-          yield x.chloride <!> (dp "acetate")
+          yield x.chloride <!> (dp "chloride")
           yield x.otherComponentsPerLitre <!> (dp "otherComponentsPerLitre")
           yield x.adultOnly <!> (string >> dp "adultOnly")
           yield! x.packs |> List.map pack

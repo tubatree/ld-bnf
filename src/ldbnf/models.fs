@@ -1008,8 +1008,10 @@ module Sections =
     static member parse (x:sectionProvider.Section) =
       let preparation (x:sectionProvider.Sectiondiv) =
         let title (p:sectionProvider.P) =
-          let ti = p.String <!> TextTitle
-          let man = p.Phs |> Array.pick ((hasOutputclass "manufacturer") >> Option.map (fun ph -> ph.String))
+          let ti = match p.XElement.FirstNode with
+                   | :? XText as t -> t.Value |> TextTitle |> Some
+                   | _ -> None
+          let man = p.Phs |> Array.tryPick ((hasOutputclass "manufacturer") >> Option.bind (fun ph -> ph.String) >> (Option.map removebrackets))
           Option.lift2 (fun a b -> (a,b)) ti man
         let pack (x:sectionProvider.Sectiondiv) =
           match x.Ps with

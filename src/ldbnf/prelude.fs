@@ -136,3 +136,6 @@ module prelude =
 
     let splitCamelCase (s:string)=
       System.Text.RegularExpressions.Regex.Replace(s, "([a-z](?=[A-Z])|[A-Z](?=[A-Z][a-z]))", "$1-").ToLower()
+
+    let removebrackets (s:string) =
+      s.Replace("(","").Replace(")","")
