@@ -1,6 +1,7 @@
 <samples>
 <section id="PHP188" outputclass="electrolytes">
   <p outputclass="title">Fluids and electrolytes</p>
+  <p outputclass="note">some note</p>
   <sectiondiv outputclass="electrolyteConcentrations">
     <p outputclass="title">Electrolyte concentrations—intravenous fluids</p>
     <sectiondiv outputclass="normalPlasmaValues">

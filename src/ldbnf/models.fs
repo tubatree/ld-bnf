@@ -975,7 +975,7 @@ module Sections =
         ElectrolyteContent(title,ftypes)
 
 
-      let title = x.P.String <!> TextTitle
+      let title = x.Ps |> Array.tryPick title
       let econcen = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteConcentrations" >> Option.map concentrations)
       let content = x.Sectiondivs |> Array.pick (hasOutputclass "electrolyteContent" >> Option.map electrolytecontent)
       {id = Id(x.Id); title = title; concentrations = econcen; content = content}
@@ -1107,7 +1107,7 @@ module Sections =
       HrtRisks(Id(x.Id),note,risks)
 
   type CompatibleStrip = {
-    name: string;
+    name: Title;
     packSize: string;
     price: decimal
     }
@@ -1118,6 +1118,7 @@ module Sections =
     compatibleStrip : CompatibleStrip
     sensitivityRange: sectionProvider.P
     manufacturer: string
+    note: string option
     }
 
   type BloodMonitoringStrips =
@@ -1131,7 +1132,7 @@ module Sections =
                        | [|ps;pr|] -> Option.lift2 (fun a b -> (a,b)) ps.String pr.Number
                        | _ -> None
             | _ -> None
-          let name = x.Ps |> Array.pick (p "compatibleStripName")
+          let name = x.Ps |> Array.pick (hasOutputclasso "compatibleStripName" >> Option.map XmlTitle)
           let psize,price = x |> unravel ["compatibleStrips"] |> List.pick pi
           {
             name = name
@@ -1145,8 +1146,9 @@ module Sections =
         compatibleStrip = x |> compatiblestrip
         sensitivityRange = x.Ps |> Array.pick (hasOutputclasso "sensitivityRange")
         manufacturer = x.Ps |> Array.pick (p "manufacturer")
+        note = x.Ps |> Array.tryPick (p "note")
         }
-      let title = x.P.String <!> TextTitle
+      let title = x.Ps |> Array.tryPick title
       BloodMonitoringStrips(Id(x.Id),title, x |> unravelr ["bloodMonitoringStrip"] |> List.map strip)
 
 
@@ -1201,7 +1203,7 @@ module Sections =
           takenInMonths = takenInMonths
           groups = groups
           }
-      let title = x.P.String <!> TextTitle
+      let title = x.Ps |> Array.tryPick title
 
       let a = x |> unravelr ["unsupervisedTreatment";"combinationDrugTherapies";"combinationDrugTherapy"]
                 |> List.map (therapy Combination Unsupervised)
@@ -1245,7 +1247,7 @@ module Sections =
         Regimen(title,acid @ anti,course)
 
       let rs = x |> unravelr["regimens";"regimen"] |> List.map regimen
-      let title = x.P.String <!> TextTitle
+      let title = x.Ps |> Array.tryPick title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
 
 
@@ -1273,7 +1275,7 @@ module Sections =
         let rsks = x |> risks
         MalariaProphylaxisRegimen(country,rsks)
 
-      let title = x.P.String <!> TextTitle
+      let title = x.Ps |> Array.tryPick title
       let regs = x |> unravelr ["malariaProphylaxisRegimen"] |> List.map regimen
       MalariaProphylaxisRegimens(Id(x.Id),title,regs)
 
@@ -1284,8 +1286,14 @@ module Sections =
     note:string option
     }
 
-  type IntramuscularAdrenalineEmergency =
-    | IntramuscularAdrenalineEmergency of Id * Title option * DoseStatement list
+  type IntramuscularAdrenalineEmergency = {
+    id:Id
+    title:Title option
+    note:string option
+    statements:DoseStatement list
+    }
+    with
+
     static member parse (x:sectionProvider.Section) =
 
       let statement (x:sectionProvider.Sectiondiv) =
@@ -1295,7 +1303,9 @@ module Sections =
           volume = x.Ps |> Array.pick (hasOutputclasso "volume")
           note = x.Ps |> Array.tryPick (p "note")
           }
-
-      let title = x.P.String <!> TextTitle
-      let statements = x |> unravelr ["doses";"doseStatement"] |> List.map statement
-      IntramuscularAdrenalineEmergency(Id(x.Id),title,statements)
+      {
+        id = Id(x.Id)
+        title = x.Ps |> Array.tryPick title
+        note = x.Ps |> Array.tryPick (p "note")
+        statements = x |> unravelr ["doses";"doseStatement"] |> List.map statement
+        }

@@ -663,7 +663,7 @@ module SectionsRdf =
       let strip (x:BloodMonitoringStrip) =
         let compatibleStrip (x:CompatibleStrip) =
           blank (Uri.has x) (optionlist{
-            yield x.name |> label
+            yield! x.name |> ti
             yield x.packSize |> (dp "packSize")
             yield x.price |> (string >> dp "price")
             })
@@ -674,6 +674,7 @@ module SectionsRdf =
           yield x.sensitivityRange |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasSensitivityRange"))
           yield x.manufacturer |> (dp "manufacturer")
           yield x.compatibleStrip |> compatibleStrip
+          yield x.note <!> (dp "note")
           })
 
       let s = optionlist {
@@ -775,7 +776,7 @@ module SectionsRdf =
       |> Assert.graph Graph.setupGraph
 
   type Graph with
-    static member fromIntramuscularAdrenalineEmergency (IntramuscularAdrenalineEmergency(id,title,statements)) =
+    static member fromIntramuscularAdrenalineEmergency (x:IntramuscularAdrenalineEmergency) =
       let statement (x:DoseStatement) =
         blank (Uri.has x) (optionlist{
           yield x.age |> (dp "age")
@@ -785,8 +786,9 @@ module SectionsRdf =
           })
 
       let s = optionlist{
-        yield! title <!> ti |> unwrap
-        yield! statements |> List.map statement
+        yield! x.title <!> ti |> unwrap
+        yield! x.statements |> List.map statement
+        yield x.note <!> (dp "note")
         }
 
       let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency> (string id))
