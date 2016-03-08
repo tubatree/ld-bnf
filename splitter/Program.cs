@@ -122,13 +122,25 @@ namespace splitter
                 var href = xref.Attribute("href");
                 if (href == null) continue;
                 var id = href.Value.Replace(".xml", "").Replace("#","");
-                
-                if (!lookup.ContainsKey(id)) continue;
 
-                //alter the href to point at the new id, stash the old one
-                xref.SetAttributeValue("rel", lookup[id].Type.ToLower());
-                xref.SetAttributeValue("href", lookup[id].Href);
-                xref.SetAttributeValue("bnfid", lookup[id].BnfId);
+                var parts = id.Split(new[] {'/'});
+
+                if (parts.Count() == 1 && lookup.ContainsKey(id))
+                {
+                    //alter the href to point at the new id, stash the old one
+                    xref.SetAttributeValue("rel", lookup[id].Type.ToLower());
+                    xref.SetAttributeValue("href", lookup[id].Href);
+                    xref.SetAttributeValue("bnfid", lookup[id].BnfId);
+                }
+
+                // href="#PHP78102/PHP185"
+                // href="treatment-summary/PHP78102#PHP185"
+                if (parts.Count() == 2 && lookup.ContainsKey(parts[0]) && lookup.ContainsKey(parts[1]))
+                {
+                    xref.SetAttributeValue("rel", lookup[parts[1]].Type.ToLower());
+                    xref.SetAttributeValue("href", lookup[parts[0]].Href + "#" + lookup[parts[1]].Slug);
+                    xref.SetAttributeValue("bnfid", lookup[parts[1]].BnfId);
+                }
             }
 
             foreach (var topic in doc.XPathSelectElements("//topic | //section").ToList())
