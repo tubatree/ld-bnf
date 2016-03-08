@@ -1245,7 +1245,7 @@ module Sections =
         Regimen(title,acid @ anti,course)
 
       let rs = x |> unravelr["regimens";"regimen"] |> List.map regimen
-      let title = x.Ps |> Array.tryPick title
+      let title = x.Ps |> Array.tryPick xmltitle
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
 
 
