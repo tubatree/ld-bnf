@@ -74,7 +74,7 @@ module RdfUris =
     static member from (x:TreatmentSummary) =
       match x with
       | TreatmentSummary (i,About(_)) -> !!(Uri.bnfsite + "about/" + string i)
-      | TreatmentSummary (i,Guidance(_)) -> !!(Uri.bnfsite + "about/" + string i)
+      | TreatmentSummary (i,Guidance(_)) -> !!(Uri.bnfsite + "guidance/" + string i)
       | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatment-summary/" + string i)
     static member frommd (x:Id) = !!(Uri.bnfsite + "medical-device/" + string x)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medical-device-type/" + string x.id)
