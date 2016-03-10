@@ -527,7 +527,6 @@ module SectionsRdf =
   let inline xdp n = string >> xsd.xmlliteral >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
   let ti  = function
-             | TextTitle s -> [s |> label]
              | XmlTitle p -> p |> xtitle
 
   type Graph with

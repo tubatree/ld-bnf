@@ -856,7 +856,7 @@ module Sections =
   type sectionProvider = XmlProvider<"./samples/others.xml", Global=true, SampleIsList=true>
 
   type Title =
-    | TextTitle of string
+    //| TextTitle of string
     | XmlTitle of sectionProvider.P
     override __.ToString() =
       failwith "should not call string on this"
@@ -899,8 +899,7 @@ module Sections =
 
   let p oc = (hasOutputclasso oc) >> Option.bind (fun (p:sectionProvider.P) -> p.String)
 
-  let title = p "title" >> Option.map TextTitle
-  let xmltitle = hasOutputclasso "title" >> Option.map XmlTitle
+  let title = hasOutputclasso "title" >> Option.map XmlTitle
 
   let rec unravel (ocs:string list) (x:sectionProvider.Sectiondiv) =
     match ocs with
@@ -1085,7 +1084,7 @@ module Sections =
                         | "additionalCasesOestrogenOnly" -> AdditionalCasesOestrogenOnly
                         | "additionalCasesCombined" -> AdditionalCasesCombined
                         | _ -> failwith "type not matched"
-            let title = x.Ps |> Array.tryPick xmltitle
+            let title = x.Ps |> Array.tryPick title
             let incedences = x.Sectiondivs
                              |> Array.collect (fun s -> s.Sectiondivs)
                              |> Array.map incidence
@@ -1238,14 +1237,14 @@ module Sections =
                -> Option.lift2 (fun d q -> Antibacterial(d,Quantity(q))) d.String q.String
             | (_,_) -> failwith "unknown class"
 
-        let title = x.Ps |> Array.pick xmltitle
+        let title = x.Ps |> Array.pick title
         let course = x.Ps |> Array.pick (hasOutputclasso "course" >> Option.map Course)
         let acid = x |> unravel ["acidSuppressant"] |> List.choose drug
         let anti = x |> unravel ["antibacterials";"antibacterial"] |> List.choose drug
         Regimen(title,acid @ anti,course)
 
       let rs = x |> unravelr["regimens";"regimen"] |> List.map regimen
-      let title = x.Ps |> Array.tryPick xmltitle
+      let title = x.Ps |> Array.tryPick title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
 
 
