@@ -272,7 +272,7 @@ namespace splitter
 
             //treatmentSummaries
             "malariaProphylaxisRegimens",
-            "intramuscularAdrenalineEmergency",
+            //"intramuscularAdrenalineEmergency",
             "helicobacterPyloriRegimens",
             "antiTuberculosisTreatments",
             "bloodMonitoringStrips",
