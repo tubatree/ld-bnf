@@ -489,10 +489,12 @@ module MedicalDeviceTypeRdf =
       let uri = Uri.fromcmdig x
 
       let gs = x.groups |> List.map (Graph.fromcmdig uri)
+      let products = x.products |> List.map Graph.from
 
       let dr r = resource (Uri.from x) r
       [dr s
-       dr gs]
+       dr gs
+       dr products]
        |> Assert.graph Graph.setupGraph
 
     static member fromcmdig uri (x:ClinicalMedicalDeviceInformationGroup) =

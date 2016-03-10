@@ -242,9 +242,10 @@ module MedicalDeviceType =
      complicance:ComplicanceStandards option}
 
   type MedicalDeviceType = {
-     id:Id;
-     title:drugProvider.Title;
-     groups:ClinicalMedicalDeviceInformationGroup list;
+     id:Id
+     title:drugProvider.Title
+     products:MedicinalProduct list
+     groups:ClinicalMedicalDeviceInformationGroup list
     }
 
 module MedicalDeviceTypeParser =
@@ -290,7 +291,13 @@ module MedicalDeviceTypeParser =
   type MedicalDeviceType with
     static member parse (x:drugProvider.Topic) =
       let gs = x.Topics |> Array.collect ClinicalMedicalDeviceInformationGroup.list |> Array.toList
-      {id=Id(x.Id); title=x.Title; groups=gs}
+      let products = match x.Body with
+                     | Some b -> b.Sections
+                                 |> Array.choose (withoco "medicinalProduct")
+                                 |> Array.map MedicinalProduct.from
+                                 |> Array.toList
+                     | _ -> []
+      {id=Id(x.Id); title=x.Title; products=products; groups=gs;}
 
 open System.Xml.Linq
 open System.Xml.XPath
