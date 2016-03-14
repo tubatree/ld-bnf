@@ -28,7 +28,7 @@ module MedicinalForm =
 
   type BlackTriangle = | BlackTriangle of string
 
-  type MedicinalProductTitle = | MedicinalProductTitle of Option<Manufacturer> * Option<BlackTriangle> * drugProvider.Title
+  type MedicinalProductTitle = | MedicinalProductTitle of Manufacturer option * BlackTriangle option * string
 
   type Ampid =
     | Ampid of int64
@@ -161,13 +161,11 @@ module MedicinalFormParser =
     static member from (x:drugProvider.Title) =
       let mph = x.Phs |> Array.tryPick (withoc "manufacturer")
       let btph = x.Phs |> Array.tryPick (withoc "blackTriangle")
-      if (mph.IsSome) then mph.Value.XElement.Remove() //edit the xml
-      if (btph.IsSome) then btph.Value.XElement.Remove()
 
       let m =  mph >>= (fromphs Manufacturer)
       let bt = btph >>= (fromphs BlackTriangle)
-
-      MedicinalProductTitle(m,bt,x)
+      let t = x |> nodetext
+      MedicinalProductTitle(m,bt,t.Value |> removebrackets)
 
   type Ampid with
     static member from (x:drugProvider.Data) =

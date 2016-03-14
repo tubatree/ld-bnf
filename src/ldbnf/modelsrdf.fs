@@ -353,7 +353,7 @@ module MedicinalFormRdf =
       let s = optionlist {
                yield m >>= Graph.fromman
                yield bt >>= Graph.frombt
-               yield! t |> dita}
+               yield t |> (Graph.dp "hasTitle")}
       blank !!"nicebnf:hasMedicinalProductTitle" s |> Some
 
     static member fromexc (Excipients e) =
