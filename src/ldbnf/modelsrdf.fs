@@ -348,7 +348,7 @@ module MedicinalFormRdf =
       optionlist {
         yield m >>= Graph.fromman
         yield bt >>= Graph.frombt
-        yield t |> (Graph.dp "Title")}
+        yield! t |> xtitle}
 
     static member fromexc (Excipients e) =
       e |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasExcipients") >> Some)
