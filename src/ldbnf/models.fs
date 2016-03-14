@@ -70,7 +70,7 @@ module MedicinalForm =
 
   type ControlledDrug = | ControlledDrug of drugProvider.P
 
-  type Pack = | Pack of PackInfo option * NhsIndicativeInfo option * DrugTariffInfo option
+  type Pack = | Pack of PackInfo option * NhsIndicativeInfo option * DrugTariffInfo option * drugProvider.Li
 
   type ClinicalMedicinalProductInformation = | ClinicalMedicinalProductInformation of Id
 
@@ -171,6 +171,7 @@ module MedicinalFormParser =
     static member from (x:drugProvider.Data) =
       Ampid(x.Number.Value)
 
+  //add a uri
   type Pack with
     static member from (x:drugProvider.Ul) =
       x.Lis |> Array.map Pack.from
@@ -178,7 +179,7 @@ module MedicinalFormParser =
       let pi = x.Ps |> Array.tryPick (withoco "packInfo") <!> PackInfo.from
       let nio = x.Ps |> Array.tryPick (withoco "nhsIndicativeInfo") <!> NhsIndicativeInfo.from
       let dti = x.Ps |> Array.tryPick (withoco "drugTariffInfo") <!> DrugTariffInfo.from
-      Pack(pi,nio,dti)
+      Pack(pi,nio,dti,x)
 
   type MedicinalProduct with
     static member from (x:drugProvider.Section) =

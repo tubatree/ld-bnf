@@ -35,7 +35,6 @@ module RdfUris =
     [element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
      element |> (stringify >> xsd.string >> (dataProperty !! "nicebnf:hasTextContent"))]
 
-  
 
   type Uri with
     static member nicebnf = "http://ld.nice.org.uk/ns/bnf#"
@@ -48,6 +47,10 @@ module RdfUris =
 
     static member fromobj o s = !!(sprintf "%s%s/%s" Uri.bnfsite (typename o |> splitCamelCase) s)
     static member fromtype<'a> s = !!(sprintf "%s%s/%s" Uri.bnfsite (typeof<'a>.Name |> splitCamelCase) s)
+    static member inline fromcontent o x =
+      let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
+      let ident = element.Value.Replace(" ","-").ToLower()
+      Uri.fromobj o ident
 
     static member has o = !!("nicebnf:has" + typename o)
     static member has<'a>() = !!("nicebnf:has" + typeof<'a>.Name)

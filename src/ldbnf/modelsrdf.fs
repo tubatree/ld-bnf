@@ -350,11 +350,10 @@ module MedicinalFormRdf =
     static member fromman (Manufacturer x) = Graph.dp "Manufacturer" x |> Some
     static member frombt (BlackTriangle x) = Graph.dp "BlackTriangle" x |> Some
     static member frommpt (MedicinalProductTitle(m,bt,t)) =
-      let s = optionlist {
-               yield m >>= Graph.fromman
-               yield bt >>= Graph.frombt
-               yield t |> (Graph.dp "hasTitle")}
-      blank !!"nicebnf:hasMedicinalProductTitle" s |> Some
+      optionlist {
+        yield m >>= Graph.fromman
+        yield bt >>= Graph.frombt
+        yield t |> (Graph.dp "hasTitle")}
 
     static member fromexc (Excipients e) =
       e |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasExcipients") >> Some)
@@ -395,8 +394,9 @@ module MedicinalFormRdf =
        yield pt >>= Graph.frompt
        yield dtp >>= Graph.fromdtp}
 
-    static member frompack(Pack(pi,nii,dti)) =
-      blank !!"nicebnf:hasPack"
+    static member frompack(Pack(pi,nii,dti,li)) =
+      let u = Pack(pi,nii,dti,li) |> Uri.fromcontent <| li
+      one !!"nicebnf:hasPack" u
         (optionlist {
           yield! pi <!> Graph.frompackinfo |> unwrap
           yield! nii <!> Graph.fromnhsii |> unwrap
@@ -407,7 +407,7 @@ module MedicinalFormRdf =
         (optionlist {
           yield a Uri.MedicinalProductEntity
           yield x.ampid |> string |> Graph.dp "Ampid"
-          yield x.title |> Graph.frommpt
+          yield! x.title |> Graph.frommpt
           yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
           yield! x.controlledDrugs |> List.choose Graph.fromcd
           yield! x.packs |> List.map Graph.frompack
