@@ -139,3 +139,9 @@ module prelude =
 
     let removebrackets (s:string) =
       s.Replace("(","").Replace(")","")
+
+    let inline nodetext x =
+      let element = ( ^a : (member XElement : System.Xml.Linq.XElement) x)
+      match element.FirstNode with
+        | :? System.Xml.Linq.XText as t -> t.Value |> Some
+          | _ -> None

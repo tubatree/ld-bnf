@@ -35,6 +35,8 @@ module RdfUris =
     [element |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasDitaContent"))
      element |> (stringify >> xsd.string >> (dataProperty !! "nicebnf:hasTextContent"))]
 
+  
+
   type Uri with
     static member nicebnf = "http://ld.nice.org.uk/ns/bnf#"
     static member nicebnfClass = "http://ld.nice.org.uk/ns/bnf/"

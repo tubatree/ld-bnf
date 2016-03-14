@@ -200,7 +200,7 @@ module BorderlineSubstanceRdf =
               | Some (PreparationTitle(p,m)) ->
                 optionlist {
                   yield p |> (string >> title)
-                  yield p.XElement.Value |> label
+                  yield p |> label
                   yield m |> dpo "Manufacturer"}
               | None -> []
       let ts = pts |> List.map Graph.frompricetarrif
@@ -216,12 +216,12 @@ module BorderlineSubstanceRdf =
         | ProteinGrams p -> p |> dp "ProteinGrams"
         | ProteinConstituents p -> p |> dp "ProteinConstituents"
         | CarbohydrateGrams c -> c |> dp "CarbohydrateGrams"
-        | CarbohydrateConstituents c -> c |> dp "CarbohydrateConstituents"
+        | CarbohydrateConstituents c -> c |> removebrackets |> dp "CarbohydrateConstituents"
         | FatGrams f -> f |> dp "FatGrams"
         | FatConstituents f -> f |> dp "FatConstituents"
         | FibreGrams f -> f |> dp "FibreGrams"
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
-        | Acbs a -> a |> dpx "Acbs"
+        | Acbs a -> a |> dpx "AcbsWarning"
         | Presentation p -> p |> dp "Presentation"
 
     static member fromdetails (Details(ds,bsps)) =

@@ -434,7 +434,7 @@ module BorderlineSubstance =
     | Manufacturer of string
     override __.ToString() = match __ with | Manufacturer x -> string x
 
-  type PreparationTitle = | PreparationTitle of bsProvider.P * Manufacturer option
+  type PreparationTitle = | PreparationTitle of string * Manufacturer option
 
 
   type PackSize =
@@ -498,21 +498,21 @@ module BorderlineSubstanceParser =
   type Manufacturer with
     static member from (x:bsProvider.Ph) =
       match x with
-        | HasOutputClass "manufacturer" ph -> ph.String >>= (Manufacturer >> Some)
+        | HasOutputClass "manufacturer" ph -> ph.String <!> (removebrackets >> Manufacturer)
         | _ -> None
 
   type PreparationTitle with
     static member from (x:bsProvider.P) =
       let m (p:bsProvider.P) = p.Phs |> Array.tryPick Manufacturer.from
       match x with
-        | HasOutputClasso "title" p -> PreparationTitle(p, m p) |> Some
+        | HasOutputClasso "title" p ->
+          match nodetext p with
+          | Some text ->  PreparationTitle(text, m p) |> Some
+          | _ -> None
         | _ -> None
 
-  let fromphn c (x:bsProvider.Ph) =
-    x.Number >>= (c >> Some)
-
-  let fromphs c (x:bsProvider.Ph) =
-    x.String >>= (c >> Some)
+  let fromphn c (x:bsProvider.Ph) = x.Number <!> c
+  let fromphs c (x:bsProvider.Ph) = x.String <!> c
 
   type UnitOfMeasure with
     static member from (x:bsProvider.Ph) = x.String <!> UnitOfMeasure
@@ -521,7 +521,7 @@ module BorderlineSubstanceParser =
     static member from (x:bsProvider.P) =
       let ps = x.Phs |> Array.tryPick (hasOutputclass "packSize") >>= (fromphn PackSize)
       let uom = x.Phs |> Array.tryPick (hasOutputclass "unitOfMeasure") >>= UnitOfMeasure.from
-      let acbs = x.Phs |> Array.tryPick (hasOutputclass "acbs") >>= (fromphs PackAcbs)
+      let acbs = x.Phs |> Array.tryPick (hasOutputclass "acbs") >>= (fromphs (removebrackets >> PackAcbs))
       PackInfo(ps,uom,acbs)
 
   type NhsIndicativeInfo with
