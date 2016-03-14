@@ -29,11 +29,9 @@ module BorderlineSubstanceTaxonomyRdf =
 
   type Graph with
     static member from(x:BorderlineSubstanceTaxonomy) =
-      let l t = match t with | Title t -> t.XElement.Value.ToString()
-
       let s = optionlist {
         yield a Uri.BorderlineSubstanceTaxonomyEntity
-        yield x.title |> (l >> label)
+        yield! x.title |> xtitle
         yield! x.general <!> dita |> unwrap
         yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
         yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
@@ -161,12 +159,9 @@ module BorderlineSubstanceRdf =
 
   type Graph with
     static member from (x:BorderlineSubstance) =
-      let l t = match t with | Title t -> t.XElement.Value.ToString()
-
       let s =  optionlist {
                 yield a Uri.BorderlineSubstanceEntity
-                yield x.title |> (l >> label)
-                yield x.title |> (string >> title)
+                yield! x.title |> xtitle
                 yield x.category |> (string >> Uri.frombst >> objectProperty !!"nicebnf:hasCategory")
                 yield x.intro <!> (string >> xsd.string >> dataProperty !!"nicebnf:hasIntroductoryNote")}
 
@@ -353,7 +348,7 @@ module MedicinalFormRdf =
       optionlist {
         yield m >>= Graph.fromman
         yield bt >>= Graph.frombt
-        yield t |> (Graph.dp "hasTitle")}
+        yield t |> (Graph.dp "Title")}
 
     static member fromexc (Excipients e) =
       e |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasExcipients") >> Some)

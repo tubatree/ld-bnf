@@ -395,10 +395,6 @@ module BorderlineSubstance =
 
   type bsProvider = XmlProvider<"./samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
 
-  type Title =
-    | Title of bsProvider.Title
-    override __.ToString() = match __ with | Title x -> string x
-
   type Link = {Uri:string;Label:string;}
 
   type Category =
@@ -475,7 +471,7 @@ module BorderlineSubstance =
 
   type BorderlineSubstance = {
     id:Id;
-    title:Title;
+    title:bsProvider.Title;
     category:Category;
     intro:IntroductionNote option;
     details:Details list;
@@ -574,13 +570,12 @@ module BorderlineSubstanceParser =
 
   type BorderlineSubstance with
     static member parse (x:bsProvider.Topic) =
-      let t = x.Title |> Title
       let c = x.Body.Data.Value |> Category
       let note = x.Body.Ps |> Array.tryPick IntroductionNote.from
       let ds = x.Body.Sections |> Array.map Detail.from |> Array.toList
 
       {id = Id(x.Id)
-       title = t;
+       title = x.Title;
        category = c;
        intro = note;
        details = ds;
@@ -802,13 +797,10 @@ module IndexParser =
 
 module BorderlineSubstanceTaxonomy =
 
-  type Title =
-      | Title of drugProvider.Title
-      override __.ToString() = match __ with | Title x -> string x
 
   type BorderlineSubstanceTaxonomy = {
     id:Id;
-    title: Title;
+    title: drugProvider.Title;
     general: drugProvider.Section option
     substances: Id list;
     categories: Id list;
@@ -820,7 +812,6 @@ module BorderlineSubstanceTaxonomyParser =
 
   type BorderlineSubstanceTaxonomy with
     static member parse (x:drugProvider.Topic) =
-      let title = x.Title |> Title
       let general = x |> sections "general" |> Array.tryPick Some
       let ids = match x.Body with
                    | Some b -> b.Sections
@@ -830,7 +821,7 @@ module BorderlineSubstanceTaxonomyParser =
                                 |> Array.toList
                    | None -> []
       let cats = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      {id=Id(x.Id);title=title;general=general;substances=ids;categories=cats}
+      {id=Id(x.Id);title=x.Title;general=general;substances=ids;categories=cats}
 
 module MedicalDevice =
 
