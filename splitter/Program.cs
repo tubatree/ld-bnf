@@ -57,7 +57,7 @@ namespace splitter
             var slug = bnfid;
 
             if (title != null && TypesToSlug.Contains(type))
-                slug = Slugger.For(title.Value,false);
+                slug = Slugger.For(title.Value);
 
             return new LookupInfo
             {
