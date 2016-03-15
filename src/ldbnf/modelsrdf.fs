@@ -689,12 +689,15 @@ module SectionsRdf =
         let patientgroup (PatientGroup(agegroup,dosage)) =
           //swap to have the dosage with a group
           let grp (x:AgeGroup) =
-            let g s a = one !!"nicebnf:hasPatientGroup" (Uri.fromgrp s)
-                         [s |> label
-                          objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(a))]
+            let g (p:sectionProvider.P) a =
+              one !!"nicebnf:hasPatientGroup" (Uri.fromgrp p.String.Value)
+                          (optionlist {
+                            yield! p |> xtitle
+                            yield objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(a))
+                            })
             match x with
-              | Adult s -> g s "adult"
-              | Child s -> g s "child"
+              | Adult p -> g p "adult"
+              | Child p -> g p "child"
 
           let dir (Dosage(p)) = p |> dita
 

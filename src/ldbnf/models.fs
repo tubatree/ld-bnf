@@ -988,7 +988,10 @@ module Sections =
       let preparation (x:sectionProvider.Sectiondiv) =
         let title (p:sectionProvider.P) =
           let ti = p |> XmlTitle |> Some
-          let man = p.Phs |> Array.tryPick ((hasOutputclass "manufacturer") >> Option.bind (fun ph -> ph.String) >> (Option.map removebrackets))
+          let man = p.Phs
+                    |> Array.tryPick ((hasOutputclass "manufacturer") >> Option.bind (fun ph ->
+                                                                              ph.XElement.Remove() //side effects
+                                                                              ph.String) >> (Option.map removebrackets))
           Option.lift2 (fun a b -> (a,b)) ti man
         let pack (x:sectionProvider.Sectiondiv) =
           match x.Ps with
@@ -1132,11 +1135,8 @@ module Sections =
   type TherapyType = | Combination | Single
   type Supervision = | Supervised | Unsupervised
   type AgeGroup =
-    | Adult of string
-    | Child of string
-    override __.ToString() = match __ with
-                             | Adult s -> s
-                             | Child s -> s
+    | Adult of sectionProvider.P
+    | Child of sectionProvider.P
 
   type Dosage = | Dosage of sectionProvider.P
 
@@ -1160,13 +1160,12 @@ module Sections =
         let takeninmonths (x:sectionProvider.P) =
           x.Phs |> Array.tryPick (hasOutputclass "takenInMonths" >> Option.bind (fun ph -> ph.String) >> Option.map TakenInMonths)
         let group (x:sectionProvider.Li) =
-          let ageGroup,regimen = match x.Outputclass,x.Ps with
-                                 | "patientGroup adult",[|p;r|] ->
-                                     p.String <!> Adult, r |> Dosage |> Some
-                                 | "patientGroup child",[|p;r|] ->
-                                     p.String <!> Child, r |> Dosage |> Some
-                                 | _ -> None,None
-          Option.lift2 (fun a b -> PatientGroup(a,b)) ageGroup regimen
+          match x.Outputclass,x.Ps with
+            | "patientGroup adult",[|p;r|] ->
+                (p |> Adult, r |> Dosage) |> PatientGroup |> Some
+            | "patientGroup child",[|p;r|] ->
+                (p |> Child, r |> Dosage) |> PatientGroup |> Some
+            | _ -> None
 
         let title = x.Ps |> Array.pick title
         let takenInMonths = x.Ps |> Array.pick (hasOutputclasso "title" >> Option.bind takeninmonths)

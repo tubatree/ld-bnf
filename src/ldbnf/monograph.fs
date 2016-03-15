@@ -112,7 +112,7 @@ module Drug =
 
     type PatientGroup = {
       parentGroup: string
-      Group:string
+      Group:drugProvider.P
       Dosage:string
       dosageXml:drugProvider.P
       }
@@ -380,9 +380,9 @@ module DrugParser =
       static member from (x:drugProvider.Li) =
         match x.Outputclass,x.Ps with
           | Some("patientGroup adult"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g.Value |? ""; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
           | Some("patientGroup child"),[| g; p |] ->
-              {parentGroup = "child" ;Group = g.Value |? ""; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
           | _,_ -> None
 
     type TheraputicIndication with

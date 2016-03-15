@@ -183,10 +183,13 @@ module DrugRdf =
       let patientGrp pg =
         blank !!"nicebnf:hasDosage"
          (optionlist {
-          yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group)
-                 [pg.Group |> label
-                  objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(pg.parentGroup))
-                  a Uri.PatientGroupEntity]
+          yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group.Value.Value)
+                 (optionlist{
+                   yield! pg.Group |> xtitle
+                   yield objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(pg.parentGroup))
+                   yield a Uri.PatientGroupEntity
+                   })
+
           yield pg.Dosage |> label
           yield! pg.dosageXml |> dita
           yield r >>= (Graph.fromsp >> Some)})
