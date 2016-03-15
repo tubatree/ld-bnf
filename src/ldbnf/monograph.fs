@@ -358,8 +358,6 @@ module DrugParser =
         let rs = x.Phs |> Array.choose (hasOutputclass "route") |> Array.map Route.from |> Array.toList
         let is = x.Phs |> Array.choose (hasOutputclass "indication") |> Array.map Indication.from |> Array.toList
         Specificity(Paragraph.from x,rs,is)
-      static member from (x:string) =
-        Specificity(Paragraph(x,None),[],[])
 
     let extractSpecificity (x:drugProvider.Sectiondiv) =
       x.Ps |> Array.choose (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
@@ -655,13 +653,11 @@ module DrugParser =
         ps |> Array.map (fun p -> p,p.Phs |> Array.map SideEffect |> Array.toList) |> Array.pick f
 
       static member title (x:drugProvider.Sectiondiv) =
-        x.Ps |> Array.pick (fun p -> match p with
-                                                | HasOutputClasso "title" p -> Some(p.Value.Value)
-                                                | _ -> None)
+        x.Ps |> Array.pick (hasOutputclasso "title")
       static member frequency (x:drugProvider.Sectiondiv) =
         let l = x |> SideEffectsGroup.title
-        match x.Outputclass,l with
-          | Some(c),l -> {frequencyid=c;label=l}
+        match x.Outputclass,l.Value with
+          | Some c ,Some s -> {frequencyid=c;label=s}
           | _ -> failwith "missing parts of the frequency"
 
       static member fromge (x:drugProvider.Sectiondiv) =
@@ -701,9 +697,9 @@ module DrugParser =
         let ac (x:drugProvider.Sectiondiv) =
           match x with
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
-                ContraindicationWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+                ContraindicationWithRoutes(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-              ContraindicationWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
+              ContraindicationWithIndications(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Contraindication.from |> Array.toList)
             | _ -> failwith "unmatched ouput class" 
         [|x.Ps |> Array.map gen
           x.Sectiondivs |> Array.choose (hasOutputclasso "additionalContraindications") |> Array.collect (fun sd -> sd.Sectiondivs |> Array.map ac) |] |> Array.collect id
@@ -717,9 +713,9 @@ module DrugParser =
         let ac (x:drugProvider.Sectiondiv) =
           match x with
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
-                CautionsWithRoutes(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+                CautionsWithRoutes(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-                CautionsWithIndications(Specificity.from(s.Ps.[0].Value.Value), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+                CautionsWithIndications(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | _ -> failwith "unmatched output class"
 
         [|x.Ps |> Array.map gen

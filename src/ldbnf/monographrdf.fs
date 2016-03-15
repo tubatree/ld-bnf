@@ -170,9 +170,9 @@ module DrugRdf =
     static member fromti (Bnf.Drug.Title (Paragraph(s,_))) =
       Some(dataProperty !!"nicebnf:hasTitle" (s^^xsd.string))
 
-    static member fromsp (Specificity (Paragraph(s,_),r,i)) =
+    static member fromsp (Specificity (Paragraph(s,p),r,i)) =
       let sp = optionlist {
-                yield s |> label
+                yield! p <!> xtitle |> unwrap
                 yield a Uri.SpecificityEntity
                 yield! r |> List.choose Graph.from
                 yield! i |> List.choose Graph.from}
