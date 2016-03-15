@@ -4,21 +4,14 @@ open prelude
 open Shared
 
 module MedicinalForm =
-  type Title =
-    | Title of string
-    override __.ToString() = match __ with | Title x -> x
 
   type LabelNumber =
     | LabelNumber of decimal
     override __.ToString() = match __ with | LabelNumber x -> string x
 
-  type CautionaryAndAdvisoryLabelsTitle =
-    | CautionaryAndAdvisoryLabelsTitle of string
-    override __.ToString() = match __ with | CautionaryAndAdvisoryLabelsTitle x -> x
-
   type CautionaryAdvisoryLabel = | CautionaryAdvisoryLabel of Option<LabelNumber> * drugProvider.P
 
-  type CautionaryAdvisoryLabels = | CautionaryAdvisoryLabels of Option<CautionaryAndAdvisoryLabelsTitle> * CautionaryAdvisoryLabel []
+  type CautionaryAdvisoryLabels = | CautionaryAdvisoryLabels of drugProvider.Title * CautionaryAdvisoryLabel []
 
   type Excipients = | Excipients of drugProvider.Section
 
@@ -83,7 +76,7 @@ module MedicinalForm =
 
   type MedicinalForm = {
     id : Id;
-    title : Title option;
+    title : drugProvider.Title;
     excipients : Excipients option;
     electrolytes : Electrolytes option;
     cautionaryAdvisoryLabels : CautionaryAdvisoryLabels option;
@@ -113,10 +106,9 @@ module MedicinalFormParser =
   type CautionaryAdvisoryLabels with
     static member from (x:drugProvider.Section) =
       let ls = x.Ps |> Array.map CautionaryAdvisoryLabel.from
-      let t = match x.Title with
-                | Some t -> t.Value <!> CautionaryAndAdvisoryLabelsTitle
-                | None -> failwith "CautionaryAdvisoryLabels must have a Title"
-      CautionaryAdvisoryLabels(t,ls)
+      match x.Title with
+            | Some t -> CautionaryAdvisoryLabels(t,ls)
+            | None -> failwith "CautionaryAdvisoryLabels must have a Title"
 
   let fromphn c (x:drugProvider.Ph) = x.Number <!> c
 
@@ -209,7 +201,7 @@ module MedicinalFormParser =
         | Some (b) -> b.Sections
         | _ -> failwith "body is required"
 
-      let t = x.Title.Value <!> Title
+      let t = x.Title
 
       let cals = x |> sections
                    |> Array.tryPick (withoco "cautionaryAndAdvisoryLabels" >> Option.map CautionaryAdvisoryLabels.from)
@@ -431,7 +423,7 @@ module BorderlineSubstance =
     | Manufacturer of string
     override __.ToString() = match __ with | Manufacturer x -> string x
 
-  type PreparationTitle = | PreparationTitle of string * Manufacturer option
+  type PreparationTitle = | PreparationTitle of bsProvider.P * Manufacturer option
 
 
   type PackSize =
@@ -495,17 +487,16 @@ module BorderlineSubstanceParser =
   type Manufacturer with
     static member from (x:bsProvider.Ph) =
       match x with
-        | HasOutputClass "manufacturer" ph -> ph.String <!> (removebrackets >> Manufacturer)
+        | HasOutputClass "manufacturer" ph ->
+          ph.XElement.Remove()  //Side effects
+          ph.String <!> (removebrackets >> Manufacturer)
         | _ -> None
 
   type PreparationTitle with
     static member from (x:bsProvider.P) =
       let m (p:bsProvider.P) = p.Phs |> Array.tryPick Manufacturer.from
       match x with
-        | HasOutputClasso "title" p ->
-          match nodetext p with
-          | Some text ->  PreparationTitle(text, m p) |> Some
-          | _ -> None
+        | HasOutputClasso "title" p -> PreparationTitle(p, m p) |> Some
         | _ -> None
 
   let fromphn c (x:bsProvider.Ph) = x.Number <!> c
@@ -648,10 +639,6 @@ module WoundManagement =
 
   type wmProvider = XmlProvider<"./samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
 
-  type Title =
-    | Title of string
-    override __.ToString () = match __ with | Title x -> x
-
   type TypeOfWound = | TypeOfWound of string
 
   type Description = | Description of wmProvider.Sectiondiv
@@ -669,7 +656,7 @@ module WoundManagement =
     manufacturer: string;
   }
 
-  type ProductGroup = | ProductGroup of Title * Description option * Product list
+  type ProductGroup = | ProductGroup of wmProvider.P * Description option * Product list
 
   type WoundManagement = {
     id: Id;
@@ -685,9 +672,6 @@ module WoundManagementParser =
   open WoundManagement
 
   let desc = Array.tryPick (hasOutputclasso "description" >> Option.map Description)
-
-  type Title with
-    static member from (x:wmProvider.P) = x.Value <!> Title
 
   type WoundManagementLink with
     static member from (x:wmProvider.Xref) =
@@ -733,7 +717,7 @@ module WoundManagementParser =
     static member list (x:wmProvider.Section) =
       x.Sectiondivs |> Array.choose (hasOutputclasso "productGroup" >> Option.map ProductGroup.from)
     static member from (x:wmProvider.Sectiondiv) =
-      let t = x.Ps |> Array.pick (hasOutputclasso "title" >> Option.bind Title.from)
+      let t = x.Ps |> Array.pick (hasOutputclasso "title")
       let d = x.Sectiondivs |> desc
       let ps = x.Sectiondivs |> Product.list
       ProductGroup(t,d,ps)
@@ -757,15 +741,12 @@ module WoundManagementParser =
 module Generic =
   type genericProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
 
-  type Title =
-    | Title of string
-    override __.ToString () = match __ with | Title x -> x
   type TargetAudience = | TargetAudience of string
   type Content = | Content of genericProvider.Section * TargetAudience option
 
   type Generic = {
     id:Id;
-    title:Title;
+    title:genericProvider.Title;
     content:Content list;
     links:ContentLink seq
   }
@@ -783,7 +764,7 @@ module GenericParser =
               | Some b -> b.Sections |> Array.map Content.from |> Array.toList
               | None -> []
       let ls = x.XElement |> ContentLink.from
-      {id=Id(x.Id); title = Title(x.Title); content = c; links = ls}
+      {id=Id(x.Id); title = x.Title; content = c; links = ls}
 
 module Index =
   type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>

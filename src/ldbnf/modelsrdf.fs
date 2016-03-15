@@ -67,7 +67,6 @@ module GenericRdf =
   open Bnf.Generic
 
   type Graph with
-    static member fromti (Title s) = s |> label
 
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
@@ -86,7 +85,7 @@ module GenericRdf =
 
       let s = optionlist {
         yield a !!(Uri.nicebnf + n)
-        yield Graph.fromti x.title
+        yield! x.title |> xtitle
         yield! x.links |> Seq.map Graph.from |> Seq.toList
         yield! x.content |> List.map Graph.fromcontent}
 
@@ -194,8 +193,7 @@ module BorderlineSubstanceRdf =
       let s = match t with
               | Some (PreparationTitle(p,m)) ->
                 optionlist {
-                  yield p |> (string >> title)
-                  yield p |> label
+                  yield! p |> xtitle
                   yield m |> dpo "Manufacturer"}
               | None -> []
       let ts = pts |> List.map Graph.frompricetarrif
@@ -311,7 +309,7 @@ module MedicinalFormRdf =
     static member from (x:MedicinalForm) =
       let s = optionlist{
                 yield a Uri.MedicinalFormEntity
-                yield x.title >>= (string >> label >> Some)
+                yield! x.title |> xtitle
                 yield x.excipients >>= Graph.fromexc
                 yield x.electrolytes >>= Graph.fromele}
 
@@ -418,7 +416,6 @@ module WoundManagementRdf =
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
                                                   "bnfsite",!!Uri.bnfsite]
-    static member fromTitle (Title t) = t |> label
 
     static member from (x:WoundManagement) =
       let s = optionlist {
@@ -461,7 +458,7 @@ module WoundManagementRdf =
     static member fromProductGroup (ProductGroup(t,d,pl)) =
       blank !!"nicebnf:hasProductGroup"
         (optionlist {
-            yield t |>  Graph.fromTitle
+            yield! t |>  xtitle
             yield! d <!> Graph.fromDescription |> unwrap
             yield! pl |> List.map Graph.fromProduct
             })
