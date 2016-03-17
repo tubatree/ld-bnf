@@ -14,6 +14,7 @@ module RdfUris =
   open Bnf.WoundManagement
   open Bnf.BorderlineSubstanceTaxonomy
   open Bnf.Publication
+  open Bnf.ClinicalMedicalDeviceInformationGroup
   open Assertion
   open rdf
   open Shared
@@ -84,7 +85,9 @@ module RdfUris =
     static member frommd (x:Id) = !!(Uri.bnfsite + "medical-device/" + string x)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medical-device-type/" + string x.id)
     static member frommdt (x:Id) = !!(Uri.bnfsite + "medical-device-type/" + string x)
-    static member fromcmdig (x:MedicalDeviceType) id = !!(Uri.bnfsite + "medical-device-type/" + string x.id + "#" + string id)
+
+    static member fromcmdig_id (x:ClinicalMedicalDeviceInformationGroup) id = !!(Uri.bnfsite + "clinical-medical-device-information-group/" + string x.id + "#" + string id)
+    static member fromcmdig (x:ClinicalMedicalDeviceInformationGroup) = !!(Uri.bnfsite + "clinical-medical-device-information-group/" + string x.id)
 
     static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interaction/" + (l.Href.ToId() |> string ))
     static member fromil id = !!(Uri.bnfsite + "interaction/" + string id)

@@ -463,7 +463,40 @@ module WoundManagementRdf =
             yield! pl |> List.map Graph.fromProduct
             })
 
+module ClinicalMedicalDeviceInformationGroupRdf =
+  open ClinicalMedicalDeviceInformationGroup
+  open Bnf.Drug
+  open Bnf.MedicinalForm
+  open Bnf.MedicalDeviceType
+  open DrugRdf
+  open MedicinalFormRdf
 
+  type Graph with
+    static member from (x:ClinicalMedicalDeviceInformationGroup) = 
+      let uri = Uri.fromcmdig_id x
+
+      let s =  optionlist {
+                yield a Uri.ClinicalMedicalDeviceInformationGroupEntity
+                yield! x.title |> xtitle
+                yield x.description <!> (Graph.fromdd uri)
+                yield x.complicance <!> (Graph.fromcs uri)}
+
+      let sec = Graph.fromsec uri
+
+      let ss = x.sections |> List.collect sec
+      let mps = x.products |> List.map Graph.from
+
+      let dr r = resource (Uri.fromcmdig x) r
+      [dr ss
+       dr mps
+       dr s]
+       |> Assert.graph Graph.setupGraph
+
+    static member fromdd uri (DeviceDescription(id,sd)) =
+      one !!"nicebnf:hasDeviceDescription" (uri id) (sd |> dita)
+
+    static member fromcs uri (ComplicanceStandards(id,sd)) =
+      one !!"nicebnf:hasComplicanceStandards" (uri id) (sd |> dita)
 
 module MedicalDeviceTypeRdf =
   open Bnf.Drug
@@ -478,36 +511,16 @@ module MedicalDeviceTypeRdf =
                yield a Uri.MedicalDeviceTypeEntity
                yield! x.title |> xtitle}
 
-      let uri = Uri.fromcmdig x
 
-      let gs = x.groups |> List.map (Graph.fromcmdig uri)
+      //let gs = x.groups |> List.map (Graph.fromcmdig uri)
       let products = x.products |> List.map Graph.from
 
       let dr r = resource (Uri.from x) r
       [dr s
-       dr gs
+       //dr gs
        dr products]
        |> Assert.graph Graph.setupGraph
 
-    static member fromcmdig uri (x:ClinicalMedicalDeviceInformationGroup) =
-      let s =  optionlist {
-                yield a Uri.ClinicalMedicalDeviceInformationGroupEntity
-                yield! x.title |> xtitle
-                yield x.description <!> (Graph.fromdd uri)
-                yield x.complicance <!> (Graph.fromcs uri)}
-
-      let sec = Graph.fromsec uri
-
-      let ss = x.sections |> List.collect sec
-      let mps = x.products |> List.map Graph.from
-
-      one !!"nicebnf:hasClinicalMedicalDeviceInformationGroup" (uri x.id) (s @ ss @ mps)
-
-    static member fromdd uri (DeviceDescription(id,sd)) =
-      one !!"nicebnf:hasDeviceDescription" (uri id) (sd |> dita)
-
-    static member fromcs uri (ComplicanceStandards(id,sd)) =
-      one !!"nicebnf:hasComplicanceStandards" (uri id) (sd |> dita)
 
 module SectionsRdf =
   open Sections

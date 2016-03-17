@@ -218,7 +218,7 @@ module MedicinalFormParser =
                     |> Array.toList
       {id = Id(x.Id); title = t; excipients=ex; electrolytes=el; cautionaryAdvisoryLabels = cals; medicinalProducts = mps; cmpis = cmpis;}
 
-module MedicalDeviceType =
+module ClinicalMedicalDeviceInformationGroup =
   open Drug
   open MedicinalForm
 
@@ -232,21 +232,14 @@ module MedicalDeviceType =
      sections:MonographSection list;
      products:MedicinalProduct list;
      description:DeviceDescription option;
-     complicance:ComplicanceStandards option}
+     complicance:ComplicanceStandards option }
 
-  type MedicalDeviceType = {
-     id:Id
-     title:drugProvider.Title
-     products:MedicinalProduct list
-     groups:ClinicalMedicalDeviceInformationGroup list
-    }
-
-module MedicalDeviceTypeParser =
+module ClinicalMedicalDeviceInformationGroupParser =
+  open ClinicalMedicalDeviceInformationGroup
   open Drug
   open DrugParser
   open MedicinalForm
   open MedicinalFormParser
-  open MedicalDeviceType
 
   let sections (x:drugProvider.Topic) =
     match x.Body with
@@ -264,9 +257,7 @@ module MedicalDeviceTypeParser =
     static member from = firstsd ComplicanceStandards
 
   type ClinicalMedicalDeviceInformationGroup with
-    static member list (x:drugProvider.Topic) =
-      x.Topics |> Array.map ClinicalMedicalDeviceInformationGroup.from
-    static member from (x:drugProvider.Topic) =
+    static member parse (x:drugProvider.Topic) =
       let mss = x.Topics |> Array.map MonographSection.section |> Array.choose id |> Array.toList
 
       let mps = x.Topics
@@ -281,9 +272,30 @@ module MedicalDeviceTypeParser =
 
       {id=Id(x.Id); title=x.Title; sections=mss; products=mps; description = des; complicance = com;}
 
+module MedicalDeviceType =
+  open Drug
+  open MedicinalForm
+
+  type MedicalDeviceType = {
+     id:Id
+     title:drugProvider.Title
+     products:MedicinalProduct list
+     groups: Href list
+    }
+
+module MedicalDeviceTypeParser =
+  open Drug
+  open DrugParser
+  open MedicinalForm
+  open MedicinalFormParser
+  open MedicalDeviceType
+
   type MedicalDeviceType with
     static member parse (x:drugProvider.Topic) =
-      let gs = x.Topics |> Array.collect ClinicalMedicalDeviceInformationGroup.list |> Array.toList
+      let gs = x.Topics
+               |> Array.collect (fun t -> t.Xrefs)
+               |> Array.map (fun x -> x.Href |> Href)
+               |> Array.toList
       let products = match x.Body with
                      | Some b -> b.Sections
                                  |> Array.choose (withoco "medicinalProduct")

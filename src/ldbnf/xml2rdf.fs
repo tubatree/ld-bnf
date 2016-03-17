@@ -39,6 +39,8 @@ open Bnf.BorderlineSubstanceTaxonomyParser
 open Bnf.Index
 open Bnf.IndexParser
 open Bnf.Sections
+open Bnf.ClinicalMedicalDeviceInformationGroup
+open Bnf.ClinicalMedicalDeviceInformationGroupParser
 open FSharp.RDF
 
 open resource
@@ -59,6 +61,7 @@ open Bnf.MedicalDeviceRdf
 open Bnf.BorderlineSubstanceTaxonomyRdf
 open Bnf.IndexRdf
 open Bnf.SectionsRdf
+open Bnf.ClinicalMedicalDeviceInformationGroupRdf
 
 module Iterator =
 
@@ -131,6 +134,7 @@ module Iterator =
             | "helicobacter-pylori-regimens" -> fi |> sectionProvider.Load |> HelicobacterPyloriRegimens.parse |> Graph.fromHelicobacterPyloriRegimens |> Done
             | "malaria-prophylaxis-regimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.fromMalariaProphylaxisRegimens |> Done
             | "intramuscular-adrenaline-emergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromIntramuscularAdrenalineEmergency |> Done
+            | "clinical-medical-device-information-group" -> fi |> drugProvider.Load |> ClinicalMedicalDeviceInformationGroup.parse |> Graph.from |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
   let writettl graph path t =
