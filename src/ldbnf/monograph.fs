@@ -381,6 +381,16 @@ module DrugParser =
               {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
           | Some("patientGroup child"),[| g; p |] ->
               {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup adult asian"),[| g; p |] ->
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup adult eastAsian"),[| g; p |] ->
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup adult female"),[| g; p |] ->
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup adult male"),[| g; p |] ->
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+          | Some("patientGroup neonate"),[| g; p |] ->
+              {parentGroup = "neonate" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
           | _,_ -> None
 
     type TheraputicIndication with
