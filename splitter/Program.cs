@@ -260,6 +260,8 @@ namespace splitter
             //no output class
 			"#PHP101868",
 			"#PHP101869",
+            "dp",
+			"np",
 
             //the lists
             "#drugs",
@@ -281,6 +283,11 @@ namespace splitter
             "fluidAndElectrolytes"
         };
 
+        static readonly Dictionary<string,string> Hack = new Dictionary<string, string>
+        {
+            {"PHP101868","dp"},
+            {"PHP101869","np"}
+        };
 
         static bool IsUnitOfWork(XElement xElement)
         {
@@ -296,8 +303,11 @@ namespace splitter
         {
             if (!topic.HasAttributes) return "";
 
-            var bnfid = topic.GetAttributeValue("bnfid").Trim();
+            var bnfid = topic.GetAttributeValue("bnfid", topic.GetAttributeValue("id")).Trim();
             var outputclass = topic.GetAttributeValue("outputclass").Trim();
+
+            if (Hack.ContainsKey(bnfid))
+                return Hack[bnfid];
 
             if ((bnfid == "" || bnfid.StartsWith("PHP") || bnfid.StartsWith("bnf_")) && outputclass != "")
             {
