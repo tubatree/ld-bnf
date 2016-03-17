@@ -80,6 +80,7 @@ namespace splitter
 			"medicalDeviceType",
 			"clinicalMedicinalProductInformation",
 			"interaction",
+            "clinicalMedicalDeviceInformationGroup"
         };
 
         static void Main(string[] args)
@@ -250,6 +251,8 @@ namespace splitter
 			"medicinalForm",
 			"clinicalMedicinalProductInformation",
 			"#clinicalMedicinalProductInformation",
+
+            "clinicalMedicalDeviceInformationGroup",
 
 			"interaction",
        "guidance",
