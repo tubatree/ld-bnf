@@ -71,6 +71,7 @@ namespace splitter
         static readonly List<string> TypesToSlug = new List<string>
         {
 			"borderlineSubstance",
+			"borderlineSubstanceTaxonomy",
 			"woundManagement",
 			"treatmentSummary",
 			"drugClassifications",
@@ -80,7 +81,13 @@ namespace splitter
 			"medicalDeviceType",
 			"clinicalMedicinalProductInformation",
 			"interaction",
-            "clinicalMedicalDeviceInformationGroup"
+            "clinicalMedicalDeviceInformationGroup",
+			"about",
+			"guidance",
+			"labels",
+			"cautionaryAndAdvisoryLabels",
+			"dental-practitioners-formulary",
+			"nurse-prescribers-formulary"
         };
 
         static void Main(string[] args)
@@ -255,16 +262,16 @@ namespace splitter
             "clinicalMedicalDeviceInformationGroup",
 
 			"interaction",
-       "guidance",
-       "about",
-       "labels",
-       "cautionaryAndAdvisoryLabels",
+	        "guidance",
+	        "about",
+	        "labels",
+	        "cautionaryAndAdvisoryLabels",
 
             //no output class
 			"#PHP101868",
 			"#PHP101869",
-            "dp",
-			"np",
+			"dental-practitioners-formulary",
+			"nurse-prescribers-formulary",
 
             //the lists
             "#drugs",
@@ -288,8 +295,8 @@ namespace splitter
 
         static readonly Dictionary<string,string> Hack = new Dictionary<string, string>
         {
-            {"PHP101868","dp"},
-            {"PHP101869","np"}
+			{"PHP101868","dental-practitioners-formulary"},
+			{"PHP101869","nurse-prescribers-formulary"}
         };
 
         static bool IsUnitOfWork(XElement xElement)

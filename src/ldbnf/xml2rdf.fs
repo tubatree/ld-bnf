@@ -113,8 +113,8 @@ module Iterator =
             | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Done
             | "medical-device-type" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
             | "wound-management" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
-            | "php101868" -> content "DentalPractitionersFormulary"
-            | "php101869" -> content "NursePrescribersFormulary"
+            | "dental-practitioners-formulary" -> content "DentalPractitionersFormulary"
+            | "nurse-prescribers-formulary" -> content "NursePrescribersFormulary"
             | "borderline-substance-acbs" -> content "BorderlineSubstanceAcbs"
             | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
