@@ -129,6 +129,14 @@ namespace splitter
 			{
 				section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
 			}
+			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='labels']"))
+			{
+				section.SetAttributeValue("outputclass", "treatmentSummary about");
+			}
+			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='cautionaryAndAdvisoryLabels']"))
+			{
+				section.SetAttributeValue("outputclass", "treatmentSummary about");
+			}
 
             // <data name="inheritsFromClass">PHP34650</data>
             foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass']"))
@@ -301,8 +309,6 @@ namespace splitter
         {
 			{"PHP101868","dental-practitioners-formulary"},
 			{"PHP101869","nurse-prescribers-formulary"},
-			{"PHP9294","about"},
-			{"PHP194","about"},
         };
 
         static bool IsUnitOfWork(XElement xElement)
