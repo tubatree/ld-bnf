@@ -509,17 +509,19 @@ module MedicalDeviceTypeRdf =
     static member from (x:MedicalDeviceType) =
       let s = optionlist {
                yield a Uri.MedicalDeviceTypeEntity
-               yield! x.title |> xtitle}
-
-
-      //let gs = x.groups |> List.map (Graph.fromcmdig uri)
-      let products = x.products |> List.map Graph.from
+               yield! x.title |> xtitle
+               yield! x.groups |> List.map Graph.fromcmdig
+               yield! x.products |> List.map Graph.fromproducts
+               }
 
       let dr r = resource (Uri.from x) r
-      [dr s
-       //dr gs
-       dr products]
-       |> Assert.graph Graph.setupGraph
+      [dr s]
+      |> Assert.graph Graph.setupGraph
+
+    static member fromproducts (x:MedicinalProduct) = Graph.from x
+
+    static member fromcmdig (x:Href) =
+      objectProperty !!"nicebnf:hasClinicalMedicalDeviceInformationGroup" (Uri.fromcmdig (string x))
 
 
 module SectionsRdf =

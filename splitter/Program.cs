@@ -46,27 +46,42 @@ namespace splitter
             public string Href { get; set; }
         }
 
-        static readonly Slugger Slugger = new Slugger();
+		static readonly Slugger Slugger = new Slugger();
 
-
-        public static LookupInfo GetInfo(XElement e)
+        public static LookupInfo AnnotateElement(XElement e)
         {
             var title = e.Element("title");
-            var bnfid = e.Attribute("id").Value.Replace(".xml", "").Replace("#", "");
-            var type = GetTopicType(e);
-            var slug = bnfid;
+			var bnfid = e.Attribute("id").Value.Replace(".xml", "").Replace("#", "");
+			var type = GetTopicType(e);
+			var slug = RootIds.Contains(bnfid) ? "index" : bnfid;
 
-            if (title != null && TypesToSlug.Contains(type))
+			if (slug != "index" && title != null && TypesToSlug.Contains(type))
                 slug = Slugger.For(title.Value);
 
-            return new LookupInfo
-            {
-                BnfId = bnfid,
-                Type = GetTopicType(e),
-                Slug = slug,
-                Href = type.SplitCamel() + "/" + slug + ".xml"
-            };
-        }
+			var lookup = new LookupInfo {
+				BnfId = bnfid,
+				Type = type,
+				Slug = slug,
+				Href = type.SplitCamel () + "/" + slug + ".xml"
+			};
+
+			e.SetAttributeValue("id", lookup.Slug);
+			e.SetAttributeValue("bnfid", lookup.BnfId);
+			e.SetAttributeValue("type", lookup.Type);
+			e.SetAttributeValue("Slug", lookup.Slug);
+			e.SetAttributeValue("href", lookup.Href);
+
+            return lookup;
+		}
+
+		static readonly List<string> RootIds = new List<string>
+		{
+			"PHP101868",		// dental prescribers formulary
+			"PHP101869",		// nurse practitioners formulary
+			"PHP101071",		// wound management
+			"PHP103610",		// borderline stubstances
+			"medicalDevices"	// medical devices
+		};
 
         static readonly List<string> TypesToSlug = new List<string>
         {
@@ -107,24 +122,27 @@ namespace splitter
                 process = f => types.Contains(f.Type);
             }
 
-            var doc = XDocument.Load(filename);
+			var doc = XDocument.Load(filename);
 
-            foreach (var section in doc.XPathSelectElements("//section[@outputclass='electrolytes']"))
-            {
-                section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
-            }
+			// change the outputclass so it doesn't clash
+			foreach (var section in doc.XPathSelectElements("//section[@outputclass='electrolytes']"))
+			{
+				section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
+			}
 
             // <data name="inheritsFromClass">PHP34650</data>
             foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass']"))
             {
                 data.Name = "xref";
                 data.SetAttributeValue("href",data.Value);
-            }
+			}
 
+			// generate lookup info
             var lookup = doc.XPathSelectElements("//topic[@id] | //section[@id]")
-                .Select(GetInfo)
+				.Select(AnnotateElement)
                 .ToDictionary(i => i.BnfId, i => i);
 
+			// annotate links with lookup info
             foreach (var xref in doc.XPathSelectElements("//xref").ToList())
             {
                 var href = xref.Attribute("href");
@@ -149,17 +167,6 @@ namespace splitter
                     xref.SetAttributeValue("href", lookup[parts[0]].Href + "#" + lookup[parts[1]].Slug);
                     xref.SetAttributeValue("bnfid", lookup[parts[1]].BnfId);
                 }
-            }
-
-            foreach (var topic in doc.XPathSelectElements("//topic | //section").ToList())
-            {
-                var idatt = topic.Attribute("id");
-                if (idatt == null) continue;
-             
-                var id = idatt.Value.Replace(".xml", "").Replace("#", "");
-
-                topic.SetAttributeValue("id", lookup[id].Slug);
-                topic.SetAttributeValue("bnfid", lookup[id].BnfId);
             }
             
             var fragments = ProcessWithId(doc.Root);
@@ -192,12 +199,12 @@ namespace splitter
             }});
 
             return childFragments;
-        }
+		}
 
-        public static string DeriveId(XElement element)
-        {
-            return element.Attribute("id") == null ? "no-id" : element.Attribute("id").Value;
-        }
+		public static string DeriveId(XElement element)
+		{
+			return element.Attribute("id") == null ? "index" : element.Attribute("id").Value;
+		}
 
         static IEnumerable<XElement> FindAllAddressableChildren(XContainer element)
         {
@@ -209,10 +216,7 @@ namespace splitter
 
         static string CreateLink(XElement child)
         {
-            var file = DeriveId(child) + ".xml";
-            var type = GetTopicType(child).SplitCamel();
-
-            return type + "/" + file;
+			return child.GetAttributeValue("href");
         }
 
         static XElement CreateLinks(XElement element)
@@ -293,10 +297,12 @@ namespace splitter
             "fluidAndElectrolytes"
         };
 
-        static readonly Dictionary<string,string> Hack = new Dictionary<string, string>
+        static readonly Dictionary<string,string> TopicHack = new Dictionary<string, string>
         {
 			{"PHP101868","dental-practitioners-formulary"},
-			{"PHP101869","nurse-prescribers-formulary"}
+			{"PHP101869","nurse-prescribers-formulary"},
+			{"PHP9294","about"},
+			{"PHP194","about"},
         };
 
         static bool IsUnitOfWork(XElement xElement)
@@ -313,11 +319,11 @@ namespace splitter
         {
             if (!topic.HasAttributes) return "";
 
-            var bnfid = topic.GetAttributeValue("bnfid", topic.GetAttributeValue("id")).Trim();
+            var bnfid = topic.GetAttributeValue("bnfid", topic.GetAttributeValue("id", "index")).Trim();
             var outputclass = topic.GetAttributeValue("outputclass").Trim();
 
-            if (Hack.ContainsKey(bnfid))
-                return Hack[bnfid];
+			if (TopicHack.ContainsKey(bnfid))
+				return TopicHack[bnfid];
 
             if ((bnfid == "" || bnfid.StartsWith("PHP") || bnfid.StartsWith("bnf_")) && outputclass != "")
             {
@@ -327,10 +333,10 @@ namespace splitter
 
                 return types[0];
             }
+
             if (bnfid.StartsWith("bnf_"))
-            {
                 return "drugInterction";
-            }
+			
             return "#" + bnfid;
         }
     }

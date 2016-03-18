@@ -88,6 +88,7 @@ module RdfUris =
 
     static member fromcmdig_id (x:ClinicalMedicalDeviceInformationGroup) id = !!(Uri.bnfsite + "clinical-medical-device-information-group/" + string x.id + "#" + string id)
     static member fromcmdig (x:ClinicalMedicalDeviceInformationGroup) = !!(Uri.bnfsite + "clinical-medical-device-information-group/" + string x.id)
+    static member fromcmdig (x:string) = !!(Uri.bnfsite + "clinical-medical-device-information-group/" + (string x).Replace(".xml",""))
 
     static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interaction/" + (l.Href.ToId() |> string ))
     static member fromil id = !!(Uri.bnfsite + "interaction/" + string id)
