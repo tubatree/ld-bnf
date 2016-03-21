@@ -139,7 +139,7 @@ namespace splitter
 			}
 
             // <data name="inheritsFromClass">PHP34650</data>
-            foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass']"))
+            foreach (var data in doc.XPathSelectElements("//data[@name='inheritsFromClass' or @name='category']"))
             {
                 data.Name = "xref";
                 data.SetAttributeValue("href",data.Value);
