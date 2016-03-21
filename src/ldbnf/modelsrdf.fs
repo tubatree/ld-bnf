@@ -202,6 +202,10 @@ module BorderlineSubstanceRdf =
     static member fromdetail (x:Detail) =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
       let inline dpx n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.xmlliteral)
+      let acbs (p:bsProvider.P) =
+        blank !!"nicebnf:hasAcbsWarning"
+         [dataProperty !!("nicebnf:hasDitaContent") ((string p)^^xsd.xmlliteral)
+          dataProperty !!("nicebnf:hashasACBSNote") ((p.XElement.Value)^^xsd.string)]
       match x with
         | Formulation s -> s |> dp "Formulation"
         | EnergyKj e -> e |> dp "EnergyKj"
@@ -214,7 +218,7 @@ module BorderlineSubstanceRdf =
         | FatConstituents f -> f |> dp "FatConstituents"
         | FibreGrams f -> f |> dp "FibreGrams"
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
-        | Acbs a -> a |> dpx "AcbsWarning"
+        | Acbs a -> a |> acbs
         | Presentation p -> p |> dp "Presentation"
         | RxAdvice p -> p |> dp "RxAdvice"
 
