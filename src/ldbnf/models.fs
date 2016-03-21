@@ -577,7 +577,7 @@ module BorderlineSubstanceParser =
 
   type BorderlineSubstance with
     static member parse (x:bsProvider.Topic) =
-      let c = x.Body.Data.Value |> Category
+      let c = x.Body.Xref.Href |> Category
       let note = x.Body.Ps |> Array.tryPick IntroductionNote.from
       let ds = x.Body.Sections |> Array.map Detail.from |> Array.toList
 

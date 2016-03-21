@@ -2,7 +2,7 @@
 <topic id="PHP103629" outputclass="borderlineSubstance">
     <title>Fresubin<tm tmtype="reg"/> HP Energy</title>
     <body>
-     <data name="category">PHP102516</data>
+     <xref name="category" href="PHP102516">PHP102516</xref>
      <p outputclass="introductionNote">Not suitable for use in child under 1 year; not recommended
      for child 1–6 years</p>
      <p>Random content</p>
@@ -88,7 +88,7 @@
 <topic id="PHP103615" outputclass="borderlineSubstance">
   <title>Novasource<tm tmtype="reg" /> GI Control</title>
   <body>
-    <data name="category">PHP102484</data>
+    <xref name="category" href="PHP102484">PHP102484</xref>
     <p outputclass="introductionNote">Not suitable for use in child under 1 year; not recommended for child 1–6 years</p>
     <section outputclass="details">
       <p outputclass="formulation">Liquid (tube feed)</p>
@@ -112,7 +112,7 @@
 <topic id="PHP103625" outputclass="borderlineSubstance">
   <title>Elemental 028<tm tmtype="reg" /> Extra</title>
   <body>
-    <data name="category">PHP102494</data>
+    <xref name="category" href="PHP102494">PHP102494</xref>
     <p outputclass="introductionNote">Not suitable for use in child under 1 year; not recommended for child 1–6 years</p>
     <section outputclass="details">
       <p outputclass="formulation">Liquid (sip feed)</p>
