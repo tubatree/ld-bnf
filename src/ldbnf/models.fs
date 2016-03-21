@@ -420,13 +420,13 @@ module BorderlineSubstance =
     | Formulation of string
     | EnergyKj of int<Kj>
     | EnergyKcal of int<Kcal>
-    | ProteinGrams of int<g>
+    | ProteinGrams of string
     | ProteinConstituents of string
-    | CarbohydrateGrams of int<g>
+    | CarbohydrateGrams of string
     | CarbohydrateConstituents of string
-    | FatGrams of int<g>
+    | FatGrams of string
     | FatConstituents of string
-    | FibreGrams of int<g>
+    | FibreGrams of string
     | SpecialCharacteristics of string
     | Acbs of bsProvider.P
     | Presentation of string
@@ -548,19 +548,19 @@ module BorderlineSubstanceParser =
   type Detail with
     static member from (x:bsProvider.P) =
       match x with
-        | HasOutputClasso "formulation" p -> p.String >>= (Formulation >> Some)
-        | HasOutputClasso "energyKj" p -> p.Number >>= (unit<Kj> >> EnergyKj >> Some)
-        | HasOutputClasso "energyKcal" p -> p.Number >>= (unit<Kcal> >> EnergyKcal >> Some)
-        | HasOutputClasso "proteinGrams" p -> p.Number >>= (unit<g> >> ProteinGrams >> Some)
-        | HasOutputClasso "proteinConstituents" p -> p.String >>= (ProteinConstituents >> Some)
-        | HasOutputClasso "carbohydrateGrams" p -> p.Number >>= (unit<g> >> CarbohydrateGrams >> Some)
-        | HasOutputClasso "carbohydrateConstituents" p -> p.String >>= (CarbohydrateConstituents >> Some)
-        | HasOutputClasso "fatGrams" p -> p.Number >>= (unit<g> >> FatGrams >> Some)
-        | HasOutputClasso "fatConstituents" p -> p.String >>= (FatConstituents >> Some)
-        | HasOutputClasso "fibreGrams" p -> p.Number >>= (unit<g> >> FibreGrams >> Some)
-        | HasOutputClasso "specialCharacteristics" p -> p.String >>= (SpecialCharacteristics >> Some)
+        | HasOutputClasso "formulation" p -> p.String <!> Formulation
+        | HasOutputClasso "energyKj" p -> p.Number <!> (unit<Kj> >> EnergyKj)
+        | HasOutputClasso "energyKcal" p -> p.Number <!> (unit<Kcal> >> EnergyKcal)
+        | HasOutputClasso "proteinGrams" p -> p.String <!> ProteinGrams
+        | HasOutputClasso "proteinConstituents" p -> p.String <!> ProteinConstituents
+        | HasOutputClasso "carbohydrateGrams" p -> p.String <!> CarbohydrateGrams
+        | HasOutputClasso "carbohydrateConstituents" p -> p.String <!> CarbohydrateConstituents
+        | HasOutputClasso "fatGrams" p -> p.String <!> FatGrams
+        | HasOutputClasso "fatConstituents" p -> p.String <!> FatConstituents
+        | HasOutputClasso "fibreGrams" p -> p.String <!> FibreGrams
+        | HasOutputClasso "specialCharacteristics" p -> p.String <!> SpecialCharacteristics
         | HasOutputClasso "acbs" p -> p |> (Acbs >> Some)
-        | HasOutputClasso "presentation" p -> p.String >>= (Presentation >> Some)
+        | HasOutputClasso "presentation" p -> p.String <!> Presentation
         | _ -> None
     static member from (x:bsProvider.Section) =
       let ds = match x with
