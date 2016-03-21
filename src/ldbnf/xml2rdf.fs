@@ -113,14 +113,14 @@ module Iterator =
             | "interaction" -> fi |> inProvider.Load |> InteractionList.parse |> Graph.from |> Done
             | "medical-device-type" -> fi |> drugProvider.Load |> MedicalDeviceType.parse |> Graph.from |> Done
             | "wound-management" -> fi |> wmProvider.Load |> WoundManagement.parse |> Graph.from |> Done
-            | "dental-practitioners-formulary" -> content "DentalPractitionersFormulary"
-            | "nurse-prescribers-formulary" -> content "NursePrescribersFormulary"
-            | "borderline-substance-acbs" -> content "BorderlineSubstanceAcbs"
+            | "dental-practitioners-formulary" -> content "dental-practitioners-formulary"
+            | "nurse-prescribers-formulary" -> content "nurse-prescribers-formulary"
+            | "borderline-substance-acbs" -> content "borderline-substance-acbs"
             | "guidance" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
             | "about" -> fi |> tsProvider.Load |> TreatmentSummary.parse |> Graph.from |> Done
-            | "interactions" -> content "InteractionsIntroduction"
+            | "interactions" -> content "interactions-introduction"
             | "labels" -> content "Labels"
-            | "cautionary-and-advisory-labels" -> content "CautionaryAndAdvisoryLabels"
+            | "cautionary-and-advisory-labels" -> content "cautionary-and-advisory-labels"
             | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | "medical-device" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
             | "borderline-substance-taxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done

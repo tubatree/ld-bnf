@@ -206,7 +206,9 @@ module BorderlineSubstanceRdf =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
 
       let acbs (p:bsProvider.P) =
-        let link = p.Xref <!> (fun xr -> objectProperty !!("nicebnf:hasACBSNote") !!("bnfsite:" + xr.Href))
+        let link = p.Xref <!> (fun xr ->
+                               xr.XElement.Remove()
+                               objectProperty !!("nicebnf:hasACBSNote") !!("bnfsite:" + xr.Href.Replace(".xml","")))
         blank !!"nicebnf:hasAcbsWarning"
           (optionlist {
             yield! p |> dita
