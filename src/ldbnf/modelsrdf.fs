@@ -216,6 +216,7 @@ module BorderlineSubstanceRdf =
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
         | Acbs a -> a |> dpx "AcbsWarning"
         | Presentation p -> p |> dp "Presentation"
+        | RxAdvice p -> p |> dp "RxAdvice"
 
     static member fromdetails (Details(ds,bsps)) =
       let dps = ds |> List.map Graph.fromdetail

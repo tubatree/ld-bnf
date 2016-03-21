@@ -430,6 +430,7 @@ module BorderlineSubstance =
     | SpecialCharacteristics of string
     | Acbs of bsProvider.P
     | Presentation of string
+    | RxAdvice of string
 
   type Manufacturer =
     | Manufacturer of string
@@ -561,6 +562,7 @@ module BorderlineSubstanceParser =
         | HasOutputClasso "specialCharacteristics" p -> p.String <!> SpecialCharacteristics
         | HasOutputClasso "acbs" p -> p |> (Acbs >> Some)
         | HasOutputClasso "presentation" p -> p.String <!> Presentation
+        | HasOutputClasso "rxAdvice" p -> p.String <!> RxAdvice
         | _ -> None
     static member from (x:bsProvider.Section) =
       let ds = match x with
