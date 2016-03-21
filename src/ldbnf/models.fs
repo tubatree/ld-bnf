@@ -557,7 +557,7 @@ module BorderlineSubstanceParser =
         | HasOutputClasso "carbohydrateGrams" p -> p.String <!> CarbohydrateGrams
         | HasOutputClasso "carbohydrateConstituents" p -> p.String <!> CarbohydrateConstituents
         | HasOutputClasso "fatGrams" p -> p.String <!> FatGrams
-        | HasOutputClasso "fatConstituents" p -> p.String <!> FatConstituents
+        | HasOutputClasso "fatConstituents" p -> p.String <!> (removebrackets >> FatConstituents)
         | HasOutputClasso "fibreGrams" p -> p.String <!> FibreGrams
         | HasOutputClasso "specialCharacteristics" p -> p.String <!> SpecialCharacteristics
         | HasOutputClasso "acbs" p -> p |> (Acbs >> Some)

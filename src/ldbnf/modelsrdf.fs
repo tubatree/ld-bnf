@@ -204,11 +204,13 @@ module BorderlineSubstanceRdf =
 
     static member fromdetail (x:Detail) =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
-      let inline dpx n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.xmlliteral)
+
       let acbs (p:bsProvider.P) =
+        let link = p.Xref <!> (fun xr -> objectProperty !!("nicebnf:hasACBSNote") !!("bnfsite:" + xr.Href))
         blank !!"nicebnf:hasAcbsWarning"
-         [dataProperty !!("nicebnf:hasDitaContent") ((string p)^^xsd.xmlliteral)
-          dataProperty !!("nicebnf:hashasACBSNote") ((p.XElement.Value)^^xsd.string)]
+          (optionlist {
+            yield! p |> dita
+            yield link})
       match x with
         | Formulation s -> s |> dp "Formulation"
         | EnergyKj e -> e |> dp "EnergyKj"
