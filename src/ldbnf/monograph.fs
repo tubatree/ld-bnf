@@ -43,7 +43,7 @@ module Shared =
 
   let rec stringify (node:XNode) =
    match node with
-    | :? XText as text -> text.Value
+    | :? XText as text -> text.Value + " "
     | :? XElement as element ->
       string {
         for node in element.Nodes() -> stringify node
