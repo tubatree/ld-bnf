@@ -15,10 +15,13 @@ module MedicalDeviceRdf =
 
   type Graph with
     static member frommedicaldevice(MedicalDevice(id,t,pdi,ids)) =
+      //horrible nested optional lists
+      let f (PrescribingAndDispensingInformation(t,sd)) =
+        blank !!"nicebnf:hasPrescribingAndDispensingInformation" (( sd |> dita ) @ (t <!> xtitle |> unwrap))
       let s = optionlist {
         yield a Uri.MedicalDeviceEntity
         yield! t |> xtitle
-        yield! pdi <!> (fun (PrescribingAndDispensingInformation(sd)) -> sd |> (dita)) |> unwrap
+        yield pdi <!> f
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
       let dr = resource (Uri.frommd id)

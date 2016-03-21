@@ -822,7 +822,8 @@ module BorderlineSubstanceTaxonomyParser =
 
 module MedicalDevice =
 
-  type PrescribingAndDispensingInformation = | PrescribingAndDispensingInformation of drugProvider.Sectiondiv
+  type PrescribingAndDispensingInformation =
+    | PrescribingAndDispensingInformation of drugProvider.Title option * drugProvider.Sectiondiv
 
   type MedicalDevice =
     | MedicalDevice of Id * drugProvider.Title * PrescribingAndDispensingInformation option * Id list
@@ -832,10 +833,17 @@ module MedicalDeviceParser =
   open MedicalDevice
 
   type MedicalDevice with
+
     static member parse (x:drugProvider.Topic) =
-      let padi = x |> topics "prescribingAndDispensingInformation"
-                   |> Array.collect allsections
-                   |> Array.tryPick (PrescribingAndDispensingInformation >> Some)
+      let s = x |> topics "prescribingAndDispensingInformation"
+                |> Array.collect allsections
+                |> Array.tryPick Some
+
+      let t = x |> topics "prescribingAndDispensingInformation"
+                |> Array.map (fun t -> t.Title)
+                |> Array.tryPick Some
+
+      let padi = s <!> (fun s' -> PrescribingAndDispensingInformation(t,s'))
 
       let id (x:drugProvider.Xref) = x.Href |> Id
       let links (x:drugProvider.Topic) = x.Xrefs |> Array.map id
