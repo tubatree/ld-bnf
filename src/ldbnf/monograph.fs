@@ -805,7 +805,7 @@ module DrugParser =
                     |> Array.map SideEffectsOverdosageInformation.from
         SideEffects(Id(x.Id), Array.concat [gse;sse] ,adv, ods)
       static member contraindications (x:drugProvider.Topic) =
-        let s = firstsection (hasOutputclasso "contraindications") x
+        let s = x |> firstsection (hasOutputclasso "contraindications")
         let cgs = match s with
                   | Some (s) -> ContraindicationsGroup.from s |> Array.toList
                   | None -> List.empty<ContraindicationsGroup>
@@ -911,7 +911,7 @@ module DrugParser =
                                            |> Array.choose (hasName "classifications" >> Option.map Classification.fromlist)
                               | None -> [||]
 
-        let vtmid = x.Body >>= (fun b ->  b.Datas |> Array.tryPick (Some >=> hasName "vtmid" >=> Vtmid.from))
+        let vtmid = x.Body >>= (fun b ->  b.Datas |> Array.tryPick (hasName "vtmid" >> Option.bind Vtmid.from))
 
         let syn (x:drugProvider.P) =
           match x with
