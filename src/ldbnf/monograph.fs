@@ -63,7 +63,7 @@ module Shared =
   let topics (n:string) (x:drugProvider.Topic) =
     x.Topics |> Array.choose (hasOutputclass n)
 
-  let allsections (x:drugProvider.Topic) =
+  let allsectiondivs (x:drugProvider.Topic) =
     match x.Body with
         | Some b -> b.Sections |> Array.collect (fun s -> s.Sectiondivs)
         | None -> [||]
@@ -71,7 +71,7 @@ module Shared =
   let sectiondivs cl (s:drugProvider.Section[]) =
     s |> Array.choose (hasOutputclasso cl) |> Array.collect (fun sec -> sec.Sectiondivs)
 
-  let somesections cl  (x:drugProvider.Topic) =
+  let somesectiondivs cl  (x:drugProvider.Topic) =
     match x.Body with
     | Some b -> b.Sections |> (sectiondivs cl)
     | None -> [||]
@@ -481,7 +481,7 @@ module DrugParser =
       match x.Body with
         | Some(b) -> 
            let gi = b.Sections |> subsections "generalInformation" GeneralInformation.from
-           let am = x |> (somesections "additionalMonitoringInRenalImpairment")
+           let am = x |> (somesectiondivs "additionalMonitoringInRenalImpairment")
                       |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInRenalImpairment)
                       |> Array.toSeq
            let da = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from
@@ -598,20 +598,20 @@ module DrugParser =
               Some(c(Id(x.Id),gi))
           | None -> None
       static member pregnancyfrom (x:drugProvider.Topic) =
-        let gis = x |> (somesections "generalInformation") |> Array.map GeneralInformation.from
-        let das = x |> (somesections "doseAdjustments") |> Array.map DoseAdjustment.from
-        let amps = x|> (somesections "additionalMonitoringInPregnancy") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInPregnancy)
+        let gis = x |> (somesectiondivs "generalInformation") |> Array.map GeneralInformation.from
+        let das = x |> (somesectiondivs "doseAdjustments") |> Array.map DoseAdjustment.from
+        let amps = x|> (somesectiondivs "additionalMonitoringInPregnancy") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInPregnancy)
         Pregnancy(Id(x.Id),gis,das,amps)
       static member breastFeedingFrom (x:drugProvider.Topic) =
-        let gis = x |> (somesections "generalInformation") |> Array.map GeneralInformation.from
-        let ambfs = x |> (somesections "additionalMonitoringInBreastFeeding") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInBreastFeeding)
-        let das = x |> (somesections "doseAdjustments") |> Array.map (addSpecificity >> addTitle >> DoseAdjustment)
+        let gis = x |> (somesectiondivs "generalInformation") |> Array.map GeneralInformation.from
+        let ambfs = x |> (somesectiondivs "additionalMonitoringInBreastFeeding") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInBreastFeeding)
+        let das = x |> (somesectiondivs "doseAdjustments") |> Array.map (addSpecificity >> addTitle >> DoseAdjustment)
         BreastFeeding(Id(x.Id),gis,ambfs,das)
       static member hepaticImparmentFrom (x:drugProvider.Topic) =
         match x.Body with
           | Some(b) ->
                     let hi = b.Sections |> subsections "doseAdjustments" DoseAdjustment.from |> Array.toSeq
-                    let am = x |> (somesections "additionalMonitoringInHepaticImpairment") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInHepaticImpairment) |> Array.toSeq
+                    let am = x |> (somesectiondivs "additionalMonitoringInHepaticImpairment") |> Array.map (addSpecificity >> addTitle >> AdditionalMonitoringInHepaticImpairment) |> Array.toSeq
                     let c (i,gi) = HepaticImpairment(i, gi, hi, am) //build a partial constructor
                     MonographSection.buidgi c x
           | None -> None
@@ -628,8 +628,8 @@ module DrugParser =
 
     type MonographSection with
       static member allergyAndCrossSensitivity (x:drugProvider.Topic) =
-        let ac = x |> (somesections "allergyAndCrossSensitivityContraindications") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityContraindications)
-        let acss = x |> (somesections "allergyAndCrossSensitivityCrossSensitivity") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityCrossSensitivity)
+        let ac = x |> (somesectiondivs "allergyAndCrossSensitivityContraindications") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityContraindications)
+        let acss = x |> (somesectiondivs "allergyAndCrossSensitivityCrossSensitivity") |> Array.map (addSpecificity >> addTitle >> AllergyAndCrossSensitivityCrossSensitivity)
         AllergyAndCrossSensitivity(Id(x.Id),ac,acss)
 
     type ExceptionToLegalCategory with
@@ -651,8 +651,8 @@ module DrugParser =
 
     type MonographSection with
       static member professionSpecificInformation (x:drugProvider.Topic) =
-        let psi = x |> somesections "dentalPractitionersFormulary" |> Array.map (addSpecificity >> addTitle >> DentalPractitionersFormularyInformation)
-        let adp = x |> somesections "adviceForDentalPractitioners" |> Array.map (addSpecificity >> addTitle >> AdviceForDentalPractitioners)
+        let psi = x |> somesectiondivs "dentalPractitionersFormulary" |> Array.map (addSpecificity >> addTitle >> DentalPractitionersFormularyInformation)
+        let adp = x |> somesectiondivs "adviceForDentalPractitioners" |> Array.map (addSpecificity >> addTitle >> AdviceForDentalPractitioners)
         ProfessionSpecificInformation(Id(x.Id),psi,adp)
 
     type SideEffectsGroup with
@@ -779,27 +779,27 @@ module DrugParser =
 
     type MonographSection with
       static member effectOnLaboratoryTests (x:drugProvider.Topic) =
-        EffectOnLaboratoryTests(Id(x.Id),allsections x |> Array.map (addSpecificity >> addTitle >> EffectOnLaboratoryTest))
+        EffectOnLaboratoryTests(Id(x.Id),allsectiondivs x |> Array.map (addSpecificity >> addTitle >> EffectOnLaboratoryTest))
       static member preTreatmentScreenings (x:drugProvider.Topic) =
-        PreTreatmentScreenings(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> PreTreatmentScreening))
+        PreTreatmentScreenings(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> PreTreatmentScreening))
       static member lessSuitableForPrescribings (x:drugProvider.Topic) =
-        LessSuitableForPrescribings(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> LessSuitableForPrescribing))
+        LessSuitableForPrescribings(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> LessSuitableForPrescribing))
       static member handlingAndStorages (x:drugProvider.Topic) =
-        HandlingAndStorages(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> HandlingAndStorage))
+        HandlingAndStorages(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> HandlingAndStorage))
       static member treatmentCessations (x:drugProvider.Topic) =
-        TreatmentCessations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> TreatmentCessation))
+        TreatmentCessations(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> TreatmentCessation))
       static member drugActions (x:drugProvider.Topic) =
-        DrugActions(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> DrugAction))
+        DrugActions(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> DrugAction))
       static member sideEffects (x:drugProvider.Topic) =
-        let gse = x |> (somesections "generalSideEffects")
+        let gse = x |> (somesectiondivs "generalSideEffects")
                     |> Array.choose (hasOutputclasso "frequencies")
                     |> Array.collect (fun f -> f.Sectiondivs |> Array.map SideEffectsGroup.fromge)
-        let sse = x |> (somesections "specificSideEffects")
+        let sse = x |> (somesectiondivs "specificSideEffects")
                     |> Array.choose (hasOutputclasso "frequencies")
                     |> Array.collect (fun f -> f.Sectiondivs |> Array.collect SideEffectsGroup.fromsp)
-        let adv = x |> (somesections "sideEffectsAdvice")
+        let adv = x |> (somesectiondivs "sideEffectsAdvice")
                     |> Array.map SideEffectAdvice.from
-        let ods = x |> (somesections "sideEffectsOverdosageInformation")
+        let ods = x |> (somesectiondivs "sideEffectsOverdosageInformation")
                     |> Array.map SideEffectsOverdosageInformation.from
         SideEffects(Id(x.Id), Array.concat [gse;sse] ,adv, ods)
       static member contraindications (x:drugProvider.Topic) =
@@ -807,8 +807,8 @@ module DrugParser =
         let cgs = match s with
                   | Some (s) -> ContraindicationsGroup.from s |> Array.toList
                   | None -> List.empty<ContraindicationsGroup>
-        let ias = x |> (somesections "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
-        let ciri = x |> (somesections "contraindicationsRenalImpairment") |> Array.map (addSpecificity >> addTitle >> ContraindicationsRenalImpairment)
+        let ias = x |> (somesectiondivs "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
+        let ciri = x |> (somesectiondivs "contraindicationsRenalImpairment") |> Array.map (addSpecificity >> addTitle >> ContraindicationsRenalImpairment)
         Contraindications(Id(x.Id), cgs, ias, ciri)
 
       static member cautions (x:drugProvider.Topic) =
@@ -816,23 +816,23 @@ module DrugParser =
         let cgs = match s with
                    | Some (s) -> CautionsGroup.from s |> Array.toList
                    | None -> List.empty<CautionsGroup>
-        let ias = x |> (somesections "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
+        let ias = x |> (somesectiondivs "importantAdvice") |> Array.map (addSpecificity >> addTitle >> ImportantAdvice)
         Cautions(Id(x.Id), cgs, ias)
       static member prescribingAndDispensingInformation (x:drugProvider.Topic) =
-        PrescribingAndDispensingInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> PrescribingAndDispensingInformation))
+        PrescribingAndDispensingInformations(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> PrescribingAndDispensingInformation))
       static member unlicencedUse (x:drugProvider.Topic) =
-        UnlicencedUses(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> UnlicencedUse))
+        UnlicencedUses(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> UnlicencedUse))
       static member monitoringRequirements (x:drugProvider.Topic) =
         match x.Body with
           | Some b -> MonitoringRequirements(Id(x.Id),b.Sections |> Array.collect MonitoringRequirement.from)
           | None -> MonitoringRequirements(Id(x.Id), Array.empty<MonitoringRequirement>)
       static member conceptionAndContraception (x:drugProvider.Topic) =
-        ConceptionAndContraceptions(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> ConceptionAndContraception))
+        ConceptionAndContraceptions(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> ConceptionAndContraception))
       static member importantSafetyInformation (x:drugProvider.Topic) =
-        ImportantSafetyInformations(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> ImportantSafetyInformation))
+        ImportantSafetyInformations(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> ImportantSafetyInformation))
 
       static member directionsForAdministration (x:drugProvider.Topic) =
-        DirectionsForAdministration(Id(x.Id), allsections x |> Array.map (addSpecificity >> addTitle >> DirectionForAdministration))
+        DirectionsForAdministration(Id(x.Id), allsectiondivs x |> Array.map (addSpecificity >> addTitle >> DirectionForAdministration))
       static member nationalFunding (x:drugProvider.Topic) =
         let fds =  match x.Body with
                          | Some b -> b.Sections |> Array.collect FundingDecision.fromfd

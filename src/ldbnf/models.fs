@@ -851,7 +851,7 @@ module MedicalDeviceParser =
 
     static member parse (x:drugProvider.Topic) =
       let s = x |> topics "prescribingAndDispensingInformation"
-                |> Array.collect allsections
+                |> Array.collect allsectiondivs
                 |> Array.tryPick Some
 
       let t = x |> topics "prescribingAndDispensingInformation"
