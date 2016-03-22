@@ -312,8 +312,8 @@ module TreatmentSummary =
 
   type Label = {
     number:string option
-    recommendation:string option
-    description:string option
+    recommendation:tsProvider.P option
+    description:tsProvider.P option
     }
 
   type TargetAudience = | TargetAudience of string
@@ -358,8 +358,8 @@ module TreatmentSummaryParser =
     static member from (x:tsProvider.Section) =
       let label (s:tsProvider.Section) = {
          number = s.Ps |> Array.tryPick ((hasOutputclasso "number") >> Option.bind (fun p -> p.String))
-         recommendation = s.Ps |> Array.tryPick ((hasOutputclasso "recommendation") >> Option.bind (fun p -> p.String))
-         description = s.Ps |> Array.tryPick ((hasOutputclasso "labelDescription") >> Option.bind (fun p -> p.String))
+         recommendation = s.Ps |> Array.tryPick (hasOutputclasso "recommendation")
+         description = s.Ps |> Array.tryPick (hasOutputclasso "labelDescription")
         }
 
       match x.Outputclass with

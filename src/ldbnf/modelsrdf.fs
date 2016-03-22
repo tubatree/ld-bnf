@@ -287,8 +287,8 @@ module TreatmentSummaryRdf =
             blank !!"nicebnf:hasLabel"
              (optionlist {
               yield l.number <!> (xsd.string >> dataProperty !!"nicebnf:hasNumber")
-              yield l.recommendation <!> (xsd.string >> dataProperty !!"nicebnf:hasRecommendation")
-              yield l.description <!> (xsd.string >> dataProperty !!"nicebnf:hasDescription")
+              yield l.recommendation <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasRecommendation")
+              yield l.description <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDescription")
               })
 
     static member fromlink url (x:ContentLink) =
