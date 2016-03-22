@@ -296,7 +296,6 @@ module TreatmentSummaryRdf =
         [objectProperty !!"nicebnf:isLinkedFrom" url] //create a back link at the same time
 
     static member fromsummary url (x:Summary) =
-
       let xr (xref:tsProvider.Xref) =
         let id = Id(xref.Href)
         match xref.Rel with
