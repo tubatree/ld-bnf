@@ -349,28 +349,36 @@ module DrugRdf =
 
     static member fromsec sid (x:MonographSection) =
 
-      let rec applyTo a xs = 
-        match xs with
+      //call of the functions in xs with the value a into a new list
+      let rec applyTo a fs =
+        match fs with
          | [] -> []
-         | x::xs -> x a::applyTo a xs
+         | x::fs -> x a::applyTo a fs
+
+
+      //the next few functions build up a list of functions (partial application)
+      //then apply the same value to them all to generate uri's
+      //execution of code should be read from right to left
+      // e.g. sec "Pregnancy" sid i [statements addps Graph.fromgi gs]
+      // gs -> fromgi -> addps -> statements -> sec
 
       //take the list, add hasSubject and type
-      let add' p f x (sub,urif,id) =
+      let add' fpredicate f x (sub,urif,id) =
         let s = f x //generate the properties
-        let n = typename x
+        let name = typename x
         //add a type and a subject
-        let s' = [a !!("nicebnf:" + n)
+        let s' = [a !!("nicebnf:" + name)
                   one !!"nicebnf:hasSubject" (urif id)
                     [a !!("nicebnf:" + sub)]]
-        one !!(p n) (webguid() |> Id |> urif) (s @ s')
+        one !!(fpredicate name) (webguid() |> Id |> urif) (s @ s')
 
       let add f x (sub,uri,sid) = add' (fun n -> "nicebnf:has" + n) f x (sub,uri,sid)
       //an alternate version that ignores the type name
       let addps f x (sub,urif,sid) = add' (fun _ -> "nicebnf:hasPrescribingInformationSection") f x (sub,urif,sid)
 
-      let inline sec n i sid stf =
-        let fs = stf |> List.collect id //take list of functions to create statements
-        fs |> applyTo (n,i,sid) //apply the functions with a name and a uri
+      let inline sec n i sid statementf =
+        let flatlist = statementf |> List.collect id //take list of functions to create statements, collect id flattens list
+        flatlist |> applyTo (n,i,sid) //apply the functions with a name and a uri
 
 
       let inline statements a g x = x |> Seq.map (a g) |> Seq.toList
