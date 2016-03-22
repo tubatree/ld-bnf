@@ -321,10 +321,6 @@ module TreatmentSummary =
     | Content of tsProvider.Section * TargetAudience option
     | LabelContent of Label
 
-//p outputclass="number">6</p>
-//  <p outputclass="recommendation">Do not take indigestion remedies, or medicines containing iron or zinc, 2 hours befor//e or after you take this medicine</p>
-//      <p outputclass="labelDescription">
-
   type BodySystem = | BodySystem of string
 
   type Summary = {
