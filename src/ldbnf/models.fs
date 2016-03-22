@@ -310,8 +310,21 @@ open System.Xml.XPath
 module TreatmentSummary =
   type tsProvider = XmlProvider<"./samples/supertreatmentsummary.xml", Global=true>
 
+  type Label = {
+    number:string option
+    recommendation:string option
+    description:string option
+    }
+
   type TargetAudience = | TargetAudience of string
-  type Content = | Content of tsProvider.Section * TargetAudience option
+  type Content =
+    | Content of tsProvider.Section * TargetAudience option
+    | LabelContent of Label
+
+//p outputclass="number">6</p>
+//  <p outputclass="recommendation">Do not take indigestion remedies, or medicines containing iron or zinc, 2 hours befor//e or after you take this medicine</p>
+//      <p outputclass="labelDescription">
+
   type BodySystem = | BodySystem of string
 
   type Summary = {
@@ -347,10 +360,16 @@ module TreatmentSummaryParser =
 
   type Content with
     static member from (x:tsProvider.Section) =
-      let ta = match x.Outputclass with
-               | Some x -> TargetAudience x |> Some
-               | None -> None
-      Content(x,ta)
+      let label (s:tsProvider.Section) = {
+         number = s.Ps |> Array.tryPick ((hasOutputclasso "number") >> Option.bind (fun p -> p.String))
+         recommendation = s.Ps |> Array.tryPick ((hasOutputclasso "recommendation") >> Option.bind (fun p -> p.String))
+         description = s.Ps |> Array.tryPick ((hasOutputclasso "labelDescription") >> Option.bind (fun p -> p.String))
+        }
+
+      match x.Outputclass with
+      | Some "label" -> x |> label |> LabelContent
+      | Some ta -> Content(x,TargetAudience ta |> Some)
+      | None -> Content(x,None)
 
   type Summary with
     static member from (x:tsProvider.Topic) =

@@ -3,6 +3,11 @@
   <body>
     <data name="doi">doi:10.18578/BNF_860949239</data>
     <data name="bodySystem">vaccines</data>
+    <section outputclass="label">
+      <p outputclass="number">5</p>
+      <p outputclass="recommendation">Do not take indigestion remedies 2 hours before or after you take this medicine</p>
+      <p outputclass="labelDescription">To be used with label 25 on <i>preparations coated to resist gastric acid</i> (e.g. enteric-coated tablets). This is to avoid the possibility of premature dissolution of the coating in the presence of an alkaline pH. Label 5 also applies to drugs such as gabapentin <i>where the absorption is significantly affected by antacids</i>. Pharmacists will be aware (from a knowledge of physiology) that the usual time during which indigestion remedies should be avoided is at least 2 hours before and after the majority of medicines have been taken; when a manufacturer advises a different time period, this can be followed, and should be explained to the patient.</p>
+    </section>
     <section>
       <sectiondiv>
         <p outputclass="title">Active immunity</p>

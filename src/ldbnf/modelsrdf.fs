@@ -276,11 +276,20 @@ module TreatmentSummaryRdf =
 
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
-    static member fromcontent (Content(s,ta)) =
-      blank !!"nicebnf:hasContent"
-       (optionlist {
-         yield ta >>= (Graph.fromta >> Some)
-         yield! s |> dita})
+    static member fromcontent c =
+      match c with
+        | Content(s,ta) ->
+            blank !!"nicebnf:hasContent"
+             (optionlist {
+              yield ta >>= (Graph.fromta >> Some)
+              yield! s |> dita})
+        | LabelContent(l) ->
+            blank !!"nicebnf:hasLabel"
+             (optionlist {
+              yield l.number <!> (xsd.string >> dataProperty !!"nicebnf:hasNumber")
+              yield l.recommendation <!> (xsd.string >> dataProperty !!"nicebnf:hasRecommendation")
+              yield l.description <!> (xsd.string >> dataProperty !!"nicebnf:hasDescription")
+              })
 
     static member fromlink url (x:ContentLink) =
       one !!"nicebnf:hasLink" (Uri.totopic (x.href))

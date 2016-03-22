@@ -323,7 +323,7 @@ module DrugRdf =
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:CautionsGroup"
                          yield! p |> dita
-                         yield! (cs |> List.map Graph.fromcau)}
+                         yield! cs |> List.map Graph.fromcau}
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x
         | CautionsWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
