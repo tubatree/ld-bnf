@@ -15,11 +15,11 @@ module DrugRdf =
   open guid
 
   //shoudl replace these with tostring
-  let getlabeld (DrugName n) = string n.Value.Value
+  let getlabeld (DrugName n) = n.Value |? ""
   let getvald (DrugName n) = string n
-  let getlabeldc (DrugClassName n) = string n.Value.Value
+  let getlabeldc (DrugClassName n) = n.Value |? ""
   let getvaldc (DrugClassName n) = string n
-  let getlabelcmpi (CMPIName n) = string n.Value.Value
+  let getlabelcmpi (CMPIName n) = n.Value |? ""
   let getvalcmpi (CMPIName n) = string n
   let tosys (Sys s) = s
 
