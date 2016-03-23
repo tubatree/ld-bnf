@@ -816,6 +816,7 @@ module BorderlineSubstanceTaxonomy =
     general: drugProvider.Section option
     substances: Id list;
     categories: Id list;
+    acbs: drugProvider.P option
     }
 
 
@@ -833,7 +834,11 @@ module BorderlineSubstanceTaxonomyParser =
                                 |> Array.toList
                    | None -> []
       let cats = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      {id=Id(x.Id);title=x.Title;general=general;substances=ids;categories=cats}
+      let acbs = x |> (somesectiondivs "acbsIndications")
+                   |> Array.tryPick (fun sd -> match sd.Ps with
+                                               | [|p|] -> Some p
+                                               | _ -> None)
+      {id=Id(x.Id);title=x.Title;general=general;substances=ids;categories=cats; acbs = acbs}
 
 module MedicalDevice =
 

@@ -38,6 +38,7 @@ module BorderlineSubstanceTaxonomyRdf =
         yield! x.general <!> dita |> unwrap
         yield! x.substances |> List.map (Uri.frombsc >> (objectProperty !!"nicebnf:hasBorderlineSubstance"))
         yield! x.categories |> List.map (Uri.frombst >> (objectProperty !!"nicebnf:hasBorderlineSubstanceTaxonomy"))
+        yield x.acbs |> (string >> xsd.xmlliteral >> (dataProperty !!"nicebnf:hasAcbsIndication"))
         }
 
       let dr = resource (Uri.frombst x.id)
