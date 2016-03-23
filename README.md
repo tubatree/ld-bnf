@@ -2,6 +2,17 @@
 
 The new versions of the BNF/BNFc feeds are self referential so can be processed independently. Previously the BNF/BNFc feeds had to be processed at as a single item to resolve references. Any references to “the feed” should be taken to mean either the BNF or BNFc DITA feed.
 
+## Getting Started
+
+This runs best in a unix environment with mono installed. It is currently building against mono:4.2.1.102 in docker on team city.
+
+* Shove a copy of the feed xml into the process directory, if it doesn’t exist create one
+* <code>./build.sh</code>
+* <code>mono splitter/bin/Release/splitter.exe process/feed.xml process/xml</code> should create some files in process/xml
+* <code>./run.sh</code>
+
+There will be some information about any ignored files and some .ttl files should have appeared in the process/ttl dir
+
 ## Process
 
 There are two main parts to the process with the second being the most complex. Firstly the feed is split from one large file and written out as a set of individual files by splitter. Once the feed is in manageable chunks of xml it is transformed by ldbnf into turtle (.ttl) files.

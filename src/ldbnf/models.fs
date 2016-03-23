@@ -433,8 +433,8 @@ module BorderlineSubstance =
 
   type Detail =
     | Formulation of string
-    | EnergyKj of int<Kj>
-    | EnergyKcal of int<Kcal>
+    | EnergyKj of string
+    | EnergyKcal of string
     | ProteinGrams of string
     | ProteinConstituents of string
     | CarbohydrateGrams of string
@@ -566,8 +566,8 @@ module BorderlineSubstanceParser =
     static member from (x:bsProvider.P) =
       match x with
         | HasOutputClasso "formulation" p -> p.String <!> Formulation
-        | HasOutputClasso "energyKj" p -> p.Number <!> (unit<Kj> >> EnergyKj)
-        | HasOutputClasso "energyKcal" p -> p.Number <!> (unit<Kcal> >> EnergyKcal)
+        | HasOutputClasso "energyKj" p -> p.String <!> EnergyKj
+        | HasOutputClasso "energyKcal" p -> p.String <!> EnergyKcal
         | HasOutputClasso "proteinGrams" p -> p.String <!> ProteinGrams
         | HasOutputClasso "proteinConstituents" p -> p.String <!> ProteinConstituents
         | HasOutputClasso "carbohydrateGrams" p -> p.String <!> CarbohydrateGrams
