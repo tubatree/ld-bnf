@@ -16,4 +16,6 @@ The links between the files are all self consistent. Some small changes are made
 
 Splatter makes as few changes as possible to the feed.
 
-### LDBNF 
+### LDBNF
+
+This parses the xml 
