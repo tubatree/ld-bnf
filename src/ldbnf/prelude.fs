@@ -75,6 +75,7 @@ module prelude =
         member this.Combine (a,b) = List.concat [a;b]
         member this.Delay(f) = f()
 
+    //unwrap an optional list, None becomes an empty list
     let unwrap (x:'a list option) =
       match x with
         | Some x -> x
