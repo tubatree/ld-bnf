@@ -581,6 +581,7 @@ module BorderlineSubstanceParser =
         | HasOutputClasso "presentationNote" p -> p |> PresentationNote |> Some
         | HasOutputClasso "rxAdvice" p -> p.String <!> RxAdvice
         | _ -> None
+
     static member from (x:bsProvider.Section) =
       let ds = match x with
                | HasOutputClass "details" s ->
