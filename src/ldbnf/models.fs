@@ -444,7 +444,7 @@ module BorderlineSubstance =
     | FibreGrams of string
     | SpecialCharacteristics of string
     | Acbs of bsProvider.P
-    | Presentation of string
+    | Presentation of bsProvider.P
     | RxAdvice of string
 
   type Manufacturer =
@@ -576,7 +576,7 @@ module BorderlineSubstanceParser =
         | HasOutputClasso "fibreGrams" p -> p.String <!> FibreGrams
         | HasOutputClasso "specialCharacteristics" p -> p.String <!> SpecialCharacteristics
         | HasOutputClasso "acbs" p -> p |> (Acbs >> Some)
-        | HasOutputClasso "presentation" p -> p.String <!> Presentation
+        | HasOutputClasso "presentation" p -> p |> Presentation |> Some
         | HasOutputClasso "rxAdvice" p -> p.String <!> RxAdvice
         | _ -> None
     static member from (x:bsProvider.Section) =

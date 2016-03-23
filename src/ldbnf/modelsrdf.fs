@@ -205,7 +205,7 @@ module BorderlineSubstanceRdf =
 
     static member fromdetail (x:Detail) =
       let inline dp n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.string)
-
+      let inline dpx n s = dataProperty !!("nicebnf:has" + n) ((string s)^^xsd.xmlliteral)
       let acbs (p:bsProvider.P) =
         let link = p.Xref <!> (fun xr ->
                                xr.XElement.Remove()
@@ -227,7 +227,7 @@ module BorderlineSubstanceRdf =
         | FibreGrams f -> f |> dp "FibreGrams"
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
         | Acbs a -> a |> acbs
-        | Presentation p -> p |> dp "Presentation"
+        | Presentation p -> p |> dpx "Presentation"
         | RxAdvice p -> p |> dp "RxAdvice"
 
     static member fromdetails (Details(ds,bsps)) =
