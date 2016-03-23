@@ -228,6 +228,7 @@ module BorderlineSubstanceRdf =
         | SpecialCharacteristics s -> s |> dp "SpecialCharacteristics"
         | Acbs a -> a |> acbs
         | Presentation p -> p |> dpx "Presentation"
+        | PresentationNote p -> p |> dpx "PresentationNote"
         | RxAdvice p -> p |> dp "RxAdvice"
 
     static member fromdetails (Details(ds,bsps)) =
