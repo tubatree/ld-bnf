@@ -6,7 +6,7 @@ The new versions of the BNF/BNFc feeds are self referential so can be processed 
 
 This runs best in a unix environment with mono installed. It is currently building against mono:4.2.1.102 in docker on team city.
 
-* Shove a copy of the feed xml into the process directory, if it doesn’t exist create one
+* Shove a copy of the feed xml into the process directory, if it doesn’t exist create one (ld-bnf/process)
 * <code>./build.sh</code>
 * <code>mono splitter/bin/Release/splitter.exe process/feed.xml process/xml</code> should create some files in process/xml
 * <code>./run.sh</code>
@@ -40,3 +40,8 @@ I was learning fsharp as I went in this project. The code style at the end of mo
 Ideally the code reading in the xml should be similar in appearance to the xml and the code writing triples should be similar in shape to the triples.
 
 The two final files are the prelude that contains some extensions to the base libraries and some helper functions and xml2rdf that performs all of the file management.
+
+To run from 'Start' in visual studio add the following in the project properties, debug tab, command line arguments
+
+--xmldirectory c:/_src/ld-bnf/process/xml --outputdirectory c:/_src/ld-bnf/process/ttl
+
