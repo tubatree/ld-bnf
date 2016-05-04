@@ -412,9 +412,12 @@ module DrugParser =
          let groups = x.Uls |> Array.map (fun u -> u.Lis |> Seq.choose PatientGroup.from)
          //if there are no routes then return something else
          let routesOfAdministration =
-            match specificities with
-            | [||] -> [||]
-            | _ -> Array.zip specificities groups |> Array.map RouteOfAdministration
+            match (specificities, groups) with
+            | [||],[||] -> [||]
+            | [||],_ -> match groups.Length with
+                        | 1 -> Array.zip [|None|] groups |> Array.map RouteOfAdministration
+                        | _ -> [||]
+            | _, _ -> Array.zip specificities groups |> Array.map RouteOfAdministration
          IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration)
 
     type IndicationsAndDoseSection with
