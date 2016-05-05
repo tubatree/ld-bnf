@@ -211,7 +211,7 @@ module MedicinalFormParser =
       let ex = x |> sections
                  |> Array.tryPick (withoco "excipients" >> Option.map Excipients)
       let el = x |> sections
-                 |> Array.tryPick (withoco "electrolytes" >> Option.map Electrolytes)
+                 |> Array.tryPick (withoco "fluidAndElectrolytes" >> Option.map Electrolytes)
       let cmpis = x |> sections
                     |> Array.choose (withoco "clinicalMedicinalProductInformationGroup")
                     |> Array.collect ClinicalMedicinalProductInformation.list
