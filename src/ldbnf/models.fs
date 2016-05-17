@@ -1247,7 +1247,7 @@ module Sections =
 
   type Course = | Course of sectionProvider.P
 
-  type Regimen = | Regimen of Title * Drug list * Course
+  type Regimen = | Regimen of Title * Drug list * Course option
 
   type HelicobacterPyloriRegimens =
     | HelicobacterPyloriRegimens of Id * Title option * Regimen list
@@ -1262,12 +1262,15 @@ module Sections =
             | (_,_) -> failwith "unknown class"
 
         let title = x.Ps |> Array.pick title
-        let course = x.Ps |> Array.pick (hasOutputclasso "course" >> Option.map Course)
+        let course = x.Ps |> Array.tryPick(hasOutputclasso "course" >> Option.map Course)
         let acid = x |> unravel ["acidSuppressant"] |> List.choose drug
         let anti = x |> unravel ["antibacterials";"antibacterial"] |> List.choose drug
         Regimen(title,acid @ anti,course)
-
-      let rs = x |> unravelr["regimens";"regimen"] |> List.map regimen
+      
+      let rsTemp = x |> unravelr["regimens";"regimen"] |> List.map regimen
+      let rs = match rsTemp with
+               | [] -> x |> unravelr["regimens";"patientGroup";"regimen"] |> List.map regimen
+               | _ -> rsTemp
       let title = x.Ps |> Array.tryPick title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
 

@@ -764,6 +764,7 @@ module SectionsRdf =
     static member fromHelicobacterPyloriRegimens (HelicobacterPyloriRegimens(id,title,regimens)) =
       let regimen (Regimen(title,drugs,course)) =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
+        
         let drug d =
           let build s q = (optionlist{
                        yield s |> label
@@ -776,7 +777,8 @@ module SectionsRdf =
                      -> blank !!"nicebnf:hasAntibacterial" (build s q)
         blank (Uri.has<Regimen>()) (optionlist{
           yield! title |> ti
-          yield course |> crse
+          //yield course |> crse
+          yield match course with | Some z -> (z |> crse)|> Some | None -> None
           yield! drugs |> List.map drug
           })
 
