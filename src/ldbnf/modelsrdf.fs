@@ -762,7 +762,7 @@ module SectionsRdf =
 
   type Graph with
     static member fromHelicobacterPyloriRegimens (HelicobacterPyloriRegimens(id,title,regimens)) =
-      let regimen (Regimen(title,drugs,course)) =
+      let regimen (Regimen(title,drugs,course,heading)) =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
         
         let drug d =
@@ -775,9 +775,16 @@ module SectionsRdf =
                      -> blank !!"nicebnf:hasAcidSuppressant" (build s q)
                    | Antibacterial(s,Quantity(q))
                      -> blank !!"nicebnf:hasAntibacterial" (build s q)
+
+        let processHeading (x:string option) = 
+          match x with
+          | Some z -> z
+          | None -> ""
+
+        let test = heading
+
         blank (Uri.has<Regimen>()) (optionlist{
           yield! title |> ti
-          //yield course |> crse
           yield match course with | Some z -> (z |> crse)|> Some | None -> None
           yield! drugs |> List.map drug
           })

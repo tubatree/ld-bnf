@@ -1352,248 +1352,179 @@
       </sectiondiv>
     </sectiondiv>
   </sectiondiv>
-</section><section id="PHP183" outputclass="helicobacterPyloriRegimens">
+</section><section id="PHP183" outputclass="helicobacterPyloriRegimens" bnfid="PHP183" type="helicobacterPyloriRegimens" Slug="PHP183" href="helicobacter-pylori-regimens/PHP183.xml">
   <p outputclass="title">Recommended regimens for <i>Helicobacter pylori</i> eradication</p>
   <sectiondiv outputclass="regimens">
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Esomeprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">esomeprazole</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
+    <sectiondiv outputclass="patientGroup">
+      <p outputclass="title">Child 1–5 years</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
         </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">500 mg twice daily</p>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">250 mg twice daily</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">7.5 mg/kg twice daily (max. per dose 500 mg)</p>
+          </sectiondiv>
         </sectiondiv>
       </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£6.63</ph> for 7-day course</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
+        </sectiondiv>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">125 mg 3 times a day</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">100 mg 3 times a day</p>
+          </sectiondiv>
+        </sectiondiv>
+      </sectiondiv>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
+        </sectiondiv>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">7.5 mg/kg twice daily (max. per dose 500 mg)</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">100 mg twice daily</p>
+          </sectiondiv>
+        </sectiondiv>
+      </sectiondiv>
     </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Esomeprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">esomeprazole</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">250 mg twice daily</p>
+    <sectiondiv outputclass="patientGroup">
+      <p outputclass="title">Child 6–11 years</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
         </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">500 mg twice daily</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">7.5 mg/kg twice daily (max. per dose 500 mg)</p>
+          </sectiondiv>
         </sectiondiv>
       </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£4.30</ph> for 7-day course</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
+        </sectiondiv>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">250 mg 3 times a day</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">200 mg 3 times a day</p>
+          </sectiondiv>
+        </sectiondiv>
+      </sectiondiv>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">1–2 mg/kg once daily (max. per dose 40 mg)</p>
+        </sectiondiv>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">7.5 mg/kg twice daily (max. per dose 500 mg)</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">200 mg twice daily</p>
+          </sectiondiv>
+        </sectiondiv>
+      </sectiondiv>
     </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Lansoprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">lansoprazole</p>
-        <p outputclass="quantity">30 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
+    <sectiondiv outputclass="patientGroup">
+      <p outputclass="title">Child 12–17 years</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">40 mg once daily</p>
         </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">500 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£5.52</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Lansoprazole</b> with <b>amoxicillin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">lansoprazole</p>
-        <p outputclass="quantity">30 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">1 g twice daily</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">500 mg twice daily</p>
+          </sectiondiv>
         </sectiondiv>
       </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.70</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Lansoprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">lansoprazole</p>
-        <p outputclass="quantity">30 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">250 mg twice daily</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>amoxicillin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">40 mg once daily</p>
         </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">amoxicillin</p>
+            <p outputclass="quantity">500 mg 3 times a day</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">400 mg 3 times a day</p>
+          </sectiondiv>
         </sectiondiv>
       </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.19</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Omeprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">omeprazole</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
+      <sectiondiv outputclass="regimen">
+        <p outputclass="title">
+          <b>Omeprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
+        <sectiondiv outputclass="acidSuppressant">
+          <p outputclass="drug">omeprazole</p>
+          <p outputclass="quantity">40 mg once daily</p>
         </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">500 mg twice daily</p>
+        <sectiondiv outputclass="antibacterials">
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">clarithromycin</p>
+            <p outputclass="quantity">500 mg twice daily</p>
+          </sectiondiv>
+          <sectiondiv outputclass="antibacterial">
+            <p outputclass="drug">metronidazole</p>
+            <p outputclass="quantity">400 mg twice daily</p>
+          </sectiondiv>
         </sectiondiv>
       </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£5.36</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Omeprazole</b> with <b>amoxicillin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">omeprazole</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">500 mg 3 times a day</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg 3 times a day</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.40</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Omeprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">omeprazole</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">250 mg twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.03</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Pantoprazole</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">pantoprazole</p>
-        <p outputclass="quantity">40 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">500 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£5.48</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Pantoprazole</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">pantoprazole</p>
-        <p outputclass="quantity">40 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">250 mg twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.15</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Rabeprazole sodium</b> with <b>amoxicillin</b> + <b>clarithromycin</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">rabeprazole sodium</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">amoxicillin</p>
-          <p outputclass="quantity">1 g twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">500 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£6.04</ph> for 7-day course</p>
-    </sectiondiv>
-    <sectiondiv outputclass="regimen">
-      <p outputclass="title">
-        <b>Rabeprazole sodium</b> with <b>clarithromycin</b> + <b>metronidazole</b></p>
-      <sectiondiv outputclass="acidSuppressant">
-        <p outputclass="drug">rabeprazole sodium</p>
-        <p outputclass="quantity">20 mg twice daily</p>
-      </sectiondiv>
-      <sectiondiv outputclass="antibacterials">
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">clarithromycin</p>
-          <p outputclass="quantity">250 mg twice daily</p>
-        </sectiondiv>
-        <sectiondiv outputclass="antibacterial">
-          <p outputclass="drug">metronidazole</p>
-          <p outputclass="quantity">400 mg twice daily</p>
-        </sectiondiv>
-      </sectiondiv>
-      <p outputclass="course">
-        <ph outputclass="price">£3.71</ph> for 7-day course</p>
     </sectiondiv>
   </sectiondiv>
 </section><section id="PHP186" outputclass="antiTuberculosisTreatments">
