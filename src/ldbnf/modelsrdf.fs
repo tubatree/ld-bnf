@@ -765,7 +765,7 @@ module SectionsRdf =
       let regimen (Regimen(title,drugs,course,patientgroup)) =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
         
-        let getPatientGroup (PatientGroup(agegroup,dosage)) =
+        let getPatientGroup (PatientGroup(agegroup,_)) =
           let grp (x:AgeGroup) =
             let g (p:sectionProvider.P) a =
               one !!"nicebnf:hasPatientGroup" (Uri.fromgrp p.String.Value)
@@ -776,12 +776,8 @@ module SectionsRdf =
             match x with
               | Adult p -> g p "adult"
               | Child p -> g p "child"
-
-
-          blank (Uri.has<Dosage>()) (optionlist{
-            yield agegroup |> grp
-            //yield! dosage.Value |> dir
-            })
+          
+          agegroup |> grp
 
         let drug d =
           let build s q = (optionlist{
