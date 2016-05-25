@@ -740,7 +740,7 @@ module SectionsRdf =
 
           blank (Uri.has<Dosage>()) (optionlist{
             yield agegroup |> grp
-            yield! dosage |> dir
+            yield! dosage.Value |> dir
             })
 
         blank (Uri.has x) (optionlist{
@@ -762,9 +762,23 @@ module SectionsRdf =
 
   type Graph with
     static member fromHelicobacterPyloriRegimens (HelicobacterPyloriRegimens(id,title,regimens)) =
-      let regimen (Regimen(title,drugs,course)) =
+      let regimen (Regimen(title,drugs,course,patientgroup)) =
         let crse (Course(p)) = p |> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasCourse")
         
+        let getPatientGroup (PatientGroup(agegroup,_)) =
+          let grp (x:AgeGroup) =
+            let g (p:sectionProvider.P) a =
+              one !!"nicebnf:hasPatientGroup" (Uri.fromgrp p.String.Value)
+                          (optionlist {
+                            yield! p |> xtitle
+                            yield objectProperty !!"rdfs:subClassOf" (Uri.fromgrp(a))
+                            })
+            match x with
+              | Adult p -> g p "adult"
+              | Child p -> g p "child"
+          
+          agegroup |> grp
+
         let drug d =
           let build s q = (optionlist{
                        yield s |> label
@@ -775,11 +789,15 @@ module SectionsRdf =
                      -> blank !!"nicebnf:hasAcidSuppressant" (build s q)
                    | Antibacterial(s,Quantity(q))
                      -> blank !!"nicebnf:hasAntibacterial" (build s q)
+        let savePatientGroup = match patientgroup with
+                              | Some z -> [z]
+                              | None -> []
+
         blank (Uri.has<Regimen>()) (optionlist{
           yield! title |> ti
-          //yield course |> crse
           yield match course with | Some z -> (z |> crse)|> Some | None -> None
           yield! drugs |> List.map drug
+          yield! savePatientGroup |> List.map getPatientGroup
           })
 
       let s = optionlist {
