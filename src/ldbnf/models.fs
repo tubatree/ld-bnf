@@ -1279,14 +1279,13 @@ module Sections =
       let rsTempOriginal = x |> unravelr["regimens";"regimen"] 
       let emptyTitles = match rsTempOriginal with
                         | [] -> []
-                        | _ -> [ for _ in 0..rsTempOriginal.Length -> None]
+                        | _ -> [ for _ in 0..(rsTempOriginal.Length - 1) -> None]
 
       let rsTemp = List.zip rsTempOriginal emptyTitles  |> List.map regimen
       let rs = match rsTemp with
                | [] -> let titles = x |> unravelr["regimens";"patientGroup"] |> List.collect bnfcPatientGroups
                        let regimens = x |> unravelr["regimens";"patientGroup";"regimen"]
                        List.zip regimens titles |> List.map regimen
-
                | _ -> rsTemp
       let title = x.Ps |> Array.tryPick title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)

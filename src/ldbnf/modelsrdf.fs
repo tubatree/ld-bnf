@@ -789,12 +789,15 @@ module SectionsRdf =
                      -> blank !!"nicebnf:hasAcidSuppressant" (build s q)
                    | Antibacterial(s,Quantity(q))
                      -> blank !!"nicebnf:hasAntibacterial" (build s q)
+        let savePatientGroup = match patientgroup with
+                              | Some z -> [z]
+                              | None -> []
 
         blank (Uri.has<Regimen>()) (optionlist{
           yield! title |> ti
           yield match course with | Some z -> (z |> crse)|> Some | None -> None
           yield! drugs |> List.map drug
-          yield! [patientgroup.Value] |> List.map getPatientGroup
+          yield! savePatientGroup |> List.map getPatientGroup
           })
 
       let s = optionlist {
