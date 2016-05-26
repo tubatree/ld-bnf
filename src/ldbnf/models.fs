@@ -883,9 +883,10 @@ module Sections =
   type Title =
     //| TextTitle of string
     | XmlTitle of sectionProvider.P
-    override __.ToString() =
+    override x.ToString() =
       failwith "should not call string on this"
       ""
+     
 
   type NormalPlasmaValues = {
     title:Title;
@@ -1185,7 +1186,7 @@ module Sections =
 
   type Dosage = | Dosage of sectionProvider.P
 
-  type PatientGroup = | PatientGroup of AgeGroup * Dosage
+  type PatientGroup = | PatientGroup of AgeGroup * Dosage option
   type TakenInMonths =
     | TakenInMonths of string
     override __.ToString() = match __ with | TakenInMonths s -> s
@@ -1207,9 +1208,9 @@ module Sections =
         let group (x:sectionProvider.Li) =
           match x.Outputclass,x.Ps with
             | "patientGroup adult",[|p;r|] ->
-                (p |> Adult, r |> Dosage) |> PatientGroup |> Some
+                (p |> Adult, r |> Dosage |> Some) |> PatientGroup |> Some
             | "patientGroup child",[|p;r|] ->
-                (p |> Child, r |> Dosage) |> PatientGroup |> Some
+                (p |> Child, r |> Dosage |> Some) |> PatientGroup |> Some
             | _ -> None
 
         let title = x.Ps |> Array.pick title
@@ -1247,12 +1248,13 @@ module Sections =
 
   type Course = | Course of sectionProvider.P
 
-  type Regimen = | Regimen of Title * Drug list * Course option
+  type Regimen = | Regimen of Title * Drug list * Course option * PatientGroup option
 
   type HelicobacterPyloriRegimens =
     | HelicobacterPyloriRegimens of Id * Title option * Regimen list
     static member parse (x:sectionProvider.Section) =
-      let regimen (x:sectionProvider.Sectiondiv) =
+      let regimen (x:sectionProvider.Sectiondiv * PatientGroup option) =
+        let sec, ti = x
         let drug (x:sectionProvider.Sectiondiv) =
           match x.Outputclass,x.Ps with
             | "acidSuppressant",[|d;q|]
@@ -1261,15 +1263,29 @@ module Sections =
                -> Option.lift2 (fun d q -> Antibacterial(d,Quantity(q))) d.String q.String
             | (_,_) -> failwith "unknown class"
 
-        let title = x.Ps |> Array.pick title
-        let course = x.Ps |> Array.tryPick(hasOutputclasso "course" >> Option.map Course)
-        let acid = x |> unravel ["acidSuppressant"] |> List.choose drug
-        let anti = x |> unravel ["antibacterials";"antibacterial"] |> List.choose drug
-        Regimen(title,acid @ anti,course)
+        let title = sec.Ps |> Array.pick title
+        let course = sec.Ps |> Array.tryPick(hasOutputclasso "course" >> Option.map Course)
+        let acid = sec |> unravel ["acidSuppressant"] |> List.choose drug
+        let anti = sec |> unravel ["antibacterials";"antibacterial"] |> List.choose drug
+        Regimen(title,acid @ anti,course, ti)
       
-      let rsTemp = x |> unravelr["regimens";"regimen"] |> List.map regimen
+      let bnfcPatientGroups(x:sectionProvider.Sectiondiv) =  
+        let count = x.Sectiondivs.Length
+        let pg = match x.Outputclass,x.Ps with
+                 | "patientGroup",[|p|] -> (p |> Child, None) |> PatientGroup |> Some
+                 | (_,_) -> None
+        Array.init count (fun _ -> pg) |> Array.toList
+
+      let rsTempOriginal = x |> unravelr["regimens";"regimen"] 
+      let emptyTitles = match rsTempOriginal with
+                        | [] -> []
+                        | _ -> [ for _ in 0..(rsTempOriginal.Length - 1) -> None]
+
+      let rsTemp = List.zip rsTempOriginal emptyTitles  |> List.map regimen
       let rs = match rsTemp with
-               | [] -> x |> unravelr["regimens";"patientGroup";"regimen"] |> List.map regimen
+               | [] -> let titles = x |> unravelr["regimens";"patientGroup"] |> List.collect bnfcPatientGroups
+                       let regimens = x |> unravelr["regimens";"patientGroup";"regimen"]
+                       List.zip regimens titles |> List.map regimen
                | _ -> rsTemp
       let title = x.Ps |> Array.tryPick title
       HelicobacterPyloriRegimens(Id(x.Id),title,rs)
