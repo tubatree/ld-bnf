@@ -72,7 +72,10 @@ module DrugRdf =
                 }
 
       let mfl = function
-                 | MedicinalForms (_,_,_,mfls) -> mfls |> Seq.map Graph.frommfl |> Seq.toList
+                 | MedicinalForms (_,_,_,x) -> let mf = x |> Seq.map Graph.frommfl |> Seq.toList
+                                               match mf with
+                                               | [] -> [blank !!"nicebnf:hasMedicinalForm" []]
+                                               | _ -> mf
                  | _ -> []
       let mfls = x.sections |> Seq.collect mfl |> Seq.toList
 
