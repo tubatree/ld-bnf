@@ -147,7 +147,7 @@ module InteractionRdf =
                                    yield dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)
                                   })
 
-      let link = Uri.fromil >> objectProperty !!"nicebnf:hasInteractionList"
+      let link i = one !!"nicebnf:hasInteractionList" (Uri.fromil i) [objectProperty !!"nicebnf:isInteractionListOf" (Uri.fromil id)]
 
       let dr r = resource (Uri.fromil id) r
       [dr s
