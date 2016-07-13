@@ -186,6 +186,7 @@ module DrugRdf =
       let patientGrp pg =
         blank !!"nicebnf:hasDosage"
          (optionlist {
+          yield dataProperty !!"nicebnf:hasOrder" (pg.Order.ToString()^^xsd.string)
           yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group.Value.Value)
                  (optionlist{
                    yield! pg.Group |> xtitle

@@ -118,6 +118,7 @@ module Drug =
       Group:drugProvider.P
       Dosage:string
       dosageXml:drugProvider.P
+      Order:int
       }
 
     type Route =
@@ -378,22 +379,23 @@ module DrugParser =
         static member from (x:drugProvider.Xref) = MedicinalForm {Href = Href x.Href; Title = x.Value |? ""}
 
     type PatientGroup with
-      static member from (x:drugProvider.Li) =
+      static member from (x:drugProvider.Li, count) =
+        count := !count + 1
         match x.Outputclass,x.Ps with
           | Some("patientGroup adult"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup child"),[| g; p |] ->
-              {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup adult asian"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup adult eastAsian"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup adult female"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup adult male"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | Some("patientGroup neonate"),[| g; p |] ->
-              {parentGroup = "neonate" ;Group = g; Dosage = p.Value |? ""; dosageXml = p} |> Some
+              {parentGroup = "neonate" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | _,_ -> None
 
     type TheraputicIndication with
@@ -406,10 +408,10 @@ module DrugParser =
       static member from (Paragraphs xs) = Seq.map TheraputicIndication.from xs
 
     type IndicationsAndDose with
-      static member from (x:drugProvider.Section) =
+      static member from (x:drugProvider.Section, count) =
          let theraputicIndications = x.Sectiondivs.[0] |> ( Paragraphs.fromsd >> TheraputicIndication.from )
          let specificities = x.Ps |> Array.map (Specificity.from >> Some)
-         let groups = x.Uls |> Array.map (fun u -> u.Lis |> Seq.choose PatientGroup.from)
+         let groups = x.Uls |> Array.map (fun u -> u.Lis |> Seq.choose (fun x -> PatientGroup.from (x,count)))
          //if there are no routes then return something else
          let routesOfAdministration =
             match (specificities, groups) with
@@ -417,7 +419,7 @@ module DrugParser =
             | [||],_ -> match groups.Length with
                         | 1 -> Array.zip [|None|] groups |> Array.map RouteOfAdministration
                         | _ -> [||]
-            | _, _ -> Array.zip specificities groups |> Array.map RouteOfAdministration
+            | _, _ ->Array.zip specificities groups |> Array.map RouteOfAdministration
          IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration)
 
     type IndicationsAndDoseSection with
@@ -434,7 +436,8 @@ module DrugParser =
       static member indicationsAndDoseGroup (x:drugProvider.Topic) =
         match x.Body with
           | Some(b) ->
-             let grps = b.Sections |> Array.choose (hasOutputclasso "indicationAndDoseGroup") |> Array.map IndicationsAndDose.from
+             let count = ref 0
+             let grps = b.Sections |> Array.choose (hasOutputclasso "indicationAndDoseGroup") |> Array.map (fun x -> IndicationsAndDose.from (x, (count)))
              let idgss = b.Sections |> Array.choose IndicationsAndDoseSection.from
              Some(IndicationsAndDoseGroup(Id(x.Id),grps,idgss))
           | None -> None
