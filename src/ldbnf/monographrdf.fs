@@ -209,9 +209,13 @@ module DrugRdf =
               yield! p |> dita
              }))
 
-    static member fromidg (IndicationsAndDose(tis,roas)) =
+    static member order (order) =
+        [dataProperty !!"nicebnf:hasOrder" (order.ToString()^^xsd.string)]
+
+    static member fromidg (IndicationsAndDose(tis,roas,count)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
+              @ (Graph.order(count))
 
     static member fromidgs (x:IndicationsAndDoseSection) =
       let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)

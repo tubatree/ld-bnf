@@ -133,7 +133,7 @@ module Drug =
 
     type RouteOfAdministration = | RouteOfAdministration of Specificity option * PatientGroup seq 
 
-    type IndicationsAndDose = | IndicationsAndDose  of TheraputicIndication seq * RouteOfAdministration seq
+    type IndicationsAndDose = | IndicationsAndDose  of TheraputicIndication seq * RouteOfAdministration seq * int
 
     type IndicationsAndDoseSection =
       | Pharmacokinetics of drugProvider.Section
@@ -420,7 +420,8 @@ module DrugParser =
                         | 1 -> Array.zip [|None|] groups |> Array.map RouteOfAdministration
                         | _ -> [||]
             | _, _ ->Array.zip specificities groups |> Array.map RouteOfAdministration
-         IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration)
+         count := !count + 1
+         IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration,count.Value)
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
