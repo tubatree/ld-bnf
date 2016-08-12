@@ -209,11 +209,21 @@ module DrugRdf =
               yield! p |> dita
              }))
 
-    static member order (order) =
-        [dataProperty !!"nicebnf:hasOrder" (order.ToString()^^xsd.string)]
+    static member order (count) =
+        [dataProperty !!"nicebnf:hasOrder" (count.ToString()^^xsd.string)]
+
+    static member therapeuticIndicationOrder (uri, count) =
+      count := !count + 1
+      blank !!"nicebnf:hasTherapeuticIndicationOrder"
+             (optionlist {
+              yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+              yield dataProperty !!"nicebnf:hasIndication" (uri.ToString()^^xsd.string)
+              })
 
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
+      let therapeuticIndicationOrder = ref 0
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
+              @ (tis |> Seq.map (fun x -> Graph.therapeuticIndicationOrder(Uri.from x,therapeuticIndicationOrder)) |> Seq.toList )
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
               @ (Graph.order(count))
 
