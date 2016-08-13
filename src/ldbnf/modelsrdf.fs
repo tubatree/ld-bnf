@@ -340,17 +340,26 @@ module MedicinalFormRdf =
                  | None -> []
 
       let cmpis = x.cmpis |> List.map Graph.fromclinicalmpi
-
+      let count = ref 0
+      let cmpiOrdering = x.cmpis |> List.map (fun x -> Graph.ClinicalMedicinalProductInformationOrder(x, count))
       let mps = x.medicinalProducts |> List.map Graph.from
       let dr r = resource (Uri.from x) r
       [dr s
        dr mps
        dr cals
+       dr cmpiOrdering
        dr cmpis]
        |> Assert.graph (empty())
 
     static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 
+    static member ClinicalMedicinalProductInformationOrder (x, count) =
+        count := !count + 1
+        blank !!"nicebnf:hasClinicalMedicinalProductInformationOrder"
+                 (optionlist {
+                  yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+                  yield dataProperty !!"nicebnf:hasClinicalMedicinalProductInformation" ((Uri.fromcmpi x).ToString()^^xsd.string)
+                  })
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
       blank !!"nicebnf:hasCautionaryAdvisoryLabel"
                (optionlist {
