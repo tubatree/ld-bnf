@@ -326,7 +326,11 @@ module TreatmentSummaryRdf =
 module MedicinalFormRdf =
   open Bnf.Drug
   open Bnf.MedicinalForm
-
+  open FSharpx.Control
+  open System.IO
+  open DrugParser
+  open Shared
+  open System
   type Graph with
     static member from (x:MedicinalForm) =
       let s = optionlist{
@@ -355,9 +359,27 @@ module MedicinalFormRdf =
 
     static member ClinicalMedicinalProductInformationOrder (x, count) =
         count := !count + 1
+        let getProducts (x:drugProvider.Topic) =
+          x.Xrefs |> Array.map (fun xref -> xref.Href)
+
+        let file (fn:string) = File.OpenText fn
+        let xmlDirectory = Environment.GetCommandLineArgs() |> Array.filter (fun x-> x.Contains("xml")) |> Array.filter (fun x-> x <> "--xmldirectory")
+        let fi = file(xmlDirectory.[0]+"/clinical-medicinal-product-information/clinicalMedicinalProductInformation.xml")
+
+        let cmpiList (fi:StreamReader) =
+          fi |> drugProvider.Load |> getProducts
+
+        let cmpis = cmpiList fi
+        let q =  x.GetType().GetProperty("Item").GetValue(x, null) |> string
+        let order q = 
+            let c = cmpis |> Array.tryFindIndex(fun i -> i.Contains(q+".xml"))
+            match c with
+            | Some c -> c
+            | None -> count.Value
+
         blank !!"nicebnf:hasClinicalMedicinalProductInformationOrder"
                  (optionlist {
-                  yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+                  yield dataProperty !!"nicebnf:hasOrder" ((order q).ToString()^^xsd.string)
                   yield dataProperty !!"nicebnf:hasClinicalMedicinalProductInformation" ((Uri.fromcmpi x).ToString()^^xsd.string)
                   })
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
