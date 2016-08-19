@@ -346,7 +346,8 @@ module MedicinalFormRdf =
       let cmpis = x.cmpis |> List.map Graph.fromclinicalmpi
       let count = ref 0
       let cmpiOrdering = x.cmpis |> List.map (fun x -> Graph.ClinicalMedicinalProductInformationOrder(x, count))
-      let mps = x.medicinalProducts |> List.map Graph.from
+      let mpsCount = ref 0 
+      let mps = x.medicinalProducts |> List.map (fun x -> Graph.fromCount(x, mpsCount))
       let dr r = resource (Uri.from x) r
       [dr s
        dr mps
@@ -459,6 +460,18 @@ module MedicinalFormRdf =
           yield! x.packs |> List.map Graph.frompack
           })
 
+    static member fromCount (x:MedicinalProduct, count) =
+      count := !count + 1
+      one !!"nicebnf:hasMedicinalProduct" (Uri.from x)
+        (optionlist {
+          yield a Uri.MedicinalProductEntity
+          yield x.ampid |> string |> Graph.dp "Ampid"
+          yield! x.title |> Graph.frommpt
+          yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
+          yield! x.controlledDrugs |> List.choose Graph.fromcd
+          yield! x.packs |> List.map Graph.frompack
+          yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+          })
 
 module WoundManagementRdf =
   open Bnf.WoundManagement

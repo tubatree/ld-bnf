@@ -70,14 +70,23 @@ module DrugRdf =
                  yield x.primaryDomainOfEffect >>= (Graph.frompdoe >> Some)
                  yield x.synonyms >>= (Graph.fromsyn >> Some)
                 }
-
+      let count = ref 0
       let mfl = function
-                 | MedicinalForms (_,_,_,x) -> let mf = x |> Seq.map Graph.frommfl |> Seq.toList
+                 | MedicinalForms (_,_,_,x) -> let mf = x |> Seq.map (fun x -> Graph.frommfl (x, count)) |> Seq.toList
                                                match mf with
                                                | [] -> [blank !!"nicebnf:hasMedicinalForm" []]
                                                | _ -> mf
                  | _ -> []
-      let mfls = x.sections |> Seq.collect mfl |> Seq.toList
+
+      let mflOrder = function
+                 | MedicinalForms (_,_,_,x) -> let mf = x |> Seq.map (fun x -> Graph.getMedicinalFormsOrder (x, count)) |> Seq.toList
+                                               match mf with
+                                               | [] -> [blank !!"nicebnf:hasMedicinalFormsOrder" []]
+                                               | _ -> mf
+                 | _ -> []
+
+      let mfls = (x.sections |> Seq.collect mfl |> Seq.toList)
+                 @(x.sections |> Seq.collect mflOrder |> Seq.toList)
 
       let dr r = resource (Uri.from x) r
       //pass in uri construction for sections
@@ -250,8 +259,15 @@ module DrugRdf =
 
     static member fromavs (AdditionalFormsStatement(p)) = p |> dita
 
-    static member frommfl (MedicinalForm(l)) =
+    static member frommfl (MedicinalForm(l), count) =
       one !!"nicebnf:hasMedicinalForm" (!!(Uri.bnfsite + (string l.Href))) [l.Title |> label]
+
+    static member getMedicinalFormsOrder (MedicinalForm(l), count) =
+      count := !count + 1
+      blank !!"nicebnf:hasMedicinalFormsOrder" (optionlist {
+               yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+               yield dataProperty !!"nicebnf:hasMedicinalForm" ((!!(Uri.bnfsite + (string l.Href))).ToString()^^xsd.string)
+               })
 
     static member fromcsc (AllergyAndCrossSensitivityContraindications (t,sp,s)) = Graph.fromthree (t,sp,s)
 
