@@ -14,65 +14,65 @@ open resource
 open System.Collections
 open System.Collections.Generic
 
-[<Test>]
-
-let ``add order to every drug triple`` () =
-
-  //arrange
-  let fi = new StreamReader ("C:/apps/ld-bnf/process/xml/drug/betamethasone.xml")
-  let xml = fi |> drugProvider.Load |> Drug.parse
-  let sec = Graph.fromsec (Uri.fromsec xml)
-  let triples = xml.sections |> Seq.map sec |> Seq.collect id |> Seq.toList
-
-
-  let count = ref 0
-
-  let addOrder x = match x with
-               | x -> ((count := !count + 1) |> (fun c-> List.append x [dataProperty !!"nicebnf:hasOrder2" (count.Value.ToString()^^xsd.string)]))
-
-  let rec processXS xs = seq {
-                   for (p,o) in xs do
-                        match p,o with
-                        | (p, O(Node.Blank(Blank.Blank(xst')),_))
-                               -> yield (p,o) 
-                        | (p, O(Node.Uri(_), xr)) -> for R(s, xss) in xr.Value do
-                                                         yield (p,o)
-                        | (p,o) -> yield (p,o) 
-                 }
-
-  let statementTuple = processXS triples |> Seq.toList
-      
-  Assert.IsNotEmpty(triples)
-
-//  let loopThroughEachResourceListAndAppendHasOrderToStatementList x = match x with
-//       R(s, xs) ->  R(s, processXS xs |> Seq.toList)
-//
-//  let modifyResource (p,o) = match o with
-//        | O(n,r) -> (p,O(n, List.map loopThroughEachResourceListAndAppendHasOrderToStatementList r.Value |> (fun l -> lazy(l))))
-//
-//  let processStatement x = match x with
-//      | (p,o) -> modifyResource (p,o)
-
-//  let rec processSL x = match x with
-//      | head :: tail ->  processStatement head :: processSL tail
-//      | [] -> []
-
 //[<Test>]
-//let ``simple case`` () =
-//  // Arrange
-//  let uri1 = !!"http://test.com/uri1"
-//  let po =
-//    (P uri1, O(Node.Uri uri1, lazy[resource uri1
-//      [ blank !!"base:someBlankProperty"
-//          [ dataProperty !!"base:someDataProperty" ("value2"^^xsd.string) 
-//            dataProperty !!"base:someDataProperty2" ("value3"^^xsd.string) ]
-//        dataProperty !!"base:someDataProperty3" ("value4"^^xsd.string) ]
-//      ]))
 //
-//  // Act
-//  let newPO = recurse po
+//let ``add order to every drug triple`` () =
 //
-//  Assert.AreEqual(po, newPO)
+//  //arrange
+//  let fi = new StreamReader ("C:/apps/ld-bnf/process/xml/drug/betamethasone.xml")
+//  let xml = fi |> drugProvider.Load |> Drug.parse
+//  let sec = Graph.fromsec (Uri.fromsec xml)
+//  let triples = xml.sections |> Seq.map sec |> Seq.collect id |> Seq.toList
+//
+//
+//  let count = ref 0
+//
+//  let addOrder x = match x with
+//               | x -> ((count := !count + 1) |> (fun c-> List.append x [dataProperty !!"nicebnf:hasOrder2" (count.Value.ToString()^^xsd.string)]))
+//
+//  let rec processXS xs = seq {
+//                   for (p,o) in xs do
+//                        match p,o with
+//                        | (p, O(Node.Blank(Blank.Blank(xst')),_))
+//                               -> yield (p,o) 
+//                        | (p, O(Node.Uri(_), xr)) -> for R(s, xss) in xr.Value do
+//                                                         yield (p,o)
+//                        | (p,o) -> yield (p,o) 
+//                 }
+//
+//  let statementTuple = processXS triples |> Seq.toList
+//      
+//  Assert.IsNotEmpty(triples)
+//
+////  let loopThroughEachResourceListAndAppendHasOrderToStatementList x = match x with
+////       R(s, xs) ->  R(s, processXS xs |> Seq.toList)
+////
+////  let modifyResource (p,o) = match o with
+////        | O(n,r) -> (p,O(n, List.map loopThroughEachResourceListAndAppendHasOrderToStatementList r.Value |> (fun l -> lazy(l))))
+////
+////  let processStatement x = match x with
+////      | (p,o) -> modifyResource (p,o)
+//
+////  let rec processSL x = match x with
+////      | head :: tail ->  processStatement head :: processSL tail
+////      | [] -> []
+//
+////[<Test>]
+////let ``simple case`` () =
+////  // Arrange
+////  let uri1 = !!"http://test.com/uri1"
+////  let po =
+////    (P uri1, O(Node.Uri uri1, lazy[resource uri1
+////      [ blank !!"base:someBlankProperty"
+////          [ dataProperty !!"base:someDataProperty" ("value2"^^xsd.string) 
+////            dataProperty !!"base:someDataProperty2" ("value3"^^xsd.string) ]
+////        dataProperty !!"base:someDataProperty3" ("value4"^^xsd.string) ]
+////      ]))
+////
+////  // Act
+////  let newPO = recurse po
+////
+////  Assert.AreEqual(po, newPO)
      
 [<Test>]
 let ``Ensure that addOrdering adds the order property to a single resource`` () =
