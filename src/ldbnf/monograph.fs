@@ -382,18 +382,16 @@ module DrugParser =
       static member from (x:drugProvider.Li, count) =
         count := !count + 1
         match x.Outputclass,x.Ps with
-          | Some("patientGroup adult"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
-          | Some("patientGroup child"),[| g; p |] ->
-              {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
-          | Some("patientGroup adult asian"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
-          | Some("patientGroup adult eastAsian"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
-          | Some("patientGroup adult female"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
+          | Some("patientGroup adult"),[| g; p |]
+          | Some("patientGroup adult asian"),[| g; p |]
+          | Some("patientGroup adult eastAsian"),[| g; p |]
+          | Some("patientGroup adult female"),[| g; p |]
           | Some("patientGroup adult male"),[| g; p |] ->
-              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
+              {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some    
+          | Some("patientGroup child"),[| g; p |] 
+          | Some("patientGroup child male"),[| g; p |]
+          | Some("patientGroup child female"),[| g; p |] ->
+              {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some         
           | Some("patientGroup neonate"),[| g; p |] ->
               {parentGroup = "neonate" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some
           | _,_ -> None
