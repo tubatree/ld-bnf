@@ -4,15 +4,7 @@ open FSharp.RDF
 open Assertion
 open rdf
 open Bnf.DrugRdf
-open Bnf.RdfUris
-open Bnf.Drug
-open Bnf.DrugParser
-open Bnf.Shared
-open System.IO
-open System
 open resource
-open System.Collections
-open System.Collections.Generic
 
 [<Test>]
 let ``Ensure that addOrdering adds the order property to a single resource`` () =
