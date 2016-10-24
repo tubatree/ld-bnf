@@ -57,97 +57,32 @@ let ``add order to every drug triple`` () =
 //      | head :: tail ->  processStatement head :: processSL tail
 //      | [] -> []
 
-let rebuildResource x = x
-                           
-
-let rebuildPO x = match x with
-                        | (p, O(u, xr)) -> (p, O(u, rebuildResource xr))
-
-let recurse x = match x with
-                | (p,o) -> rebuildPO((p,o))
-
-[<Test>]
-let ``simple case`` () =
-  // Arrange
-  let uri1 = !!"http://test.com/uri1"
-  let po =
-    (P uri1, O(Node.Uri uri1, lazy[resource uri1
-      [ blank !!"base:someBlankProperty"
-          [ dataProperty !!"base:someDataProperty" ("value2"^^xsd.string) 
-            dataProperty !!"base:someDataProperty2" ("value3"^^xsd.string) ]
-        dataProperty !!"base:someDataProperty3" ("value4"^^xsd.string) ]
-      ]))
-
-  // Act
-  let newPO = recurse po
-
-  Assert.AreEqual(po, newPO)
-
-type Resource = {
-  Uri : FSharp.RDF.Uri
-  Statements : Statement list
-}
-
-type StringDataProperty = {
-  Uri : FSharp.RDF.Uri
-  Value : string
-}
-
-let getResource r = 
-  match r with
-  | R(S(uri), statements) ->
-    { Uri = uri; Statements = statements }
-
-let getBlankNodeFrom s = 
-  match s with
-  | P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
-    (pUri, statements)
+//[<Test>]
+//let ``simple case`` () =
+//  // Arrange
+//  let uri1 = !!"http://test.com/uri1"
+//  let po =
+//    (P uri1, O(Node.Uri uri1, lazy[resource uri1
+//      [ blank !!"base:someBlankProperty"
+//          [ dataProperty !!"base:someDataProperty" ("value2"^^xsd.string) 
+//            dataProperty !!"base:someDataProperty2" ("value3"^^xsd.string) ]
+//        dataProperty !!"base:someDataProperty3" ("value4"^^xsd.string) ]
+//      ]))
+//
+//  // Act
+//  let newPO = recurse po
+//
+//  Assert.AreEqual(po, newPO)
      
-let getDataProperty s = 
-  match s with
-  | (P(pUri), O(Node.Literal(Literal.String value), _)) -> 
-    {Uri = pUri; Value = value} 
-  | (P(pUri), o) ->    
-    {Uri = pUri; Value = "no match"} 
-
-let addOrderDataProperty c s =
-    s |> List.append [dataProperty !!"nicebnf:hasOrder" (c.ToString()^^xsd.string)]
-
-let addOrderToBlankNode x =
-    let bCount = ref 0
-    x
-    |> List.map (fun s -> 
-                  match s with
-                  | P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
-                       (bCount := !bCount + 1) 
-                       P(pUri), O(Node.Blank(Blank.Blank(statements |> addOrderDataProperty bCount.Value)), lazy [])
-                  | _ -> s)
-     
-let addOrdering p =
-  let rCount = ref 0
-  match p with
-  | (P p, O(n, resources)) -> 
-    let newRes = 
-      resources.Value
-      |> List.map (fun r -> 
-                   match r with
-                   | R(s, statements) -> 
-                     (rCount := !rCount + 1) 
-                     |> (fun a -> R(s, statements 
-                                       |> addOrderDataProperty rCount.Value
-                                       |> addOrderToBlankNode)))
-
-    (P p, O(n, lazy newRes))
-       
 [<Test>]
 let ``Ensure that addOrdering adds the order property to a single resource`` () =
-
   let po =
    (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
      [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
      ]))
 
-  let newPo = addOrdering po
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
 
   match newPo with
   | (P p, O(Node.Uri u, resources)) ->
@@ -155,12 +90,12 @@ let ``Ensure that addOrdering adds the order property to a single resource`` () 
     let resource = 
       resources.Force() 
       |> List.head
-      |> getResource 
+      |> Graph.getResource 
 
     let property =
       resource.Statements
       |> List.head
-      |> getDataProperty 
+      |> Graph.getDataProperty 
 
     Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
     Assert.AreEqual("1", property.Value)
@@ -172,14 +107,15 @@ let ``Ensure that addOrdering adds order to multiple resources and increments or
          resource !!"base:rUri1" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
          resource !!"base:rUri2" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]]))
 
-  let newPo = addOrdering po
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
 
   match newPo with
   | (P p, O(Node.Uri u, resources)) ->
 
     let resources = 
       resources.Force() 
-      |> List.map getResource
+      |> List.map Graph.getResource
 
     let statements =
       resources
@@ -188,12 +124,12 @@ let ``Ensure that addOrdering adds order to multiple resources and increments or
     let resourceOneProperty = 
       List.nth statements 0
       |> List.head
-      |> getDataProperty
+      |> Graph.getDataProperty
 
     let resourceTwoProperty = 
       List.nth statements 1
       |> List.head
-      |> getDataProperty
+      |> Graph.getDataProperty
 
     Assert.AreEqual(!!"nicebnf:hasOrder", resourceOneProperty.Uri)
     Assert.AreEqual("1", resourceOneProperty.Value)
@@ -202,13 +138,57 @@ let ``Ensure that addOrdering adds order to multiple resources and increments or
     Assert.AreEqual("2", resourceTwoProperty.Value)
 
 [<Test>]
+let ``Ensure that addOrdering adds order to a nested resource and increments order`` () =
+  let po =
+   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[
+         resource !!"base:rUri" 
+            [ one !!"base:nUri" !!"base:nested" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string)]]
+         ]))
+
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
+
+  match newPo with
+  | (P p, O(Node.Uri u, resources)) ->
+
+    let resources = 
+      resources.Force() 
+      |> List.map Graph.getResource
+
+    let statements =
+      resources
+      |> List.map (fun s-> s.Statements)
+
+    let nestedResources = 
+      List.nth statements 0
+      |> List.tail 
+      |> List.head
+
+    let nestedResource = 
+      match nestedResources with
+        | (P p, O(Node.Uri u, resources)) -> resources.Force() |> List.map Graph.getResource
+
+    let statements =
+      nestedResource
+      |> List.map (fun s-> s.Statements)
+
+    let property =
+      List.nth statements 0
+      |> List.head
+      |> Graph.getDataProperty
+
+    Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
+    Assert.AreEqual("2", property.Value)
+
+[<Test>]
 let ``Ensure that addOrdering adds order to a blank node``() = 
   let po =   
    (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
      [ blank !!"base:someBlankProperty"
          [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string)]]]))
   
-  let newPo = addOrdering po
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
 
   match newPo with
   | (P p, O(Node.Uri u, resources)) ->
@@ -218,19 +198,19 @@ let ``Ensure that addOrdering adds order to a blank node``() =
     let resource =
       resources.Force()
       |> List.head
-      |> getResource
+      |> Graph.getResource
 
     let (bUri, bStatements) = 
       List.nth resource.Statements 1
-      |> getBlankNodeFrom
+      |> Graph.getBlankNodeFrom
 
     let property =
       bStatements
       |> List.head
-      |> getDataProperty
+      |> Graph.getDataProperty
 
     Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
-    Assert.AreEqual("1", property.Value)
+    Assert.AreEqual("2", property.Value)
 
 [<Test>]
 let ``Ensure that addOrdering adds order to multipe blank nodes and increments order``() = 
@@ -239,7 +219,8 @@ let ``Ensure that addOrdering adds order to multipe blank nodes and increments o
      [ blank !!"base:someBlankProperty1" [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string) ]
        blank !!"base:someBlankProperty2" [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string) ]]]))
   
-  let newPo = addOrdering po
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
 
   match newPo with
   | (P p, O(Node.Uri u, resources)) ->
@@ -249,29 +230,29 @@ let ``Ensure that addOrdering adds order to multipe blank nodes and increments o
     let resource =
       resources.Force()
       |> List.head
-      |> getResource
+      |> Graph.getResource
 
     let (bnAUri, bnAStatements) = 
       List.nth resource.Statements 1
-      |> getBlankNodeFrom
+      |> Graph.getBlankNodeFrom
    
     let bnAProperty =
       List.nth bnAStatements 0
-      |> getDataProperty 
+      |> Graph.getDataProperty 
 
     Assert.AreEqual(!!"nicebnf:hasOrder", bnAProperty.Uri)
-    Assert.AreEqual("1", bnAProperty.Value)
+    Assert.AreEqual("2", bnAProperty.Value)
 
     let (bnBUri, bnBStatements) = 
       List.nth resource.Statements 2
-      |> getBlankNodeFrom
+      |> Graph.getBlankNodeFrom
    
     let bnBProperty =
       List.nth bnBStatements 0
-      |> getDataProperty 
+      |> Graph.getDataProperty 
 
     Assert.AreEqual(!!"nicebnf:hasOrder", bnBProperty.Uri)
-    Assert.AreEqual("2", bnBProperty.Value)
+    Assert.AreEqual("3", bnBProperty.Value)
 
 [<Test>]
 let ``Ensure that addOrdering maintains the existing structure`` () =
@@ -283,7 +264,8 @@ let ``Ensure that addOrdering maintains the existing structure`` () =
        dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
      ]))
 
-  let newPo = addOrdering po
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
 
   match newPo with
   | (P p, O(Node.Uri u, resources)) ->
@@ -293,26 +275,26 @@ let ``Ensure that addOrdering maintains the existing structure`` () =
     let resource = 
       resources.Force() 
       |> List.head
-      |> getResource 
+      |> Graph.getResource 
 
     Assert.AreEqual(!!"base:rUri", resource.Uri)
 
     let property =
       List.nth resource.Statements 2
-      |> getDataProperty 
+      |> Graph.getDataProperty 
 
     Assert.AreEqual(!!"base:someDataProperty", property.Uri)
     Assert.AreEqual("dataValue", property.Value)
 
     let (bUri, bStatements) = 
       List.nth resource.Statements 1
-      |> getBlankNodeFrom
+      |> Graph.getBlankNodeFrom
 
     Assert.AreEqual(!!"base:someBlankProperty", bUri)
 
     let property =
       List.nth bStatements 1
-      |> getDataProperty 
+      |> Graph.getDataProperty 
 
     Assert.AreEqual(!!"base:someBlankDataProperty", property.Uri)
     Assert.AreEqual("blankValue", property.Value)

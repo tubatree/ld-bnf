@@ -380,7 +380,7 @@ module MedicinalFormRdf =
 
         blank !!"nicebnf:hasClinicalMedicinalProductInformationOrder"
                  (optionlist {
-                  yield dataProperty !!"nicebnf:hasOrder" ((order q).ToString()^^xsd.string)
+                  yield dataProperty !!"nicebnf:hasOrderDisabled" ((order q).ToString()^^xsd.string)
                   yield dataProperty !!"nicebnf:hasClinicalMedicinalProductInformation" ((Uri.fromcmpi x).ToString()^^xsd.string)
                   })
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
@@ -470,7 +470,7 @@ module MedicinalFormRdf =
           yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
           yield! x.controlledDrugs |> List.choose Graph.fromcd
           yield! x.packs |> List.map Graph.frompack
-          yield dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)
+          yield dataProperty !!"nicebnf:hasOrderDisabled" (count.Value.ToString()^^xsd.string)
           })
 
 module WoundManagementRdf =
