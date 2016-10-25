@@ -12,4 +12,6 @@ let ``Ensure that addOrdering adds the order property to a single resource`` () 
    (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
      [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
      ]))
+  let count = ref 0
+  let newPo = Graph.addOrder(po, count)
   ()
