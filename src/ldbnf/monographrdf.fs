@@ -13,6 +13,7 @@ module DrugRdf =
   open Rdf
   open RdfUris
   open guid
+  open Bnf.Order
 
   //shoudl replace these with tostring
   let getlabeld (DrugName n) = n.Value |? ""
@@ -31,16 +32,6 @@ module DrugRdf =
        yield ph.XElement.Value |> label
        yield! ph |> dita
        }
-
-  type Resource = {
-    Uri : FSharp.RDF.Uri
-    Statements : Statement list
-  }
-
-  type StringDataProperty = {
-    Uri : FSharp.RDF.Uri
-    Value : string
-  }
 
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
@@ -69,67 +60,6 @@ module DrugRdf =
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
        |> Assert.graph Graph.setupGraph
 
-    static member getResource(r) = 
-      match r with
-      | R(S(uri), statements) ->
-        { Uri = uri; Statements = statements }
-
-    static member getBlankNodeFrom(s) = 
-      match s with
-      | FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
-        (pUri, statements)
-     
-    static member getDataProperty(s) = 
-      match s with
-      | (FSharp.RDF.P(pUri), O(Node.Literal(Literal.String value), _)) -> 
-        {Uri = pUri; Value = value} 
-      | (FSharp.RDF.P(pUri), o) ->    
-        {Uri = pUri; Value = "no match"} 
-
-    static member addOrder(p, c) =
-      let addOrderDataProperty c s =
-          s |> List.append [dataProperty !!"nicebnf:hasOrder" (c.ToString()^^xsd.string)]
-
-      let addOrderToBlankNode c x =
-          x
-          |> List.map (fun s -> 
-                        match s with
-                        | FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
-                             (c := !c + 1) 
-                             FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements |> addOrderDataProperty c.Value)), lazy [])
-                        | _ -> s)
-
-      let addOrderToNestedResources c x =
-          x
-          |> List.map (fun s -> 
-                        match s with
-                        | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
-                             (c := !c + 1) 
-                             let resources = List.map (fun r -> 
-                                                       match r with
-                                                        | R(S(uri), statements) ->
-                                                          R(S(uri), statements |> addOrderDataProperty c.Value)) xr.Value
-                             (FSharp.RDF.P p, O(Node.Uri(o), lazy resources))
-
-                        | _ -> s)
-
-      let addOrdering p c =
-        match p with
-        | (FSharp.RDF.P p, O(n, resources)) -> 
-          let newRes = 
-            resources.Value
-            |> List.map (fun r -> 
-                         match r with
-                         | R(s, statements) -> 
-                           (c := !c + 1) 
-                           |> (fun a -> R(s, statements 
-                                             |> addOrderDataProperty c.Value
-                                             |> addOrderToNestedResources c
-                                             |> addOrderToBlankNode c)))
-
-          (FSharp.RDF.P p, O(n, lazy newRes))
-      addOrdering p c
-
     static member from (x:Drug) =
       let getvtmid (Vtmid i) = Some(string i)
 
@@ -157,7 +87,7 @@ module DrugRdf =
                  | _ -> []
 
       let mflsCounter = ref 0
-      let mfls = (x.sections |> Seq.collect mfl |> Seq.toList |> List.map (fun c -> Graph.addOrder(c,mflsCounter)))
+      let mfls = (x.sections |> Seq.collect mfl |> Seq.toList |> List.map (fun c -> addOrder c mflsCounter))
                  @(x.sections |> Seq.collect mflOrder |> Seq.toList)
 
       let dr r = resource (Uri.from x) r
@@ -175,7 +105,7 @@ module DrugRdf =
        dr (x.classifications |> Seq.map (Graph.fromcl (Uri.from x)) |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
-       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList |> List.map (fun c -> Graph.addOrder(c,sectionCount)))
+       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList |> List.map (fun c -> addOrder c sectionCount))
        dr mfls]
        |> Assert.graph Graph.setupGraph
 

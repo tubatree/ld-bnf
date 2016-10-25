@@ -47,12 +47,13 @@
     <None Include="paket.references" />
     <None Include="paket.template" />
     <Compile Include="prelude.fs" />
+    <Compile Include="order.fs" />
     <None Include="types.fsx" />
     <Compile Include="monograph.fs" />
-    <Compile Include="models.fs"/>
+    <Compile Include="models.fs" />
     <Compile Include="rdf.fs" />
     <Compile Include="monographrdf.fs" />
-    <Compile Include="modelsrdf.fs"/>
+    <Compile Include="modelsrdf.fs" />
     <Compile Include="xml2rdf.fs" />
   </ItemGroup>
   <PropertyGroup>
