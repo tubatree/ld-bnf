@@ -337,7 +337,7 @@ module DrugParser =
             | Some(x) -> Paragraphs.fromsd x
             | None -> Paragraphs [||]
         static member fromsd (x:drugProvider.Sectiondiv) =
-          x.Ps |> Seq.map Paragraph.from |> Paragraphs
+          x.Sectiondivs.[0].Ps |> Seq.map Paragraph.from |> Paragraphs
         static member froms (x:drugProvider.Section) =
           x.Ps |> Seq.map Paragraph.from |> Paragraphs
 
