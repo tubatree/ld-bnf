@@ -236,7 +236,6 @@ module DrugRdf =
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
       let therapeuticIndicationOrder = ref 0
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
-              @ (tis |> Seq.map (fun x -> Graph.therapeuticIndicationOrder(Uri.from x,therapeuticIndicationOrder)) |> Seq.toList )
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
               @ (Graph.order(count))
 
