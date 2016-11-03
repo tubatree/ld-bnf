@@ -23,6 +23,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <OtherFlags>--warnon:1182</OtherFlags>
+    <StartArguments>--xmldirectory process/xml --outputdirectory process/ttl</StartArguments>
+    <StartWorkingDirectory>C:\apps\ld-bnf\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -47,14 +49,15 @@
     <None Include="paket.references" />
     <None Include="paket.template" />
     <Compile Include="prelude.fs" />
-    <Compile Include="order.fs" />
     <None Include="types.fsx" />
     <Compile Include="monograph.fs" />
     <Compile Include="models.fs" />
     <Compile Include="rdf.fs" />
+    <Compile Include="order.fs" />
     <Compile Include="monographrdf.fs" />
     <Compile Include="modelsrdf.fs" />
     <Compile Include="xml2rdf.fs" />
+    <None Include="App.config" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
