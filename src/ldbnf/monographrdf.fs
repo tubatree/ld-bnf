@@ -176,7 +176,7 @@ module DrugRdf =
     static member from (x:Indication) =
       Some(one !!"nicebnf:hasIndication" (Uri.from x)
             [x |> (string >> label)
-             a Uri.IndicationEntity ])
+             a Uri.IndicationEntity]  )
 
     static member from (x:FundingIdentifier) =
       Some(one !!"nicebnf:hasFundingIdentifier" (Uri.fromfi x)
@@ -229,13 +229,13 @@ module DrugRdf =
       count := !count + 1
       blank !!"nicebnf:hasTherapeuticIndicationOrder"
              (optionlist {
-              yield dataProperty !!"nicebnf:hasOrderDisabled" (count.Value.ToString()^^xsd.string)
               yield dataProperty !!"nicebnf:hasIndication" (uri.ToString()^^xsd.string)
               })
 
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
       let therapeuticIndicationOrder = ref 0
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
+              @ (tis |> Seq.map (fun x -> Graph.therapeuticIndicationOrder(Uri.from x,therapeuticIndicationOrder)) |> Seq.toList )
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
               @ (Graph.order(count))
 

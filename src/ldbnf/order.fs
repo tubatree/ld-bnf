@@ -3,6 +3,7 @@ open FSharp.RDF
 open Assertion
 open rdf
 open resource
+open Bnf.RdfUris
 
 module Order =
    type Resource = {
@@ -49,14 +50,16 @@ module Order =
                      match s with
                      | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
                           (c := !c + 1) 
-                          let resources = List.map (fun r -> 
-                                                    match r with
-                                                     | R(S(uri), statements) ->
-                                                       R(S(uri), statements |> addOrderDataProperty c.Value)) xr.Value
-                          (FSharp.RDF.P p, O(Node.Uri(o), lazy resources))
-
+                          if o.ToString().Contains("http://ld.nice.org.uk/ns/bnf")
+                          then
+                          (FSharp.RDF.P p, O(Node.Uri(o), xr))
+                          else
+                           let resources = List.map (fun r -> 
+                                                     match r with
+                                                      | R(S(uri), statements) ->
+                                                        R(S(uri), statements |> addOrderDataProperty c.Value)) xr.Value
+                           (FSharp.RDF.P p, O(Node.Uri(o), lazy resources))
                      | _ -> s)
-
    let addOrder p c =
      match p with
      | (FSharp.RDF.P p, O(n, resources)) -> 
