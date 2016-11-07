@@ -380,7 +380,7 @@ module MedicinalFormRdf =
 
         blank !!"nicebnf:hasClinicalMedicinalProductInformationOrder"
                  (optionlist {
-                  yield dataProperty !!"nicebnf:hasOrderDisabled" ((order q).ToString()^^xsd.string)
+                  yield dataProperty !!"nicebnf:hasOrder" ((order q).ToString()^^xsd.string)
                   yield dataProperty !!"nicebnf:hasClinicalMedicinalProductInformation" ((Uri.fromcmpi x).ToString()^^xsd.string)
                   })
     static member fromcal (CautionaryAdvisoryLabel(ln,p)) =
@@ -536,7 +536,6 @@ module ClinicalMedicalDeviceInformationGroupRdf =
   open Bnf.MedicalDeviceType
   open DrugRdf
   open MedicinalFormRdf
-  open Bnf.Order
 
   type Graph with
     static member from (x:ClinicalMedicalDeviceInformationGroup) = 
@@ -549,8 +548,8 @@ module ClinicalMedicalDeviceInformationGroupRdf =
                 yield x.complicance <!> (Graph.fromcs uri)}
 
       let sec = Graph.fromsec uri
-      let count = ref 0
-      let ss = x.sections |> List.collect sec |> List.map (fun c -> addOrder c count)
+
+      let ss = x.sections |> List.collect sec
       let mps = x.products |> List.map Graph.from
 
       let dr r = resource (Uri.fromcmdig x) r
