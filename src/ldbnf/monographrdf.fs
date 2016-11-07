@@ -44,8 +44,9 @@ module DrugRdf =
                 getvalcmpi x.cmpiname |> title]
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromseccmpi x)
+      let count = ref 0
       [dr s
-       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
+       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList |>  List.map (fun c -> addOrder c count))]
        |> Assert.graph Graph.setupGraph
 
     static member from (x:DrugClass) =
