@@ -1199,9 +1199,19 @@ module Sections =
     groups:PatientGroup list;
   }
 
+  type TherapyNotes = {
+    supervision:Supervision;
+    notes: sectionProvider.Sectiondiv
+  }
+
   type AntiTuberculosisTreatments =
-    | AntiTuberculosisTreatments of Id * Title option * Therapy list
+    | AntiTuberculosisTreatments of Id * Title option * Therapy list * TherapyNotes list
     static member parse (x:sectionProvider.Section) =
+      let therapyNotes su (x:sectionProvider.Sectiondiv) =
+        {
+          supervision = su
+          notes = x
+        }
       let therapy ty su (x:sectionProvider.Sectiondiv) =
         let takeninmonths (x:sectionProvider.P) =
           x.Phs |> Array.tryPick (hasOutputclass "takenInMonths" >> Option.bind (fun ph -> ph.String) >> Option.map TakenInMonths)
@@ -1237,7 +1247,13 @@ module Sections =
       let d = x |> unravelr ["supervisedTreatment";"singleDrugTherapies";"singleDrugTherapy"]
                 |> List.map (therapy Single Supervised)
 
-      AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d)
+      let e = x |> unravelr ["unsupervisedTreatment";"drugTherapyNotes";"drugTherapyNote"]
+                |> List.map (therapyNotes Unsupervised)
+
+      let f = x |> unravelr ["supervisedTreatment";"drugTherapyNotes";"drugTherapyNote"]
+                |> List.map (therapyNotes Supervised)
+
+      AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d,e @ f)
 
 
   type Quantity = | Quantity of string

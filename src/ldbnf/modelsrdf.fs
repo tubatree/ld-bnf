@@ -765,7 +765,7 @@ module SectionsRdf =
 
 
   type Graph with
-    static member fromAntiTuberculosisTreatments (AntiTuberculosisTreatments(id,title,therapies)) =
+    static member fromAntiTuberculosisTreatments (AntiTuberculosisTreatments(id,title,therapies,notes)) =
       let therapy (x:Therapy) =
         let patientgroup (PatientGroup(agegroup,dosage)) =
           //swap to have the dosage with a group
@@ -795,9 +795,16 @@ module SectionsRdf =
           yield! x.groups |> List.map patientgroup
           })
 
+      let therapyNotes (x) =
+        blank (Uri.has x) (optionlist{
+          yield x.supervision |> (toString >> dp "supervision")
+          yield! x.notes |> dita
+          })
+
       let s = optionlist {
         yield! title <!> ti |> unwrap
         yield! therapies |> List.map therapy
+        yield!  notes |> List.map therapyNotes
         }
 
       let dr = resource (Uri.fromtype<AntiTuberculosisTreatments> (string id))
