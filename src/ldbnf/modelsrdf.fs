@@ -470,7 +470,6 @@ module MedicinalFormRdf =
           yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
           yield! x.controlledDrugs |> List.choose Graph.fromcd
           yield! x.packs |> List.map Graph.frompack
-          yield dataProperty !!"nicebnf:hasOrderDisabled" (count.Value.ToString()^^xsd.string)
           })
 
 module WoundManagementRdf =
@@ -548,8 +547,7 @@ module ClinicalMedicalDeviceInformationGroupRdf =
                 yield x.complicance <!> (Graph.fromcs uri)}
 
       let sec = Graph.fromsec uri
-      let count = ref 0
-      let ss = x.sections |> List.collect sec |> List.map (fun c -> addOrder c count)
+      let ss = x.sections |> List.collect sec
       let mps = x.products |> List.map Graph.from
 
       let dr r = resource (Uri.fromcmdig x) r
