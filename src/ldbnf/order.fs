@@ -43,8 +43,18 @@ module Order =
                      | _ -> ())
      count
 
-   let addOrderDataProperty c s =
-       s |> List.append [dataProperty !!"nicebnf:hasOrder" (c.ToString()^^xsd.string)]
+   let addOrderDataProperty id c s =
+       let xs = ref List.Empty
+       s
+       |> List.map(fun s ->
+             match s with
+             | (FSharp.RDF.P p, O(Node.Uri(o), xr)) ->
+               (if o.ToString().Contains(id) = true
+               then
+               xs := List.append !xs [dataProperty !!"nicebnf:hasOrder" (c.ToString()^^xsd.string)])
+               (FSharp.RDF.P p, O(Node.Uri(o), xr))
+             | _ -> s)
+       |> List.append xs.Value
 
    let addOrderToBlankNode x =
        let count = ref 0
@@ -53,7 +63,7 @@ module Order =
                      match s with
                      | FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
                           (count := !count + 1) 
-                          FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements |> addOrderDataProperty count.Value)), lazy [])
+                          FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements |> addOrderDataProperty "" count.Value)), lazy [])
                      | _ -> s)
 
    let addOrderNode (o, p, c) =
@@ -101,6 +111,6 @@ module Order =
                                                 |> addOrderToNestedResources nestedResource
                                                 |> List.append nestedResource.Value
                                                 |> (fun c-> nestedResource := List.empty; c)
-                                                |> addOrderDataProperty count.Value))
+                                                |> addOrderDataProperty id count.Value))
                        (FSharp.RDF.P p, O(Node.Uri(o), lazy newRes))
                      | _ -> s) |> List.append parentResources.Value |> (fun c -> parentResources:= List.Empty; c)))
