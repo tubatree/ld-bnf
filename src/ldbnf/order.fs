@@ -74,7 +74,7 @@ module Order =
                             xs := List.append !xs [addOrderNode(o, p, count.Value)])
                            (FSharp.RDF.P p, O(Node.Uri(o), xr))
                       | _ -> s)
-   let addOrder resources =
+   let addOrder id resources =
      let parentResources = ref List.Empty
      let count = ref 0
      resources
@@ -87,7 +87,8 @@ module Order =
                      match s with
                      | (FSharp.RDF.P p, O(Node.Uri(o), resources)) -> 
                        (count := !count + 1) 
-                       (if (isEligibleForOrder statements p).Value > 1 && p.ToString() <> "rdf:type"
+                       (if (isEligibleForOrder statements p).Value > 1 
+                           && p.ToString() <> "rdf:type" && o.ToString().Contains(id) = false
                        then
                         parentResources := List.append !parentResources [addOrderNode(o, p, !count)])
                        let newRes = 
@@ -98,6 +99,8 @@ module Order =
                                            R(s, statements
                                                 |> addOrderToBlankNode
                                                 |> addOrderToNestedResources nestedResource
-                                                |> List.append nestedResource.Value |> (fun c-> nestedResource := List.empty; c)))
+                                                |> List.append nestedResource.Value
+                                                |> (fun c-> nestedResource := List.empty; c)
+                                                |> addOrderDataProperty count.Value))
                        (FSharp.RDF.P p, O(Node.Uri(o), lazy newRes))
                      | _ -> s) |> List.append parentResources.Value |> (fun c -> parentResources:= List.Empty; c)))
