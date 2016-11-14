@@ -87,6 +87,7 @@ module Order =
    let addOrder id resources =
      let parentResources = ref List.Empty
      let count = ref 0
+     let id = id.ToString()
      resources
      |> List.map(fun r ->
          match r with

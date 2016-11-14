@@ -46,7 +46,7 @@ module DrugRdf =
       let sec = Graph.fromsec (Uri.fromseccmpi x)
       [dr s
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
-       |> Assert.graph Graph.setupGraph
+       |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member from (x:DrugClass) =
       let s = [a Uri.DrugClassEntity
@@ -58,7 +58,7 @@ module DrugRdf =
 
       [dr s
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
-       |> Assert.graph Graph.setupGraph
+       |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member from (x:Drug) =
       let getvtmid (Vtmid i) = Some(string i)
@@ -84,7 +84,6 @@ module DrugRdf =
       let dr r = resource (Uri.from x) r
       //pass in uri construction for sections
       let sec = Graph.fromsec (Uri.fromsec x)
-      let drugId = (Uri.from x).ToString()
       let sdoe = match x.secondaryDomainsOfEffect with
                  | Some d -> Graph.fromsdoes d
                  | None -> []
@@ -96,7 +95,7 @@ module DrugRdf =
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)
        dr mfls]
-        |> addOrder drugId |> Assert.graph Graph.setupGraph
+        |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member fromsyn (Synonyms s) = dataProperty !!"nicebnf:hasSynonyms" (s^^xsd.string)
 
