@@ -331,6 +331,7 @@ module MedicinalFormRdf =
   open DrugParser
   open Shared
   open System
+  open Bnf.Order
   type Graph with
     static member from (x:MedicinalForm) =
       let s = optionlist{
@@ -354,7 +355,7 @@ module MedicinalFormRdf =
        dr cals
        dr cmpiOrdering
        dr cmpis]
-       |> Assert.graph (empty())
+       |> addOrder (Uri.from x) |> Assert.graph (empty())
 
     static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 
