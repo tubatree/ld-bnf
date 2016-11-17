@@ -58,7 +58,7 @@ module Order =
                       | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
                            (count := !count + 1) 
                            if (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
-                             && o.ToString().Contains(id) = false
+                             && o.ToString().Contains(id) = false && p.ToString() <> "nicebnf:hasClinicalMedicinalProductInformation"
                            then
                             xs := List.append !xs [addOrderNode(o, p, count.Value)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
