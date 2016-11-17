@@ -353,7 +353,6 @@ module MedicinalFormRdf =
       [dr s
        dr mps
        dr cals
-       dr cmpiOrdering
        dr cmpis]
        |> addOrder (Uri.from x) |> Assert.graph (empty())
 

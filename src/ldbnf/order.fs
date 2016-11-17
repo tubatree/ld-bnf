@@ -4,7 +4,10 @@ open Assertion
 open rdf
 open resource
 open Bnf.RdfUris
-
+open System.IO
+open System
+open DrugParser
+open Shared
 module Order =
    type Resource = {
      Uri : FSharp.RDF.Uri
@@ -50,16 +53,40 @@ module Order =
             yield dataProperty !!(p.ToString()) (o.ToString()^^xsd.string)
             })
 
+   
+   let getCountFromFile o path =
+       let xmlDirectory = Environment.GetCommandLineArgs() |> Array.filter (fun x-> x.Contains("xml")) |> Array.filter (fun x-> x <> "--xmldirectory")
+       let fi =  File.OpenText(xmlDirectory.[0]+path)
+       let list = fi |> drugProvider.Load 
+                     |> (fun x -> x.Xrefs) 
+                     |> Array.map (fun xref -> xref.Href)
+       let segments = (new Uri(o.ToString())).Segments 
+       let uri = (segments |> Array.toList |> List.tail)
+       let order = list |> Array.tryFindIndex(fun i -> i.Contains(uri.Tail.Head+".xml"))
+       match order with
+             | Some(order) -> order
+             | None -> 0
+
    let addOrderToResources id xs x:List<Statement> =
         let count = ref 0
         x
         |> List.map (fun s -> 
                       match s with
                       | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
-                           (count := !count + 1) 
-                           if (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
-                             && o.ToString().Contains(id) = false && p.ToString() <> "nicebnf:hasClinicalMedicinalProductInformation"
+                           if (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:hasClinicalMedicinalProductInformation"
                            then
+                            let path = "/clinical-medicinal-product-information/clinicalMedicinalProductInformation.xml"
+                            xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
+                            (FSharp.RDF.P p, O(Node.Uri(o), xr))
+                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:inheritsFromClass"
+                           then
+                            let path = "/drug-classes/drugClasses.xml"
+                            xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
+                            (FSharp.RDF.P p, O(Node.Uri(o), xr))
+                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
+                             && o.ToString().Contains(id) = false
+                           then
+                            (count := !count + 1) 
                             xs := List.append !xs [addOrderNode(o, p, count.Value)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
                            elif (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
