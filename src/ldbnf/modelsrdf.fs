@@ -475,7 +475,7 @@ module MedicinalFormRdf =
 
 module WoundManagementRdf =
   open Bnf.WoundManagement
-
+  open Bnf.Order
   let dp n = xsd.string >> dataProperty !!("nicebnf:has" + n)
 
   type Graph with
@@ -496,7 +496,7 @@ module WoundManagementRdf =
       let dr r = resource (Uri.from x) r
 
       [dr s]
-      |> Assert.graph Graph.setupGraph
+      |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member fromDescription (Description sd) = sd |> dita
 
