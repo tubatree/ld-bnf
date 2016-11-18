@@ -92,7 +92,6 @@ module Order =
                            elif (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
                                && o.ToString().Contains(id) = true
                            then
-                            (count := !count + 1)
                             let newXr = xr.Value 
                                         |> List.map(fun s-> match s with
                                               R(s, statements) -> 
