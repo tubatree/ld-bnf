@@ -67,18 +67,18 @@ module Order =
              | Some(order) -> order
              | None -> 0
 
-   let addOrderToResources id xs x:List<Statement> =
+   let rec addOrderToResources id xs x:List<Statement> =
         let count = ref 0
         x
         |> List.map (fun s -> 
                       match s with
                       | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
-                           if (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:hasClinicalMedicinalProductInformation"
+                           if (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:hasClinicalMedicinalProductInformation1"
                            then
                             let path = "/clinical-medicinal-product-information/clinicalMedicinalProductInformation.xml"
                             xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
-                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:inheritsFromClass"
+                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:inheritsFromClass1"
                            then
                             let path = "/drug-classes/drugClasses.xml"
                             xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
@@ -112,6 +112,18 @@ module Order =
                         FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(x)), lazy [])
                       | _ -> s
 
+   let rec addOrderToNestedResources id s = match s with
+                      | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
+                         let xs = ref List.Empty
+                         let newXr = xr.Value 
+                                         |> List.map(fun s-> match s with
+                                               R(s, statements) -> 
+                                               R(s, statements 
+                                                 |> (addOrderToResources id xs)
+                                                 |> List.append xs.Value
+                                                 |> List.map (addOrderToNestedResources id)))
+                         (FSharp.RDF.P p, O(Node.Uri(o), lazy newXr))
+                      | _ -> s
    let addOrder id resources =
      let xs = ref List.Empty
      let id = id.ToString()
@@ -120,6 +132,7 @@ module Order =
          match r with
          | R(s, statements) ->
            R(s, statements |> addOrderToResources id xs
-                           |> List.append !xs 
-                           |> (fun s -> xs:= List.Empty; s)
+                           |> List.append xs.Value
+                           |> (fun s-> xs := List.Empty; s)
+                           |> List.map (addOrderToNestedResources id)
                            |> List.map (addOrderToResourcesWithinBlankNodes id)))
