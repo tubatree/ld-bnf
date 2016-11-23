@@ -73,12 +73,12 @@ module Order =
         |> List.map (fun s -> 
                       match s with
                       | (FSharp.RDF.P p, O(Node.Uri(o), xr)) -> 
-                           if (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:hasClinicalMedicinalProductInformation1"
+                           if p.ToString() = "nicebnf:hasClinicalMedicinalProductInformation"
                            then
                             let path = "/clinical-medicinal-product-information/clinicalMedicinalProductInformation.xml"
                             xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
-                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:inheritsFromClass1"
+                           elif (isEligibleForOrder x p).Value > 1 && p.ToString() = "nicebnf:inheritsFromClass"
                            then
                             let path = "/drug-classes/drugClasses.xml"
                             xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
