@@ -35,6 +35,16 @@ module Order =
      | (FSharp.RDF.P(pUri), o) ->    
        {Uri = pUri; Value = "no match"} 
 
+   let unreservedChars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.~";
+
+   let urlEncode str =
+       String.init (String.length str) (fun i ->
+           let symbol = str.[i]
+           if unreservedChars.IndexOf(symbol) = -1 then
+               "%" + String.Format("{0:X2}", int symbol)
+           else
+               string symbol)
+
    let isEligibleForOrder x label =
      let count = ref 0
      x |> List.iter (fun x -> 
@@ -50,7 +60,7 @@ module Order =
     blank !!(p.ToString() + "Order")
            (optionlist {
             yield dataProperty !!"nicebnf:hasOrder" (c.ToString()^^xsd.string)
-            yield dataProperty !!(p.ToString()) (o.ToString()^^xsd.string)
+            yield dataProperty !!(p.ToString()) (Uri.EscapeUriString(o.ToString())^^xsd.string)
             })
 
    
