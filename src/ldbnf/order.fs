@@ -23,6 +23,12 @@ module Order =
      | R(S(uri), statements) ->
        { Uri = uri; Statements = statements }
 
+   let getResourceFromStatement s = 
+     match s with
+     | (FSharp.RDF.P p, O(Node.Uri(o), xr)) ->
+       xr.Value
+     | _ -> []
+
    let getBlankNodeFrom s = 
      match s with
      | FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements)),_) -> 
