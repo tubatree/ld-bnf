@@ -106,6 +106,7 @@ module GenericRdf =
 
 module IndexRdf =
   open Bnf.Index
+  open Bnf.Order
 
   type Graph with
     static member fromindex n (Index(id,ids)) =
@@ -120,6 +121,7 @@ module IndexRdf =
       let dr r = resource (uri (sprintf "%ss" n) id) r
 
       [dr s]
+      |> addOrder (uri (sprintf "%ss" n) id)
       |> Assert.graph (empty())
 
 
