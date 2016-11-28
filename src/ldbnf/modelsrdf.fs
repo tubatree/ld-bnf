@@ -565,6 +565,7 @@ module ClinicalMedicalDeviceInformationGroupRdf =
       [dr ss
        dr mps
        dr s]
+       |> addOrder (Uri.fromcmdig x)
        |> Assert.graph Graph.setupGraph
 
     static member fromdd uri (DeviceDescription(id,sd)) =
