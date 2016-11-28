@@ -119,7 +119,7 @@ module IndexRdf =
 
 module InteractionRdf =
   open Bnf.Interaction
-
+  open Bnf.Order
   type Graph with
     static member from (InteractionList(id,t,il,ids,n)) =
       let note (Note(p,t)) = blank !!"nicebnf:hasNote"
@@ -153,6 +153,7 @@ module InteractionRdf =
       [dr s
        dr (il |> List.map interactionDetail)
        dr (ids |> List.map link)]
+       |> addOrder (Uri.fromil id)
        |> Assert.graph (empty())
 
 module BorderlineSubstanceRdf =
