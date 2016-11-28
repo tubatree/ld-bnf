@@ -818,6 +818,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<AntiTuberculosisTreatments> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<AntiTuberculosisTreatments> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -867,6 +868,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
