@@ -47,7 +47,7 @@ module BorderlineSubstanceTaxonomyRdf =
 
 module PublicationRdf =
   open Bnf.Publication
-
+  open Bnf.Order
   type Graph with
     static member fromPublication (Publication(d,wmid,BorderlineSubstanceTaxonomyId(bsid))) =
       let dto = (System.DateTimeOffset d)^^xsd.datetime
@@ -65,6 +65,7 @@ module PublicationRdf =
 
       let dr = resource !!(Uri.bnfsite + "publication")
       [dr s]
+      |> addOrder !!(Uri.bnfsite + "publication")
       |> Assert.graph (empty())
 
 module GenericRdf =
