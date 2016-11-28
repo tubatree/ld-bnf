@@ -249,6 +249,7 @@ module DrugClassificationRdf =
 
 module TreatmentSummaryRdf =
   open Bnf.TreatmentSummary
+  open Bnf.Order
 
   type Graph with
     static member from (x:TreatmentSummary) =
@@ -265,7 +266,7 @@ module TreatmentSummaryRdf =
       let p = Graph.fromts (Uri.from x) x
       let dr r = resource (Uri.from x) r
       [dr s
-       dr p] |> Assert.graph (empty())
+       dr p] |> addOrder (Uri.from x) |> Assert.graph (empty())
 
     static member fromdoi (Shared.Doi s)=
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
