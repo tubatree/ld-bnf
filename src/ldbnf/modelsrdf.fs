@@ -32,6 +32,7 @@ module MedicalDeviceRdf =
 
 module BorderlineSubstanceTaxonomyRdf =
   open BorderlineSubstanceTaxonomy
+  open Bnf.Order
 
   type Graph with
     static member from(x:BorderlineSubstanceTaxonomy) =
@@ -46,6 +47,7 @@ module BorderlineSubstanceTaxonomyRdf =
 
       let dr = resource (Uri.frombst x.id)
       [dr s]
+      |> addOrder (Uri.frombst x.id)
       |> Assert.graph (empty())
 
 module PublicationRdf =
