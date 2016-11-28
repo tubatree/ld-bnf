@@ -157,6 +157,7 @@ module InteractionRdf =
 
 module BorderlineSubstanceRdf =
   open Bnf.BorderlineSubstance
+  open Bnf.Order
 
   let inline dpo n x = x <!> (string >> xsd.string >> (dataProperty !!("nicebnf:has" + n)))
 
@@ -173,6 +174,7 @@ module BorderlineSubstanceRdf =
       let dr r = resource (Uri.from x) r
       [dr s
        dr ds]
+       |> addOrder (Uri.from x)
        |> Assert.graph (empty())
 
 
@@ -250,7 +252,6 @@ module DrugClassificationRdf =
 module TreatmentSummaryRdf =
   open Bnf.TreatmentSummary
   open Bnf.Order
-
   type Graph with
     static member from (x:TreatmentSummary) =
       let isa  (TreatmentSummary (_,x)) =
