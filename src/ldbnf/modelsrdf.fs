@@ -571,6 +571,7 @@ module MedicalDeviceTypeRdf =
   open Bnf.MedicalDeviceType
   open DrugRdf
   open MedicinalFormRdf
+  open Bnf.Order
 
   type Graph with
     static member from (x:MedicalDeviceType) =
@@ -583,6 +584,7 @@ module MedicalDeviceTypeRdf =
 
       let dr r = resource (Uri.from x) r
       [dr s]
+      |> addOrder (Uri.from x)
       |> Assert.graph Graph.setupGraph
 
     static member fromproducts (x:MedicinalProduct) = Graph.from x
