@@ -12,6 +12,7 @@ open RdfUris
 
 module MedicalDeviceRdf =
   open MedicalDevice
+  open Bnf.Order
 
   type Graph with
     static member frommedicaldevice(MedicalDevice(id,t,pdi,ids)) =
@@ -25,7 +26,9 @@ module MedicalDeviceRdf =
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
       let dr = resource (Uri.frommd id)
-      [dr s] |> Assert.graph (empty())
+      [dr s]
+      |> addOrder (Uri.frommd id)
+      |> Assert.graph (empty())
 
 module BorderlineSubstanceTaxonomyRdf =
   open BorderlineSubstanceTaxonomy
