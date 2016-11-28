@@ -776,6 +776,7 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
 
       [dr s]
+      |> addOrder (Uri.fromtype<BloodMonitoringStrips> (string id))
       |> Assert.graph Graph.setupGraph
 
 
