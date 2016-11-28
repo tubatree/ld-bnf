@@ -607,6 +607,7 @@ module SectionsRdf =
   open Bnf.Drug
   open DrugRdf
   open MedicinalFormRdf
+  open Bnf.Order
 
   let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
@@ -670,6 +671,7 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string x.id))
 
       [dr s]
+       |> addOrder (Uri.fromtype<FluidAndElectrolytes> (string x.id))
        |> Assert.graph Graph.setupGraph
 
 
