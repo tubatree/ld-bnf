@@ -890,6 +890,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
