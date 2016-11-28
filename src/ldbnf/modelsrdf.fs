@@ -746,6 +746,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<HrtRisks> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<HrtRisks> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
