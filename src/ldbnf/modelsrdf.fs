@@ -911,4 +911,5 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency>(string(x.id)))
       [dr s]
+      |> addOrder (Uri.fromtype<IntramuscularAdrenalineEmergency>(string(x.id)))
       |> Assert.graph Graph.setupGraph
