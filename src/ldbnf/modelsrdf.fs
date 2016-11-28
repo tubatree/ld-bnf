@@ -706,6 +706,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<ParenteralFeeding> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<ParenteralFeeding> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
