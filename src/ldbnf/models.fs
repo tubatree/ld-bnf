@@ -313,7 +313,7 @@ module TreatmentSummary =
   type Label = {
     number:string option
     recommendation:tsProvider.P option
-    description:tsProvider.P option
+    description:tsProvider.P list
     }
 
   type TargetAudience = | TargetAudience of string
@@ -359,7 +359,7 @@ module TreatmentSummaryParser =
       let label (s:tsProvider.Section) = {
          number = s.Ps |> Array.tryPick ((hasOutputclasso "number") >> Option.bind (fun p -> p.String))
          recommendation = s.Ps |> Array.tryPick (hasOutputclasso "recommendation")
-         description = s.Ps |> Array.tryPick (hasOutputclasso "labelDescription")
+         description = s.Ps |> Array.choose (hasOutputclasso "labelDescription") |> Array.toList
         }
 
       match x.Outputclass with

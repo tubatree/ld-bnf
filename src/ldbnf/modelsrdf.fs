@@ -288,7 +288,7 @@ module TreatmentSummaryRdf =
           yield dataProperty !!"rdfs:label" (x^^xsd.string)
           yield objectProperty !!"nicebnf:isBodySystemOf" url
           })
-
+    static member fromld(p) = (p |> string) |> (xsd.xmlliteral >> dataProperty !!"nicebnf:hasDescription") |> Some
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
     static member fromcontent c =
@@ -303,7 +303,7 @@ module TreatmentSummaryRdf =
              (optionlist {
               yield l.number <!> (xsd.string >> dataProperty !!"nicebnf:hasNumber")
               yield l.recommendation <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasRecommendation")
-              yield l.description <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDescription")
+              yield! l.description |> List.choose Graph.fromld
               })
 
     static member fromlink url (x:ContentLink) =
