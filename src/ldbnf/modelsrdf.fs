@@ -75,6 +75,7 @@ module PublicationRdf =
 
 module GenericRdf =
   open Bnf.Generic
+  open Bnf.Order
 
   type Graph with
 
@@ -102,6 +103,7 @@ module GenericRdf =
       let dr r = resource (uri n x.id) r
 
       [dr s]
+      |> addOrder (uri n x.id)
       |> Assert.graph (empty())
 
 module IndexRdf =

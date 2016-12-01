@@ -116,6 +116,10 @@ module Order =
                             (FSharp.RDF.P p, O(Node.Uri(o), lazy newXr))
                            else
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
+                      | FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(statements)),_) ->
+                        (count := !count + 1) 
+                        let newStatements = statements |>  List.append [dataProperty !!"nicebnf:hasOrder" (count.Value.ToString()^^xsd.string)]
+                        FSharp.RDF.P(pUri), O(Node.Blank(Blank.Blank(newStatements)),lazy [])
                       | _ -> s)
 
    let rec addOrderToResourcesWithinBlankNodes id s = match s with
