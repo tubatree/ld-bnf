@@ -90,13 +90,13 @@ module Order =
                             xs := List.append !xs [addOrderNode(o, p, getCountFromFile o path)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
                            elif (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
-                             && o.ToString().Contains(id) = false
+                             && o.ToString().Contains(id+"#") = false
                            then
                             (count := !count + 1) 
                             xs := List.append !xs [addOrderNode(o, p, count.Value)]
                             (FSharp.RDF.P p, O(Node.Uri(o), xr))
                            elif (isEligibleForOrder x p).Value > 1 && p.ToString() <> "rdf:type"
-                               && o.ToString().Contains(id) = true
+                               && o.ToString().Contains(id+"#") = true
                            then
                             let newXr = xr.Value 
                                         |> List.map(fun s-> match s with
