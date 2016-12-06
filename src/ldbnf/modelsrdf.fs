@@ -269,6 +269,7 @@ module TreatmentSummaryRdf =
         match x with
           | Generic _ ->  [a Uri.TreatmentSummaryEntity]
           | About _ | Guidance _ -> [a !!(Uri.nicebnf + (toString x))]
+          | AboutIndex _ -> [a !!(Uri.nicebnf + "About")]
           | _ -> [a !!(Uri.nicebnf + (toString x))
                   a Uri.TreatmentSummaryEntity]
 
@@ -326,6 +327,12 @@ module TreatmentSummaryRdf =
         yield! x.sublinks |> List.choose xr
         }
 
+    static member fromaboutindex (x:Summary) =
+      optionlist {
+        yield! x.title |> xtitle
+        yield! x.indexlinks |> List.map (Uri.fromaboutindex >> (objectProperty !!"nicebnf:hasIndexLink"))
+      }
+
     static member fromts url (TreatmentSummary (_,x)) =
       match x with
         | ComparativeInformation s -> Graph.fromsummary url s
@@ -333,6 +340,7 @@ module TreatmentSummaryRdf =
         | MedicalEmergenciesBodySystems s -> Graph.fromsummary url s
         | TreatmentOfBodySystems s -> Graph.fromsummary url s
         | About s -> Graph.fromsummary url s
+        | AboutIndex s -> Graph.fromaboutindex s
         | Guidance s -> Graph.fromsummary url s
         | Generic s -> Graph.fromsummary url s
 

@@ -330,6 +330,7 @@ module TreatmentSummary =
     content:Content list
     links:ContentLink seq
     sublinks: tsProvider.Xref list
+    indexlinks: Id list
   }
 
   type Treatment =
@@ -340,6 +341,7 @@ module TreatmentSummary =
     | About of Summary
     | Guidance of Summary
     | Generic of Summary
+    | AboutIndex of Summary
 
   type TreatmentSummary = | TreatmentSummary of Id * Treatment
 
@@ -374,14 +376,21 @@ module TreatmentSummaryParser =
       let bs = x.Body.Datas |> Array.tryPick (withname "bodySystem" >> Option.map BodySystem.from)
       let c = x.Body.Sections |> Array.map Content.from |> Array.toList
 
-      Id(x.Id),{title = x.Title; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
+      Id(x.Id),{title = x.Title; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList; indexlinks = []}
 
+    static member fromIndex (x:tsProvider.Topic) =
+      let href (x:XElement) =
+        let href = x.Attribute(XName.Get "href").Value
+        Id(href) |> Some
+      Id(x.Id),{title = null; doi = None; bodySystem = None; content = []; links = null; sublinks = []; indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList}
+  
   type TreatmentSummary with
     static member from c (i,s) = TreatmentSummary(i, c s)
 
   type TreatmentSummary with
     static member parse (x:tsProvider.Topic) =
       let build c t = Summary.from t |> TreatmentSummary.from c
+      let buildIndex c t = Summary.fromIndex t |> TreatmentSummary.from c
       match x with
         | HasOutputClass "comparativeInformation" t -> t |> build ComparativeInformation
         | HasOutputClass "managementOfConditions" t -> t |> build ManagementOfConditions
@@ -389,6 +398,7 @@ module TreatmentSummaryParser =
         | HasOutputClass "treatmentOfBodySystems" t -> t |> build TreatmentOfBodySystems
         | HasOutputClass "about" t -> t |> build About
         | HasOutputClass "guidance" t -> t |> build Guidance
+        | HasID "index" t -> t |> buildIndex AboutIndex
         | t -> t |> build Generic
 
 

@@ -113,11 +113,16 @@ module prelude =
     let inline outputclass arg =
         ( ^a : (member Outputclass : string) arg) 
 
+    let inline ID arg =
+        ( ^a : (member Id : string) arg) 
+
     let overlap s (o:string) x =
       if (o.Split [|' '|] |> Array.exists (fun  c -> c = s)) then Some(x)
       else None
 
     let inline hasOutputclass (s:string) x = overlap s (outputclass x) x
+
+    let inline hasID (s:string) x = overlap s (ID x) x
 
     let inline hasOutputclasso (s:string) x =
         match outputclasso x with
@@ -125,6 +130,8 @@ module prelude =
           | None -> None
 
     let inline (|HasOutputClass|_|) (n:string) x = hasOutputclass n x
+
+    let inline (|HasID|_|) (n:string) x = hasID n x
 
     let inline (|HasOutputClasso|_|) (n:string) x = hasOutputclasso n x
 
