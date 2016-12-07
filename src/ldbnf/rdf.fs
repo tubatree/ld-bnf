@@ -81,9 +81,10 @@ module RdfUris =
       match x with
       | TreatmentSummary (i,About(_)) -> !!(Uri.bnfsite + "about/" + string i)
       | TreatmentSummary (i,AboutIndex(_)) -> !!(Uri.bnfsite + "about/" + string i)
+      | TreatmentSummary (i,GuidanceIndex(_)) -> !!(Uri.bnfsite + "guidance/" + string i)
       | TreatmentSummary (i,Guidance(_)) -> !!(Uri.bnfsite + "guidance/" + string i)
       | TreatmentSummary (i,_) -> !!(Uri.bnfsite + "treatment-summary/" + string i)
-    static member fromaboutindex (x:Id) = !!(Uri.bnfsite + "about/" + string x)
+    static member fromotherindex t x = !!(Uri.bnfsite + t+"/" + string x)
     static member frommd (x:Id) = !!(Uri.bnfsite + "medical-device/" + string x)
     static member from (x:MedicalDeviceType) = !!(Uri.bnfsite + "medical-device-type/" + string x.id)
     static member frommdt (x:Id) = !!(Uri.bnfsite + "medical-device-type/" + string x)

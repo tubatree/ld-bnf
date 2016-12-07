@@ -335,6 +335,7 @@ module TreatmentSummary =
 
   type Index = {
     indexlinks: Id list
+    topicType: string option
   }
 
   type Treatment =
@@ -346,6 +347,7 @@ module TreatmentSummary =
     | Guidance of Summary
     | Generic of Summary
     | AboutIndex of Index
+    | GuidanceIndex of Index
 
   type TreatmentSummary = | TreatmentSummary of Id * Treatment
 
@@ -386,7 +388,8 @@ module TreatmentSummaryParser =
       let href (x:XElement) =
         let href = x.Attribute(XName.Get "href").Value
         Id(href) |> Some
-      Id(x.Id),{indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList}
+      let topicType = x.XElement.XPathSelectElement("//topic").Attribute(XName.Get "bnfid").Value
+      Id(x.Id),{indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList; topicType = Some(topicType)}
   
   type TreatmentSummary with
     static member from c (i,s) = TreatmentSummary(i, c s)
@@ -402,7 +405,8 @@ module TreatmentSummaryParser =
         | HasOutputClass "treatmentOfBodySystems" t -> t |> build TreatmentOfBodySystems
         | HasOutputClass "about" t -> t |> build About
         | HasOutputClass "guidance" t -> t |> build Guidance
-        | HasID "index" t -> t |> buildIndex AboutIndex
+        | HasIndex ("index", "About") t -> t |> buildIndex AboutIndex
+        | HasIndex ("index", "Guidance") t -> t |> buildIndex GuidanceIndex
         | t -> t |> build Generic
 
 

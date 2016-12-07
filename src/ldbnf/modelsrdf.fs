@@ -264,18 +264,24 @@ module TreatmentSummaryRdf =
   open Bnf.TreatmentSummary
   open Bnf.Order
   type Graph with
+    static member gettopictype (x) = 
+      let t = match x with
+              | AboutIndex s | GuidanceIndex s -> s.topicType
+              | _ -> None
+      t.Value
+
     static member from (x:TreatmentSummary) =
       let isa  (TreatmentSummary (_,x)) =
         match x with
           | Generic _ ->  [a Uri.TreatmentSummaryEntity]
           | About _ | Guidance _ -> [a !!(Uri.nicebnf + (toString x))]
-          | AboutIndex _ -> [a !!(Uri.nicebnf + "About")]
+          | AboutIndex _ | GuidanceIndex _ -> [a !!(Uri.nicebnf + Graph.gettopictype x)]
           | _ -> [a !!(Uri.nicebnf + (toString x))
                   a Uri.TreatmentSummaryEntity]
 
       let s = optionlist {
                yield! isa x}
-
+                                   
       let p = Graph.fromts (Uri.from x) x
       let dr r = resource (Uri.from x) r
       [dr s
@@ -327,8 +333,8 @@ module TreatmentSummaryRdf =
         yield! x.sublinks |> List.choose xr
         }
 
-    static member fromaboutindex (x:Index) =
-      optionlist {yield! x.indexlinks |> List.map (Uri.fromaboutindex >> (objectProperty !!"nicebnf:hasIndexLink"))}
+    static member fromotherindex (x:Index) =
+      optionlist {yield! x.indexlinks |> List.map (Uri.fromotherindex (x.topicType.Value.ToLower()) >> (objectProperty !!"nicebnf:hasIndexLink"))}
 
     static member fromts url (TreatmentSummary (_,x)) =
       match x with
@@ -337,7 +343,7 @@ module TreatmentSummaryRdf =
         | MedicalEmergenciesBodySystems s -> Graph.fromsummary url s
         | TreatmentOfBodySystems s -> Graph.fromsummary url s
         | About s -> Graph.fromsummary url s
-        | AboutIndex s -> Graph.fromaboutindex s
+        | AboutIndex s | GuidanceIndex s -> Graph.fromotherindex s
         | Guidance s -> Graph.fromsummary url s
         | Generic s -> Graph.fromsummary url s
 

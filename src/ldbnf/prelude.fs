@@ -116,13 +116,22 @@ module prelude =
     let inline ID arg =
         ( ^a : (member Id : string) arg) 
 
+    let inline BNFID arg =
+        ( ^a : (member Bnfid : string) arg) 
+
     let overlap s (o:string) x =
       if (o.Split [|' '|] |> Array.exists (fun  c -> c = s)) then Some(x)
       else None
 
+    let checkID i t (o:string, p:string) x =
+      if (o.Split [|' '|] |> Array.exists (fun  c -> c = i)) &&
+       (p.Split [|' '|] |> Array.exists (fun  c -> c = t)) 
+      then Some(x)
+      else None
+
     let inline hasOutputclass (s:string) x = overlap s (outputclass x) x
 
-    let inline hasID (s:string) x = overlap s (ID x) x
+    let inline hasIndex (i:string, t:string) x = checkID i t ((ID x),(BNFID x)) x
 
     let inline hasOutputclasso (s:string) x =
         match outputclasso x with
@@ -131,7 +140,7 @@ module prelude =
 
     let inline (|HasOutputClass|_|) (n:string) x = hasOutputclass n x
 
-    let inline (|HasID|_|) (n:string) x = hasID n x
+    let inline (|HasIndex|_|) (i:string,t:string) x = hasIndex (i,t) x
 
     let inline (|HasOutputClasso|_|) (n:string) x = hasOutputclasso n x
 

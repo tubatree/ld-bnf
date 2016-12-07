@@ -81,7 +81,8 @@ namespace splitter
 			"PHP101071",		// wound management
 			"PHP103610",		// borderline stubstances
 			"medicalDevices",	// medical devices
-   "About"
+   "About",
+   "Guidance"
 		};
 
         static readonly List<string> TypesToSlug = new List<string>
@@ -301,6 +302,7 @@ namespace splitter
             "#drugClasses",
             "#bnf-interactions-list",
             "#About",
+            "#Guidance",
 
             //treatmentSummaries
             "malariaProphylaxisRegimens",
