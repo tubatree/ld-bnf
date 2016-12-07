@@ -130,13 +130,19 @@ namespace splitter
 			{
 				section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
 			}
+
 			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='labels']"))
 			{
 				section.SetAttributeValue("outputclass", "treatmentSummary about");
+    doc.XPathSelectElement("//topic[@id='About']").Add(section);
+    section.Remove();
 			}
+
 			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='cautionaryAndAdvisoryLabels']"))
 			{
 				section.SetAttributeValue("outputclass", "treatmentSummary about");
+    doc.XPathSelectElement("//topic[@id='About']").Add(section);
+    section.Remove();
 			}
 
             // <data name="inheritsFromClass">PHP34650</data>
