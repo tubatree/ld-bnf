@@ -327,7 +327,7 @@ module TreatmentSummaryRdf =
         yield! x.sublinks |> List.choose xr
         }
 
-    static member fromaboutindex (x:Summary) =
+    static member fromaboutindex (x:Index) =
       optionlist {yield! x.indexlinks |> List.map (Uri.fromaboutindex >> (objectProperty !!"nicebnf:hasIndexLink"))}
 
     static member fromts url (TreatmentSummary (_,x)) =

@@ -333,6 +333,10 @@ module TreatmentSummary =
     indexlinks: Id list
   }
 
+  type Index = {
+    indexlinks: Id list
+  }
+
   type Treatment =
     | ComparativeInformation of Summary
     | ManagementOfConditions of Summary
@@ -341,7 +345,7 @@ module TreatmentSummary =
     | About of Summary
     | Guidance of Summary
     | Generic of Summary
-    | AboutIndex of Summary
+    | AboutIndex of Index
 
   type TreatmentSummary = | TreatmentSummary of Id * Treatment
 
@@ -382,7 +386,7 @@ module TreatmentSummaryParser =
       let href (x:XElement) =
         let href = x.Attribute(XName.Get "href").Value
         Id(href) |> Some
-      Id(x.Id),{title = x.Title; doi = None; bodySystem = None; content = []; links = null; sublinks = []; indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList}
+      Id(x.Id),{indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList}
   
   type TreatmentSummary with
     static member from c (i,s) = TreatmentSummary(i, c s)
