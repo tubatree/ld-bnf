@@ -44,10 +44,9 @@ module DrugRdf =
                 getvalcmpi x.cmpiname |> title]
       let dr r = resource (Uri.from x) r
       let sec = Graph.fromsec (Uri.fromseccmpi x)
-      let count = ref 0
       [dr s
-       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList |>  List.map (fun c -> addOrder c count))]
-       |> Assert.graph Graph.setupGraph
+       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
+       |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member from (x:DrugClass) =
       let s = [a Uri.DrugClassEntity
@@ -59,7 +58,7 @@ module DrugRdf =
 
       [dr s
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)]
-       |> Assert.graph Graph.setupGraph
+       |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member from (x:Drug) =
       let getvtmid (Vtmid i) = Some(string i)
@@ -80,35 +79,23 @@ module DrugRdf =
                                                | _ -> mf
                  | _ -> []
 
-      let mflOrder = function
-                 | MedicinalForms (_,_,_,x) -> let mf = x |> Seq.map (fun x -> Graph.getMedicinalFormsOrder (x, count)) |> Seq.toList
-                                               match mf with
-                                               | [] -> [blank !!"nicebnf:hasMedicinalFormsOrder" []]
-                                               | _ -> mf
-                 | _ -> []
-
-      let mflsCounter = ref 0
-      let mfls = (x.sections |> Seq.collect mfl |> Seq.toList |> List.map (fun c -> addOrder c mflsCounter))
-                 @(x.sections |> Seq.collect mflOrder |> Seq.toList)
+      let mfls = (x.sections |> Seq.collect mfl |> Seq.toList)
 
       let dr r = resource (Uri.from x) r
       //pass in uri construction for sections
       let sec = Graph.fromsec (Uri.fromsec x)
-
       let sdoe = match x.secondaryDomainsOfEffect with
                  | Some d -> Graph.fromsdoes d
                  | None -> []
-      let o = x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList
 
-      let sectionCount = ref 0
       [dr s
        dr sdoe
        dr (x.classifications |> Seq.map (Graph.fromcl (Uri.from x)) |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
-       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList |> List.map (fun c -> addOrder c sectionCount))
+       dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)
        dr mfls]
-       |> Assert.graph Graph.setupGraph
+        |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member fromsyn (Synonyms s) = dataProperty !!"nicebnf:hasSynonyms" (s^^xsd.string)
 
@@ -200,7 +187,6 @@ module DrugRdf =
       let patientGrp pg =
         blank !!"nicebnf:hasDosage"
          (optionlist {
-          yield dataProperty !!"nicebnf:hasOrderDisabled" (pg.Order.ToString()^^xsd.string)
           yield one !!"nicebnf:hasPatientGroup" (Uri.fromgrp pg.Group.Value.Value)
                  (optionlist{
                    yield! pg.Group |> xtitle
@@ -234,11 +220,8 @@ module DrugRdf =
               })
 
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
-      let therapeuticIndicationOrder = ref 0
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
-              @ (tis |> Seq.map (fun x -> Graph.therapeuticIndicationOrder(Uri.from x,therapeuticIndicationOrder)) |> Seq.toList )
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
-              @ (Graph.order(count))
 
     static member fromidgs (x:IndicationsAndDoseSection) =
       let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
