@@ -80,7 +80,9 @@ namespace splitter
 			"PHP101869",		// nurse practitioners formulary
 			"PHP101071",		// wound management
 			"PHP103610",		// borderline stubstances
-			"medicalDevices"	// medical devices
+			"medicalDevices",	// medical devices
+   "About",
+   "Guidance"
 		};
 
         static readonly List<string> TypesToSlug = new List<string>
@@ -129,13 +131,19 @@ namespace splitter
 			{
 				section.SetAttributeValue("outputclass", "fluidAndElectrolytes");
 			}
+
 			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='labels']"))
 			{
 				section.SetAttributeValue("outputclass", "treatmentSummary about");
+    doc.XPathSelectElement("//topic[@id='About']").Add(section);
+    section.Remove();
 			}
+
 			foreach (var section in doc.XPathSelectElements("//topic[@outputclass='cautionaryAndAdvisoryLabels']"))
 			{
 				section.SetAttributeValue("outputclass", "treatmentSummary about");
+    doc.XPathSelectElement("//topic[@id='About']").Add(section);
+    section.Remove();
 			}
 
             // <data name="inheritsFromClass">PHP34650</data>
@@ -293,6 +301,8 @@ namespace splitter
             "#borderlineSubstances",
             "#drugClasses",
             "#bnf-interactions-list",
+            "#About",
+            "#Guidance",
 
             //treatmentSummaries
             "malariaProphylaxisRegimens",

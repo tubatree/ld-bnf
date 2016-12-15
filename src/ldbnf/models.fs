@@ -313,7 +313,7 @@ module TreatmentSummary =
   type Label = {
     number:string option
     recommendation:tsProvider.P option
-    description:tsProvider.P option
+    description:tsProvider.P list
     }
 
   type TargetAudience = | TargetAudience of string
@@ -330,6 +330,12 @@ module TreatmentSummary =
     content:Content list
     links:ContentLink seq
     sublinks: tsProvider.Xref list
+    indexlinks: Id list
+  }
+
+  type Index = {
+    indexlinks: Id list
+    topicType: string option
   }
 
   type Treatment =
@@ -340,6 +346,8 @@ module TreatmentSummary =
     | About of Summary
     | Guidance of Summary
     | Generic of Summary
+    | AboutIndex of Index
+    | GuidanceIndex of Index
 
   type TreatmentSummary = | TreatmentSummary of Id * Treatment
 
@@ -359,7 +367,7 @@ module TreatmentSummaryParser =
       let label (s:tsProvider.Section) = {
          number = s.Ps |> Array.tryPick ((hasOutputclasso "number") >> Option.bind (fun p -> p.String))
          recommendation = s.Ps |> Array.tryPick (hasOutputclasso "recommendation")
-         description = s.Ps |> Array.tryPick (hasOutputclasso "labelDescription")
+         description = s.Ps |> Array.choose (hasOutputclasso "labelDescription") |> Array.toList
         }
 
       match x.Outputclass with
@@ -374,14 +382,22 @@ module TreatmentSummaryParser =
       let bs = x.Body.Datas |> Array.tryPick (withname "bodySystem" >> Option.map BodySystem.from)
       let c = x.Body.Sections |> Array.map Content.from |> Array.toList
 
-      Id(x.Id),{title = x.Title; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList}
+      Id(x.Id),{title = x.Title; doi = d; bodySystem = bs; content = c; links = ls; sublinks = x.Body.Xrefs |> Array.toList; indexlinks = []}
 
+    static member fromIndex (x:tsProvider.Topic) =
+      let href (x:XElement) =
+        let href = x.Attribute(XName.Get "href").Value
+        Id(href) |> Some
+      let topicType = x.XElement.XPathSelectElement("//topic").Attribute(XName.Get "bnfid").Value
+      Id(x.Id),{indexlinks = x.XElement.XPathSelectElements("//xref") |> Seq.choose href |> Seq.toList; topicType = Some(topicType)}
+  
   type TreatmentSummary with
     static member from c (i,s) = TreatmentSummary(i, c s)
 
   type TreatmentSummary with
     static member parse (x:tsProvider.Topic) =
       let build c t = Summary.from t |> TreatmentSummary.from c
+      let buildIndex c t = Summary.fromIndex t |> TreatmentSummary.from c
       match x with
         | HasOutputClass "comparativeInformation" t -> t |> build ComparativeInformation
         | HasOutputClass "managementOfConditions" t -> t |> build ManagementOfConditions
@@ -389,6 +405,8 @@ module TreatmentSummaryParser =
         | HasOutputClass "treatmentOfBodySystems" t -> t |> build TreatmentOfBodySystems
         | HasOutputClass "about" t -> t |> build About
         | HasOutputClass "guidance" t -> t |> build Guidance
+        | HasIndex ("index", "About") t -> t |> buildIndex AboutIndex
+        | HasIndex ("index", "Guidance") t -> t |> buildIndex GuidanceIndex
         | t -> t |> build Generic
 
 
@@ -1199,9 +1217,19 @@ module Sections =
     groups:PatientGroup list;
   }
 
+  type TherapyNotes = {
+    supervision:Supervision;
+    notes: sectionProvider.Sectiondiv
+  }
+
   type AntiTuberculosisTreatments =
-    | AntiTuberculosisTreatments of Id * Title option * Therapy list
+    | AntiTuberculosisTreatments of Id * Title option * Therapy list * TherapyNotes list
     static member parse (x:sectionProvider.Section) =
+      let therapyNotes su (x:sectionProvider.Sectiondiv) =
+        {
+          supervision = su
+          notes = x
+        }
       let therapy ty su (x:sectionProvider.Sectiondiv) =
         let takeninmonths (x:sectionProvider.P) =
           x.Phs |> Array.tryPick (hasOutputclass "takenInMonths" >> Option.bind (fun ph -> ph.String) >> Option.map TakenInMonths)
@@ -1237,7 +1265,13 @@ module Sections =
       let d = x |> unravelr ["supervisedTreatment";"singleDrugTherapies";"singleDrugTherapy"]
                 |> List.map (therapy Single Supervised)
 
-      AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d)
+      let e = x |> unravelr ["unsupervisedTreatment";"drugTherapyNotes";"drugTherapyNote"]
+                |> List.map (therapyNotes Unsupervised)
+
+      let f = x |> unravelr ["supervisedTreatment";"drugTherapyNotes";"drugTherapyNote"]
+                |> List.map (therapyNotes Supervised)
+
+      AntiTuberculosisTreatments(Id(x.Id),title,a @ b @ c @ d,e @ f)
 
 
   type Quantity = | Quantity of string

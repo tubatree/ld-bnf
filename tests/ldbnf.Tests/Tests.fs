@@ -8,226 +8,97 @@ open resource
 open Bnf.Order
 
 [<Test>]
-let ``Ensure that addOrder adds the order property to a single resource`` () =
-  let po =
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
-     [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
-     ]))
+let ``Ensure that addOrder creates an add order node for external resource`` () =
+  let drug =
+   [resource !!"nicebnf:paracetamol" [
+     one !!"nicebnf:hasMedicinalForm" !!"nicebnf:PHP5356" []
+     one !!"nicebnf:hasMedicinalForm" !!"nicebnf:PHP5373" []
+     ]
+   ] |> addOrder !!"nicebnf:paracetamol"
 
-  let count = ref 0
-  let newPo = addOrder po count 
+  let resource =
+    drug
+    |> List.head
+    |> getResource
 
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
+  let statements =
+    resource.Statements
 
-    let resource = 
-      resources.Force() 
-      |> List.head
-      |> getResource 
+  let (resourceOneOrderNodeUri, resourceOneStatements) = 
+    List.nth statements 0
+    |> getBlankNodeFrom
 
-    let property =
-      resource.Statements
-      |> List.head
-      |> getDataProperty 
+  let resourceOneHasOrder =
+    List.nth resourceOneStatements 0
+    |> getDataProperty
 
-    Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
-    Assert.AreEqual("1", property.Value)
+  Assert.AreEqual(!!"nicebnf:hasMedicinalFormOrder", resourceOneOrderNodeUri)
+  Assert.AreEqual(!!"nicebnf:hasOrder", resourceOneHasOrder.Uri)
+  Assert.AreEqual("1", resourceOneHasOrder.Value)
 
-[<Test>]
-let ``Ensure that addOrder adds order to multiple resources and increments order`` () =
-  let po =
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[
-         resource !!"base:rUri1" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
-         resource !!"base:rUri2" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]]))
+  let (resourceTwoOrderNodeUri, resourceTwoStatements) = 
+    List.nth statements 1
+    |> getBlankNodeFrom
 
-  let count = ref 0
-  let newPo = addOrder po count
+  let resourceTwoHasOrder =
+    List.nth resourceTwoStatements 0
+    |> getDataProperty
 
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
-
-    let resources = 
-      resources.Force() 
-      |> List.map getResource
-
-    let statements =
-      resources
-      |> List.map (fun s-> s.Statements)
-
-    let resourceOneProperty = 
-      List.nth statements 0
-      |> List.head
-      |> getDataProperty
-
-    let resourceTwoProperty = 
-      List.nth statements 1
-      |> List.head
-      |> getDataProperty
-
-    Assert.AreEqual(!!"nicebnf:hasOrder", resourceOneProperty.Uri)
-    Assert.AreEqual("1", resourceOneProperty.Value)
-
-    Assert.AreEqual(!!"nicebnf:hasOrder", resourceTwoProperty.Uri)
-    Assert.AreEqual("2", resourceTwoProperty.Value)
+  Assert.AreEqual(!!"nicebnf:hasMedicinalFormOrder", resourceTwoOrderNodeUri)
+  Assert.AreEqual(!!"nicebnf:hasOrder", resourceTwoHasOrder.Uri)
+  Assert.AreEqual("2", resourceTwoHasOrder.Value)
 
 [<Test>]
-let ``Ensure that addOrder adds order to a nested resource and increments order`` () =
-  let po =
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[
-         resource !!"base:rUri" 
-            [ one !!"base:nUri" !!"base:nested" [ dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string)]]
-         ]))
+let ``Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource`` () =
+  let drug =
+   [resource !!"nicebnf:paracetamol" [
+       one !!"nicebnf:hasIndicationAndDose" !!"nicebnf:paracetamol#36542"
+                [dataProperty !!"nicebnf:hasDitaContent" ("abc"^^xsd.string) ]
+       one !!"nicebnf:hasIndicationAndDose" !!"nicebnf:paracetamol#25728"
+                [dataProperty !!"nicebnf:hasDitaContent" ("abc"^^xsd.string) ]
+      ]
+   ] |> addOrder !!"nicebnf:paracetamol"
 
-  let count = ref 0
-  let newPo = addOrder po count
+  let resource =
+    drug
+    |> List.head
+    |> getResource
 
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
+  let statements =
+    resource.Statements
 
-    let resources = 
-      resources.Force() 
-      |> List.map getResource
+  let resourceOne = 
+    List.nth statements 0
+    |> getResourceFromStatement
 
-    let statements =
-      resources
-      |> List.map (fun s-> s.Statements)
+  let resourceOneInternalResource = 
+    resourceOne
+    |> List.head
+    |> getResource
 
-    let nestedResources = 
-      List.nth statements 0
-      |> List.tail 
-      |> List.head
+  let resourceOneInternalResourceStatements = resourceOneInternalResource.Statements
 
-    let nestedResource = 
-      match nestedResources with
-        | (P p, O(Node.Uri u, resources)) -> resources.Force() |> List.map getResource
+  let resourceOneProperty = 
+    List.nth resourceOneInternalResourceStatements 0
+    |> getDataProperty
 
-    let statements =
-      nestedResource
-      |> List.map (fun s-> s.Statements)
+  Assert.AreEqual(!!"nicebnf:hasOrder", resourceOneProperty.Uri)
+  Assert.AreEqual("1", resourceOneProperty.Value)
 
-    let property =
-      List.nth statements 0
-      |> List.head
-      |> getDataProperty
+  let resourceTwo = 
+    List.nth statements 1
+    |> getResourceFromStatement
 
-    Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
-    Assert.AreEqual("2", property.Value)
+  let resourceTwoInternalResource = 
+    resourceTwo
+    |> List.head
+    |> getResource
 
-[<Test>]
-let ``Ensure that addOrder adds order to a blank node``() = 
-  let po =   
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
-     [ blank !!"base:someBlankProperty"
-         [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string)]]]))
-  
-  let count = ref 0
-  let newPo = addOrder po count
+  let resourceTwoInternalResourceStatements = resourceTwoInternalResource.Statements
 
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
-    Assert.AreEqual(!!"base:pUri", p)
-    Assert.AreEqual(!!"base:oUri", u)
+  let resourceTwoProperty = 
+    List.nth resourceTwoInternalResourceStatements 0
+    |> getDataProperty
 
-    let resource =
-      resources.Force()
-      |> List.head
-      |> getResource
-
-    let (bUri, bStatements) = 
-      List.nth resource.Statements 1
-      |> getBlankNodeFrom
-
-    let property =
-      bStatements
-      |> List.head
-      |> getDataProperty
-
-    Assert.AreEqual(!!"nicebnf:hasOrder", property.Uri)
-    Assert.AreEqual("2", property.Value)
-
-[<Test>]
-let ``Ensure that addOrder adds order to multipe blank nodes and increments order``() = 
-  let po =   
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
-     [ blank !!"base:someBlankProperty1" [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string) ]
-       blank !!"base:someBlankProperty2" [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string) ]]]))
-  
-  let count = ref 0
-  let newPo = addOrder po count
-
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
-    Assert.AreEqual(!!"base:pUri", p)
-    Assert.AreEqual(!!"base:oUri", u)
-
-    let resource =
-      resources.Force()
-      |> List.head
-      |> getResource
-
-    let (bnAUri, bnAStatements) = 
-      List.nth resource.Statements 1
-      |> getBlankNodeFrom
-   
-    let bnAProperty =
-      List.nth bnAStatements 0
-      |> getDataProperty 
-
-    Assert.AreEqual(!!"nicebnf:hasOrder", bnAProperty.Uri)
-    Assert.AreEqual("2", bnAProperty.Value)
-
-    let (bnBUri, bnBStatements) = 
-      List.nth resource.Statements 2
-      |> getBlankNodeFrom
-   
-    let bnBProperty =
-      List.nth bnBStatements 0
-      |> getDataProperty 
-
-    Assert.AreEqual(!!"nicebnf:hasOrder", bnBProperty.Uri)
-    Assert.AreEqual("3", bnBProperty.Value)
-
-[<Test>]
-let ``Ensure that addOrder maintains the existing structure`` () =
-
-  let po =
-   (P !!"base:pUri", O(Node.Uri !!"base:oUri", lazy[resource !!"base:rUri"
-     [ blank !!"base:someBlankProperty"
-         [ dataProperty !!"base:someBlankDataProperty" ("blankValue"^^xsd.string)]
-       dataProperty !!"base:someDataProperty" ("dataValue"^^xsd.string) ]
-     ]))
-
-  let count = ref 0
-  let newPo = addOrder po count
-
-  match newPo with
-  | (P p, O(Node.Uri u, resources)) ->
-    Assert.AreEqual(!!"base:pUri", p)
-    Assert.AreEqual(!!"base:oUri", u)
-
-    let resource = 
-      resources.Force() 
-      |> List.head
-      |> getResource 
-
-    Assert.AreEqual(!!"base:rUri", resource.Uri)
-
-    let property =
-      List.nth resource.Statements 2
-      |> getDataProperty 
-
-    Assert.AreEqual(!!"base:someDataProperty", property.Uri)
-    Assert.AreEqual("dataValue", property.Value)
-
-    let (bUri, bStatements) = 
-      List.nth resource.Statements 1
-      |> getBlankNodeFrom
-
-    Assert.AreEqual(!!"base:someBlankProperty", bUri)
-
-    let property =
-      List.nth bStatements 1
-      |> getDataProperty 
-
-    Assert.AreEqual(!!"base:someBlankDataProperty", property.Uri)
-    Assert.AreEqual("blankValue", property.Value)
+  Assert.AreEqual(!!"nicebnf:hasOrder", resourceTwoProperty.Uri)
+  Assert.AreEqual("2", resourceTwoProperty.Value)

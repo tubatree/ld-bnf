@@ -12,6 +12,7 @@ open RdfUris
 
 module MedicalDeviceRdf =
   open MedicalDevice
+  open Bnf.Order
 
   type Graph with
     static member frommedicaldevice(MedicalDevice(id,t,pdi,ids)) =
@@ -25,10 +26,13 @@ module MedicalDeviceRdf =
         yield! ids |> List.map (Uri.frommdt >> (objectProperty !!"nicebnf:hasMedicalDeviceType"))
         }
       let dr = resource (Uri.frommd id)
-      [dr s] |> Assert.graph (empty())
+      [dr s]
+      |> addOrder (Uri.frommd id)
+      |> Assert.graph (empty())
 
 module BorderlineSubstanceTaxonomyRdf =
   open BorderlineSubstanceTaxonomy
+  open Bnf.Order
 
   type Graph with
     static member from(x:BorderlineSubstanceTaxonomy) =
@@ -43,11 +47,12 @@ module BorderlineSubstanceTaxonomyRdf =
 
       let dr = resource (Uri.frombst x.id)
       [dr s]
+      |> addOrder (Uri.frombst x.id)
       |> Assert.graph (empty())
 
 module PublicationRdf =
   open Bnf.Publication
-
+  open Bnf.Order
   type Graph with
     static member fromPublication (Publication(d,wmid,BorderlineSubstanceTaxonomyId(bsid))) =
       let dto = (System.DateTimeOffset d)^^xsd.datetime
@@ -65,10 +70,12 @@ module PublicationRdf =
 
       let dr = resource !!(Uri.bnfsite + "publication")
       [dr s]
+      |> addOrder !!(Uri.bnfsite + "publication")
       |> Assert.graph (empty())
 
 module GenericRdf =
   open Bnf.Generic
+  open Bnf.Order
 
   type Graph with
 
@@ -96,10 +103,12 @@ module GenericRdf =
       let dr r = resource (uri n x.id) r
 
       [dr s]
+      |> addOrder (uri n x.id)
       |> Assert.graph (empty())
 
 module IndexRdf =
   open Bnf.Index
+  open Bnf.Order
 
   type Graph with
     static member fromindex n (Index(id,ids)) =
@@ -114,12 +123,13 @@ module IndexRdf =
       let dr r = resource (uri (sprintf "%ss" n) id) r
 
       [dr s]
+      |> addOrder (uri (sprintf "%ss" n) id)
       |> Assert.graph (empty())
 
 
 module InteractionRdf =
   open Bnf.Interaction
-
+  open Bnf.Order
   type Graph with
     static member from (InteractionList(id,t,il,ids,n)) =
       let note (Note(p,t)) = blank !!"nicebnf:hasNote"
@@ -153,10 +163,12 @@ module InteractionRdf =
       [dr s
        dr (il |> List.map interactionDetail)
        dr (ids |> List.map link)]
+       |> addOrder (Uri.fromil id)
        |> Assert.graph (empty())
 
 module BorderlineSubstanceRdf =
   open Bnf.BorderlineSubstance
+  open Bnf.Order
 
   let inline dpo n x = x <!> (string >> xsd.string >> (dataProperty !!("nicebnf:has" + n)))
 
@@ -173,6 +185,7 @@ module BorderlineSubstanceRdf =
       let dr r = resource (Uri.from x) r
       [dr s
        dr ds]
+       |> addOrder (Uri.from x)
        |> Assert.graph (empty())
 
 
@@ -249,23 +262,30 @@ module DrugClassificationRdf =
 
 module TreatmentSummaryRdf =
   open Bnf.TreatmentSummary
-
+  open Bnf.Order
   type Graph with
+    static member gettopictype (x) = 
+      let t = match x with
+              | AboutIndex s | GuidanceIndex s -> s.topicType
+              | _ -> None
+      t.Value
+
     static member from (x:TreatmentSummary) =
       let isa  (TreatmentSummary (_,x)) =
         match x with
           | Generic _ ->  [a Uri.TreatmentSummaryEntity]
           | About _ | Guidance _ -> [a !!(Uri.nicebnf + (toString x))]
+          | AboutIndex _ | GuidanceIndex _ -> [a !!(Uri.nicebnf + Graph.gettopictype x)]
           | _ -> [a !!(Uri.nicebnf + (toString x))
                   a Uri.TreatmentSummaryEntity]
 
       let s = optionlist {
                yield! isa x}
-
+                                   
       let p = Graph.fromts (Uri.from x) x
       let dr r = resource (Uri.from x) r
       [dr s
-       dr p] |> Assert.graph (empty())
+       dr p] |> addOrder (Uri.from x) |> Assert.graph (empty())
 
     static member fromdoi (Shared.Doi s)=
       dataProperty !!"nicebnf:hasDoi" (s^^xsd.string)
@@ -275,7 +295,7 @@ module TreatmentSummaryRdf =
           yield dataProperty !!"rdfs:label" (x^^xsd.string)
           yield objectProperty !!"nicebnf:isBodySystemOf" url
           })
-
+    static member fromld(p) = (p |> string) |> (xsd.xmlliteral >> dataProperty !!"nicebnf:hasDescription") |> Some
     static member fromta (TargetAudience s) =
       dataProperty !!"nicebnf:hasTargetAudience" (s^^xsd.string)
     static member fromcontent c =
@@ -290,7 +310,7 @@ module TreatmentSummaryRdf =
              (optionlist {
               yield l.number <!> (xsd.string >> dataProperty !!"nicebnf:hasNumber")
               yield l.recommendation <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasRecommendation")
-              yield l.description <!> (string >> xsd.xmlliteral >> dataProperty !!"nicebnf:hasDescription")
+              yield! l.description |> List.choose Graph.fromld
               })
 
     static member fromlink url (x:ContentLink) =
@@ -313,6 +333,9 @@ module TreatmentSummaryRdf =
         yield! x.sublinks |> List.choose xr
         }
 
+    static member fromotherindex (x:Index) =
+      optionlist {yield! x.indexlinks |> List.map (Uri.fromotherindex (x.topicType.Value.ToLower()) >> (objectProperty !!"nicebnf:hasIndexLink"))}
+
     static member fromts url (TreatmentSummary (_,x)) =
       match x with
         | ComparativeInformation s -> Graph.fromsummary url s
@@ -320,6 +343,7 @@ module TreatmentSummaryRdf =
         | MedicalEmergenciesBodySystems s -> Graph.fromsummary url s
         | TreatmentOfBodySystems s -> Graph.fromsummary url s
         | About s -> Graph.fromsummary url s
+        | AboutIndex s | GuidanceIndex s -> Graph.fromotherindex s
         | Guidance s -> Graph.fromsummary url s
         | Generic s -> Graph.fromsummary url s
 
@@ -331,6 +355,7 @@ module MedicinalFormRdf =
   open DrugParser
   open Shared
   open System
+  open Bnf.Order
   type Graph with
     static member from (x:MedicinalForm) =
       let s = optionlist{
@@ -352,9 +377,8 @@ module MedicinalFormRdf =
       [dr s
        dr mps
        dr cals
-       dr cmpiOrdering
        dr cmpis]
-       |> Assert.graph (empty())
+       |> addOrder (Uri.from x) |> Assert.graph (empty())
 
     static member fromclinicalmpi x = objectProperty !!"nicebnf:hasClinicalMedicinalProductInformation" (Uri.fromcmpi x)
 
@@ -470,12 +494,11 @@ module MedicinalFormRdf =
           yield! x.strengthOfActiveIngredient |> List.choose Graph.fromsai
           yield! x.controlledDrugs |> List.choose Graph.fromcd
           yield! x.packs |> List.map Graph.frompack
-          yield dataProperty !!"nicebnf:hasOrderDisabled" (count.Value.ToString()^^xsd.string)
           })
 
 module WoundManagementRdf =
   open Bnf.WoundManagement
-
+  open Bnf.Order
   let dp n = xsd.string >> dataProperty !!("nicebnf:has" + n)
 
   type Graph with
@@ -496,7 +519,7 @@ module WoundManagementRdf =
       let dr r = resource (Uri.from x) r
 
       [dr s]
-      |> Assert.graph Graph.setupGraph
+      |> addOrder (Uri.from x) |> Assert.graph Graph.setupGraph
 
     static member fromDescription (Description sd) = sd |> dita
 
@@ -548,14 +571,14 @@ module ClinicalMedicalDeviceInformationGroupRdf =
                 yield x.complicance <!> (Graph.fromcs uri)}
 
       let sec = Graph.fromsec uri
-      let count = ref 0
-      let ss = x.sections |> List.collect sec |> List.map (fun c -> addOrder c count)
+      let ss = x.sections |> List.collect sec
       let mps = x.products |> List.map Graph.from
 
       let dr r = resource (Uri.fromcmdig x) r
       [dr ss
        dr mps
        dr s]
+       |> addOrder (Uri.fromcmdig x)
        |> Assert.graph Graph.setupGraph
 
     static member fromdd uri (DeviceDescription(id,sd)) =
@@ -570,6 +593,7 @@ module MedicalDeviceTypeRdf =
   open Bnf.MedicalDeviceType
   open DrugRdf
   open MedicinalFormRdf
+  open Bnf.Order
 
   type Graph with
     static member from (x:MedicalDeviceType) =
@@ -582,6 +606,7 @@ module MedicalDeviceTypeRdf =
 
       let dr r = resource (Uri.from x) r
       [dr s]
+      |> addOrder (Uri.from x)
       |> Assert.graph Graph.setupGraph
 
     static member fromproducts (x:MedicinalProduct) = Graph.from x
@@ -596,6 +621,7 @@ module SectionsRdf =
   open Bnf.Drug
   open DrugRdf
   open MedicinalFormRdf
+  open Bnf.Order
 
   let inline dp n = xsd.string >> (dataProperty !!("nicebnf:has" + (n |> titleCase)))
 
@@ -659,6 +685,7 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<FluidAndElectrolytes> (string x.id))
 
       [dr s]
+       |> addOrder (Uri.fromtype<FluidAndElectrolytes> (string x.id))
        |> Assert.graph Graph.setupGraph
 
 
@@ -693,6 +720,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<ParenteralFeeding> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<ParenteralFeeding> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -732,6 +760,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<HrtRisks> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<HrtRisks> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -761,11 +790,12 @@ module SectionsRdf =
       let dr = resource (Uri.fromtype<BloodMonitoringStrips> (string id))
 
       [dr s]
+      |> addOrder (Uri.fromtype<BloodMonitoringStrips> (string id))
       |> Assert.graph Graph.setupGraph
 
 
   type Graph with
-    static member fromAntiTuberculosisTreatments (AntiTuberculosisTreatments(id,title,therapies)) =
+    static member fromAntiTuberculosisTreatments (AntiTuberculosisTreatments(id,title,therapies,notes)) =
       let therapy (x:Therapy) =
         let patientgroup (PatientGroup(agegroup,dosage)) =
           //swap to have the dosage with a group
@@ -795,13 +825,21 @@ module SectionsRdf =
           yield! x.groups |> List.map patientgroup
           })
 
+      let therapyNotes (x) =
+        blank (Uri.has x) (optionlist{
+          yield x.supervision |> (toString >> dp "supervision")
+          yield! x.notes |> dita
+          })
+
       let s = optionlist {
         yield! title <!> ti |> unwrap
         yield! therapies |> List.map therapy
+        yield!  notes |> List.map therapyNotes
         }
 
       let dr = resource (Uri.fromtype<AntiTuberculosisTreatments> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<AntiTuberculosisTreatments> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -851,6 +889,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<HelicobacterPyloriRegimens> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -872,6 +911,7 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
       [dr s]
+      |> addOrder (Uri.fromtype<MalariaProphylaxisRegimens> (string id))
       |> Assert.graph Graph.setupGraph
 
   type Graph with
@@ -892,4 +932,5 @@ module SectionsRdf =
 
       let dr = resource (Uri.fromtype<IntramuscularAdrenalineEmergency>(string(x.id)))
       [dr s]
+      |> addOrder (Uri.fromtype<IntramuscularAdrenalineEmergency>(string(x.id)))
       |> Assert.graph Graph.setupGraph
