@@ -124,7 +124,7 @@ namespace splitter
                 process = f => types.Contains(f.Type);
             }
 
-   var doc = XDocument.Load(filename);
+   var doc = XDocument.Load(filename, LoadOptions.PreserveWhitespace);
 
 			// change the outputclass so it doesn't clash
 			foreach (var section in doc.XPathSelectElements("//section[@outputclass='electrolytes']"))
