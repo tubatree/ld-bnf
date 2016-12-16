@@ -121,6 +121,7 @@ module Iterator =
             | "interactions" -> content "interactions-introduction"
             | "labels" -> content "Labels"
             | "cautionary-and-advisory-labels" -> content "cautionary-and-advisory-labels"
+            | "publication" -> fi |> drugProvider.Load |> Publication.parse |> Graph.fromPublication |> Done
             | "medical-device" -> fi |> drugProvider.Load |> MedicalDevice.parse |> Graph.frommedicaldevice |> Done
             | "borderline-substance-taxonomy" -> fi |> drugProvider.Load |> BorderlineSubstanceTaxonomy.parse |> Graph.from |> Done
             | "medical-devices" -> fi |> indexProvider.Load |> Index.parse |> (Graph.fromindex "MedicalDevice") |> Done
