@@ -167,8 +167,7 @@ $RECYCLE.BIN/
 # ===================================================
 
 # NuGet Packages Directory
-packages/*
-!packages/FSharp.Data/
+packages/
 
 # Generated documentation folder
 docs/output/
