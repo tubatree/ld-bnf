@@ -12,4 +12,6 @@ nuget NUnit
 nuget NUnit.Runners
 nuget FAKE
 nuget SourceLink.Fake
+nuget FSharp.Data.Whitespace
+
 github fsharp/FAKE modules/Octokit/Octokit.fsx
