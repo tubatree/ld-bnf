@@ -14,6 +14,11 @@ module DrugRdf =
   open RdfUris
   open guid
   open Bnf.Order
+  open System.IO
+  open System
+  open System.Xml.Linq
+  open System.Xml.XPath
+  open FSharp.Collections.ParallelSeq
 
   //shoudl replace these with tostring
   let getlabeld (DrugName n) = n.Value |? ""
@@ -33,6 +38,20 @@ module DrugRdf =
        yield! ph |> dita
        }
 
+  let file (fn:string) = 
+     use f = File.OpenText fn
+     f.ReadToEnd()
+  let xmlDirectory = Environment.GetCommandLineArgs() |> Array.filter (fun x-> x.Contains("xml")) |> Array.filter (fun x-> x <> "--xmldirectory")
+  let filePath = xmlDirectory.[0]+"/drug/"
+  let files  = Directory.EnumerateFiles(filePath,"*.xml*")
+  let classifications = files |> Seq.map(fun x-> file(filePath+Path.GetFileName(x)))
+                              |> Seq.map(fun x-> x |> XDocument.Parse
+                                                    |> (fun x -> x.XPathSelectElements(".//data[@name='classifications']"))
+                                                    |> Seq.map(fun f -> f.ToString())
+                                                    |> System.String.Concat)
+                              |> System.String.Concat
+                              |> (fun x -> "<root>" + x + "</root>")
+                              |> XDocument.Parse                                        
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
@@ -104,18 +123,27 @@ module DrugRdf =
 
     //the label for this is in another part of the feed so will be created elsewhere
     static member fromcl drugurl (Classification(id,ifcs,typ)) =
+      let parseClassfications (ctype, id) =
+        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+ctype+"']/data/data/data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
+        result
+      let searchForClassification typ = if (parseClassfications(typ, id.ToString()).Length > 0) then "true" else ""
+      
       let pname = function
                       | Primary -> !!"nicebnf:hasPrimaryClassification"
                       | Secondary -> !!"nicebnf:hasSecondaryClassification"
 
-      let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
+      let hasDrugsInClassification = function
+                      | Primary -> dataProperty !!"nicebnf:hasDrugsInPrimaryClassification" (searchForClassification("primary")^^xsd.string)
+                      | Secondary -> dataProperty !!"nicebnf:hasDrugsInSecondaryClassification" (searchForClassification("secondary")^^xsd.string)
 
+      let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
       let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc)
                    [(a Uri.ClassificationEntity)]
       let c = one !!"nicebnf:hasClassification" (Classification(id,ifcs,typ) |> Uri.fromc)
                    [(a Uri.ClassificationEntity)
                     objectProperty !!"nicebnf:isClassificationOf" drugurl]
-      c :: cl :: ifs
+
+      (hasDrugsInClassification typ) :: c :: cl :: ifs
 
     static member fromil (i:InteractionLink) =
       one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionListEntity]
