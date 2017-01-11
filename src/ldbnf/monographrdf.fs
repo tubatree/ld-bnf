@@ -43,7 +43,7 @@ module DrugRdf =
      f.ReadToEnd()
   let xmlDirectory = Environment.GetCommandLineArgs() |> Array.filter (fun x-> x.Contains("xml")) |> Array.filter (fun x-> x <> "--xmldirectory")
   let filePath = xmlDirectory.[0]+"/drug/"
-  let files  = Directory.EnumerateFiles(filePath,"*.xml*")
+  let files  = Directory.EnumerateFiles(filePath, @"*.xml")
   let classifications = files |> Seq.map(fun x-> file(filePath+Path.GetFileName(x)))
                               |> Seq.map(fun x-> x |> XDocument.Parse
                                                     |> (fun x -> x.XPathSelectElements(".//data[@name='classifications']"))
@@ -124,7 +124,7 @@ module DrugRdf =
     //the label for this is in another part of the feed so will be created elsewhere
     static member fromcl drugurl (Classification(id,ifcs,typ)) =
       let parseClassfications (ctype, id) =
-        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+ctype+"']/data/data/data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
+        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+ctype+"']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
         result
       let searchForClassification typ = if (parseClassfications(typ, id.ToString()).Length > 0) then "true" else ""
       
