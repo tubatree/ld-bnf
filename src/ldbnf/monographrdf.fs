@@ -123,18 +123,20 @@ module DrugRdf =
 
     //the label for this is in another part of the feed so will be created elsewhere
     static member fromcl drugurl (Classification(id,ifcs,typ)) =
-      let parseClassfications (ctype, id) =
-        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+ctype+"']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
+      let parseClassfications (id) =
+        let result = classifications.XPathSelectElements(".//data[@name='classifications']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
         result
-      let searchForClassification typ = if (parseClassfications(typ, id.ToString()).Length > 0) then "true" else ""
+      let searchForClassification = if (parseClassfications(id.ToString()).Length > 1) then "true" else ""
       
       let pname = function
                       | Primary -> !!"nicebnf:hasPrimaryClassification"
                       | Secondary -> !!"nicebnf:hasSecondaryClassification"
 
       let hasDrugsInClassification = function
-                      | Primary -> dataProperty !!"nicebnf:hasDrugsInPrimaryClassification" (searchForClassification("primary")^^xsd.string)
-                      | Secondary -> dataProperty !!"nicebnf:hasDrugsInSecondaryClassification" (searchForClassification("secondary")^^xsd.string)
+                      | Primary -> dataProperty !!"nicebnf:hasDrugsInPrimaryClassification" (searchForClassification^^xsd.string)
+                      | Secondary -> dataProperty !!"nicebnf:hasDrugsInSecondaryClassification" (searchForClassification^^xsd.string)
+
+
 
       let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
       let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc)
@@ -143,7 +145,11 @@ module DrugRdf =
                    [(a Uri.ClassificationEntity)
                     objectProperty !!"nicebnf:isClassificationOf" drugurl]
 
-      (hasDrugsInClassification typ) :: c :: cl :: ifs
+      (if (searchForClassification = "true") 
+       then
+        (hasDrugsInClassification typ) :: c :: cl :: ifs
+      else
+       c :: cl :: ifs)
 
     static member fromil (i:InteractionLink) =
       one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionListEntity]
