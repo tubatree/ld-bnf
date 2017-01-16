@@ -124,7 +124,10 @@ module DrugRdf =
     //the label for this is in another part of the feed so will be created elsewhere
     static member fromcl drugurl (Classification(id,ifcs,typ)) =
       let parseClassfications (id) =
-        let result = classifications.XPathSelectElements(".//data[@name='classifications']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
+        let classificationType = match typ with
+                                 | Primary -> "primary"
+                                 | Secondary -> "secondary"
+        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+classificationType+"']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
         result
       let searchForClassification = if (parseClassfications(id.ToString()).Length > 1) then "true" else ""
       
