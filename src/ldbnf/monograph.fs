@@ -97,7 +97,7 @@ module Drug =
 
     type InheritsFromClass = | InheritsFromClass of string
 
-    type ClassificationType = | Primary | Secondary
+    type ClassificationType = | Primary | Secondary | Tertiary
 
     type Classification = | Classification of Id * InheritsFromClass list * ClassificationType
 
@@ -308,7 +308,7 @@ module Drug =
                  name : DrugName;
                  interactionLinks : InteractionLink seq;
                  constituentDrugs : ConstituentDrug seq;
-                 classifications : Classification seq;
+                 classifications : List<Classification> [];
                  vtmid : Option<Vtmid>;
                  synonyms : Synonyms option;
                  sections : MonographSection seq;
@@ -548,8 +548,11 @@ module DrugParser =
             | Some(Classification(id,inherits,typ)) -> Classification(id,st_in @ inherits,typ)
             | None -> Classification(st_id,st_in,st_type)
 
-        cs |> List.fold folder (Classification(Id(""),[],ty))
 
+        let last = [cs |> List.fold folder (Classification(Id(""),[],ty))]
+        let tertiary = if cs.Length > 2 then [folder (Classification(Id(""),[],Tertiary)) cs.[1]] else []
+
+        last @ tertiary
 
     type TheraputicUse with
       static member from (x:drugProvider.Data) =

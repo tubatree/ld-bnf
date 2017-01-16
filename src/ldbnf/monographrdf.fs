@@ -109,7 +109,7 @@ module DrugRdf =
 
       [dr s
        dr sdoe
-       dr (x.classifications |> Seq.map (Graph.fromcl (Uri.from x)) |> Seq.toList |> List.collect id)
+       dr (x.classifications |> Seq.map (fun c-> c |> List.collect(Graph.fromcl (Uri.from x))) |> Seq.toList |> List.collect id)
        dr (x.constituentDrugs |> Seq.map Graph.fromcd |> Seq.toList)
        dr (x.interactionLinks |> Seq.map Graph.fromil |> Seq.toList)
        dr (x.sections |> Seq.map sec |> Seq.collect id |> Seq.toList)
@@ -127,18 +127,20 @@ module DrugRdf =
         let classificationType = match typ with
                                  | Primary -> "primary"
                                  | Secondary -> "secondary"
-        let result = classifications.XPathSelectElements(".//data[@name='classifications' and @type='"+classificationType+"']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
+                                 | Tertiary -> "tertiary"
+        let result = classifications.XPathSelectElements(".//data[@name='classifications']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
         result
       let searchForClassification = if (parseClassfications(id.ToString()).Length > 1) then "true" else ""
       
       let pname = function
                       | Primary -> !!"nicebnf:hasPrimaryClassification"
                       | Secondary -> !!"nicebnf:hasSecondaryClassification"
+                      | Tertiary -> !!"nicebnf:hasTertiaryClassification"
 
       let hasDrugsInClassification = function
                       | Primary -> dataProperty !!"nicebnf:hasDrugsInPrimaryClassification" (searchForClassification^^xsd.string)
                       | Secondary -> dataProperty !!"nicebnf:hasDrugsInSecondaryClassification" (searchForClassification^^xsd.string)
-
+                      | Tertiary -> dataProperty !!"nicebnf:hasDrugsInTertiaryClassification" (searchForClassification^^xsd.string)
 
 
       let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
