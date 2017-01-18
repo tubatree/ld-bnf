@@ -14,11 +14,6 @@ module DrugRdf =
   open RdfUris
   open guid
   open Bnf.Order
-  open System.IO
-  open System
-  open System.Xml.Linq
-  open System.Xml.XPath
-  open FSharp.Collections.ParallelSeq
 
   //shoudl replace these with tostring
   let getlabeld (DrugName n) = n.Value |? ""
@@ -37,21 +32,7 @@ module DrugRdf =
        yield ph.XElement.Value |> label
        yield! ph |> dita
        }
-
-  let file (fn:string) = 
-     use f = File.OpenText fn
-     f.ReadToEnd()
-  let xmlDirectory = Environment.GetCommandLineArgs() |> Array.filter (fun x-> x.Contains("xml")) |> Array.filter (fun x-> x <> "--xmldirectory")
-  let filePath = xmlDirectory.[0]+"/drug/"
-  let files  = Directory.EnumerateFiles(filePath, @"*.xml")
-  let classifications = files |> Seq.map(fun x-> file(filePath+Path.GetFileName(x)))
-                              |> Seq.map(fun x-> x |> XDocument.Parse
-                                                    |> (fun x -> x.XPathSelectElements(".//data[@name='classifications']"))
-                                                    |> Seq.map(fun f -> f.ToString())
-                                                    |> System.String.Concat)
-                              |> System.String.Concat
-                              |> (fun x -> "<root>" + x + "</root>")
-                              |> XDocument.Parse                                        
+                                         
   type Graph with
     static member setupGraph = Graph.ReallyEmpty ["nicebnf",!!Uri.nicebnf
                                                   "rdfs",!!"http://www.w3.org/2000/01/rdf-schema#"
@@ -123,25 +104,9 @@ module DrugRdf =
 
     //the label for this is in another part of the feed so will be created elsewhere
     static member fromcl drugurl (Classification(id,ifcs,typ)) =
-      let parseClassfications (id) =
-        let classificationType = match typ with
-                                 | Primary -> "primary"
-                                 | Secondary -> "secondary"
-                                 | Tertiary -> "tertiary"
-        let result = classifications.XPathSelectElements(".//data[@name='classifications']//data[@name='drugClassification' and text()='"+id+"']")  |> Seq.toList
-        result
-      let searchForClassification = if (parseClassfications(id.ToString()).Length > 1) then "true" else ""
-      
       let pname = function
                       | Primary -> !!"nicebnf:hasPrimaryClassification"
                       | Secondary -> !!"nicebnf:hasSecondaryClassification"
-                      | Tertiary -> !!"nicebnf:hasTertiaryClassification"
-
-      let hasDrugsInClassification = function
-                      | Primary -> dataProperty !!"nicebnf:hasDrugsInPrimaryClassification" (searchForClassification^^xsd.string)
-                      | Secondary -> dataProperty !!"nicebnf:hasDrugsInSecondaryClassification" (searchForClassification^^xsd.string)
-                      | Tertiary -> dataProperty !!"nicebnf:hasDrugsInTertiaryClassification" (searchForClassification^^xsd.string)
-
 
       let ifs = ifcs |> Seq.map Graph.fromdc |> Seq.toList
       let cl = one (pname typ) (Classification(id,ifcs,typ) |> Uri.fromc)
@@ -149,12 +114,8 @@ module DrugRdf =
       let c = one !!"nicebnf:hasClassification" (Classification(id,ifcs,typ) |> Uri.fromc)
                    [(a Uri.ClassificationEntity)
                     objectProperty !!"nicebnf:isClassificationOf" drugurl]
-
-      (if (searchForClassification = "true") 
-       then
-        (hasDrugsInClassification typ) :: c :: cl :: ifs
-      else
-       c :: cl :: ifs)
+      
+      c :: cl :: ifs
 
     static member fromil (i:InteractionLink) =
       one !!"nicebnf:hasInteractionList" (Uri.from i) [a Uri.InteractionListEntity]

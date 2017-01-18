@@ -79,6 +79,10 @@ module Shared =
 
 module Drug =
     open Shared
+    open System.Xml.Linq
+    open System.Xml.XPath
+    open System.IO
+    open System
 
     //this type is probably redundant
     type Paragraph = | Paragraph of string * drugProvider.P option
@@ -97,7 +101,7 @@ module Drug =
 
     type InheritsFromClass = | InheritsFromClass of string
 
-    type ClassificationType = | Primary | Secondary | Tertiary
+    type ClassificationType = | Primary | Secondary
 
     type Classification = | Classification of Id * InheritsFromClass list * ClassificationType
 
@@ -520,13 +524,15 @@ module DrugParser =
 
     type Classification with
       static member private from typ (x:drugProvider.Data) =
-        let l = x.Datas |> Array.tryPick (Some >=> hasName "drugClassification" >=> (fun d -> d.String >>= (Id >> Some)))
+        let id = x.Datas |> Array.tryPick (Some >=> hasName "drugClassification" >=> (fun d -> d.String >>= (Id >> Some)))
+        let l = id
         let i = x.Xrefs |> Array.choose InheritsFromClass.from |> Array.toList
         match l with
           | Some(l) -> Some( Classification(l,i, typ))
           | None -> None
 
       static member fromlist (x:drugProvider.Data) =
+
         let ty = match x.Type with
                  | Some "primary" -> Primary
                  | _ -> Secondary
@@ -550,10 +556,12 @@ module DrugParser =
 
 
         let last = [cs |> List.fold folder (Classification(Id(""),[],ty))]
-        let tertiary = if cs.Length > 2 then [folder (Classification(Id(""),[],Tertiary)) cs.[1]] else []
-
-        last @ tertiary
-
+        let other = if (x.Datas |> Array.choose (hasName "classification") |> Array.toList).Length >= 2 then [[cs.[0]] |> List.collect flatten |> List.fold folder (Classification(Id(""),[],ty))] else []
+        let xs = ref List.Empty
+        let y = other @ last
+        y |> List.iter(fun r -> match r with
+                                | Classification(id,inherits,typ) -> if (Bnf.Utils.parseClassfications(id.ToString()).Length > 1) then xs := List.append !xs [Classification(id,inherits,typ)] else xs := List.append !xs [] )
+        xs.Value
     type TheraputicUse with
       static member from (x:drugProvider.Data) =
         TheraputicUse(x.String.Value,TheraputicUse.from x.Datas)
