@@ -556,11 +556,13 @@ module DrugParser =
 
 
         let last = [cs |> List.fold folder (Classification(Id(""),[],ty))]
-        let other = if (x.Datas |> Array.choose (hasName "classification") |> Array.toList).Length >= 2 then [[cs.[0]] |> List.collect flatten |> List.fold folder (Classification(Id(""),[],ty))] else []
+        let classifications = x.Datas |> Array.choose (hasName "classification") |> Array.toList
+        let getOther c = [c] |> List.collect flatten |> List.fold folder (Classification(Id(""),[],ty))
+        let other = if classifications.Length >= 2 then classifications |> List.map getOther else []
         let xs = ref List.Empty
         let y = other @ last
         y |> List.iter(fun r -> match r with
-                                | Classification(id,inherits,typ) -> if (Bnf.Utils.parseClassfications(id.ToString()).Length > 1) then xs := List.append !xs [Classification(id,inherits,typ)] else xs := List.append !xs [] )
+                                |  Classification(id,inherits,typ) -> if (Bnf.Utils.parseClassfications(id.ToString()).Length > 1) then xs := List.append !xs [Classification(id,inherits,typ)] else xs := List.append !xs [] )
         xs.Value
     type TheraputicUse with
       static member from (x:drugProvider.Data) =
