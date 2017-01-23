@@ -50,6 +50,7 @@
     <None Include="paket.template" />
     <Compile Include="prelude.fs" />
     <None Include="types.fsx" />
+    <Compile Include="Utils.fs" />
     <Compile Include="monograph.fs" />
     <Compile Include="models.fs" />
     <Compile Include="rdf.fs" />
