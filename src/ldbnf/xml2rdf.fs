@@ -14,6 +14,9 @@ open Shared
 open System.Xml.Linq
 open FSharp.Data
 open Bnf.Publication
+open Bnf.PublicationInfo
+open Bnf.PublicationInfoParser
+open Bnf.PublicationInfoRdf
 open Bnf.Drug
 open Bnf.DrugParser
 open Bnf.TreatmentSummary
@@ -134,6 +137,7 @@ module Iterator =
             | "malaria-prophylaxis-regimens" -> fi |> sectionProvider.Load |> MalariaProphylaxisRegimens.parse |> Graph.fromMalariaProphylaxisRegimens |> Done
             | "intramuscular-adrenaline-emergency" -> fi |> sectionProvider.Load |> IntramuscularAdrenalineEmergency.parse |> Graph.fromIntramuscularAdrenalineEmergency |> Done
             | "clinical-medical-device-information-group" -> fi |> drugProvider.Load |> ClinicalMedicalDeviceInformationGroup.parse |> Graph.from |> Done
+            | "publication" -> fi |> publicationInfoProvider.Load |> PublicationInfo.parse |> Graph.fromPublicationInfo |> Done
             | _ -> sprintf "%s %s" t f |> NotDone
 
   let writettl graph path t =

@@ -73,6 +73,18 @@ module PublicationRdf =
       |> addOrder !!(Uri.bnfsite + "publication")
       |> Assert.graph (empty())
 
+module PublicationInfoRdf =
+  open Bnf.PublicationInfo
+  type Graph with
+    static member fromPublicationInfo (PublicationInfo(x)) =
+      let dto = (System.DateTimeOffset x)^^xsd.datetime
+      let s = [a !!(Uri.nicebnf + "Publication")
+               dto |> (dataProperty !!"nicebnf:hasPublicationDate")]
+
+      let dr = resource !!(Uri.bnfsite + "publications/")
+      [dr s]
+      |> Assert.graph (empty())
+
 module GenericRdf =
   open Bnf.Generic
   open Bnf.Order

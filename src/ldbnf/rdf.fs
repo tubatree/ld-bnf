@@ -18,6 +18,7 @@ module RdfUris =
   open Assertion
   open rdf
   open Shared
+  open Bnf.PublicationInfo
 
   let optionlist = new OptionlistBuilder<Predicate * Object>()
 
