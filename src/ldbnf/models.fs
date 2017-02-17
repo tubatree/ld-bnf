@@ -828,6 +828,19 @@ module IndexParser =
       let ids = x.Xrefs |> Array.map (fun xref -> xref.Href |> Id) |> Array.toList
       Index(Id(x.Id),ids)
 
+module PublicationInfo =
+  open Shared
+  type publicationInfoProvider = XmlProvider<"./samples/PHP001.xml", Global=true>
+  type PublicationInfo =
+    | PublicationInfo of System.DateTime
+
+module PublicationInfoParser =
+  open Shared
+  open PublicationInfo
+  type PublicationInfo with
+    static member parse (x:publicationInfoProvider.Topic) =
+      PublicationInfo(x.Prolog.Critdates.Revised.Modified)
+
 module BorderlineSubstanceTaxonomy =
 
 

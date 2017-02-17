@@ -1,0 +1,13 @@
+<topic DITAArchVersion="1.2" id="PHP001" outputclass="publication" bnfid="PHP001" type="publication" Slug="PHP001" href="publication/PHP001.xml">
+    <title>BNF</title>
+    <prolog>
+      <copyright>
+        <copyryear year="2016" />
+        <copyrholder>BMJ Group and the Royal Pharmaceutical Society of Great Britain</copyrholder>
+      </copyright>
+      <critdates>
+        <revised modified="2016-12-20" />
+      </critdates>
+    </prolog>
+    <body> </body>
+  </topic>
