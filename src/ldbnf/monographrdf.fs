@@ -343,7 +343,7 @@ module DrugRdf =
 
     static member fromcg (x:CautionsGroup) =
       let merge(x:drugProvider.P[]) = 
-        let u = x |> Array.map (fun y -> y.XElement) |> System.String.Concat
+        let u = x |> Seq.skip 1 |> Seq.map (fun y -> y.XElement) |> System.String.Concat
         drugProvider.P(XDocument.Parse("<sectiondiv>" + u + "</sectiondiv>").Root)
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:CautionsGroup"
