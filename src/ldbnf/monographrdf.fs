@@ -14,6 +14,7 @@ module DrugRdf =
   open RdfUris
   open guid
   open Bnf.Order
+  open System.Xml.Linq
 
   //shoudl replace these with tostring
   let getlabeld (DrugName n) = n.Value |? ""
@@ -341,6 +342,9 @@ module DrugRdf =
         | ContraindicationWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
 
     static member fromcg (x:CautionsGroup) =
+      let merge(x:drugProvider.P[]) = 
+        let u = x |> Array.map (fun y -> y.XElement) |> System.String.Concat
+        drugProvider.P(XDocument.Parse("<sectiondiv>" + u + "</sectiondiv>").Root)
       let gen (p,cs) =  optionlist {
                          yield a !!"nicebnf:CautionsGroup"
                          yield! p |> dita
@@ -348,7 +352,7 @@ module DrugRdf =
       match x with
         | GeneralCautions (p,cs) -> (gen(p,cs)) |> subtype x
         | CautionsWithRoutes (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
-        | CautionsWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p,cs) |> subtype x
+        | CautionsWithIndications (s,p,cs) -> Graph.fromsp s :: gen(p |> merge, cs) |> subtype x
 
     static member fromfd (x:FundingDecision) =
       match x with
