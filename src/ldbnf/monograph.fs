@@ -244,7 +244,7 @@ module Drug =
     type CautionsGroup =
       | GeneralCautions of drugProvider.P * Caution list
       | CautionsWithRoutes of Specificity * drugProvider.P * Caution list
-      | CautionsWithIndications of Specificity * drugProvider.P * Caution list
+      | CautionsWithIndications of Specificity * drugProvider.P[] * Caution list
 
     type PrescribingAndDispensingInformation =
       | PrescribingAndDispensingInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
@@ -745,7 +745,7 @@ module DrugParser =
             | HasOutputClasso "cautionsOrContraindicationsWithRoutes" s ->
                 CautionsWithRoutes(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | HasOutputClasso "cautionsOrContraindicationsWithIndications" s ->
-                CautionsWithIndications(Specificity.from(s.Ps.[0]), s.Ps.[1], s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
+                CautionsWithIndications(Specificity.from(s.Ps.[0]), s.Ps, s.Ps.[1].Phs |> Array.map Caution.from |> Array.toList)
             | _ -> failwith "unmatched output class"
 
         [|x.Ps |> Array.map gen
