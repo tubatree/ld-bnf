@@ -274,6 +274,7 @@ module Drug =
       | NonNHS of Specificity option * drugProvider.Sectiondiv
       | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv option
       | SmcDecisions of Specificity option * drugProvider.Sectiondiv
+      | AwmsgDecisions of Specificity option * drugProvider.Sectiondiv
 
     type InteractionStatement = | InteractionStatement of Title option * Specificity option * drugProvider.Sectiondiv
 
@@ -786,11 +787,15 @@ module DrugParser =
 
         let buildSmc (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> SmcDecisions)
 
+        let buildAwmsgDecisions (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> AwmsgDecisions)
+
         match x with
           | HasOutputClasso "niceTechnologyAppraisals" _ ->
              x.Sectiondivs |> Array.map buildTa
           | HasOutputClasso "smcDecisions" _ ->
              x.Sectiondivs |> Array.map buildSmc
+          | HasOutputClasso "awmsgDecisions" _ ->
+             x.Sectiondivs |> Array.map buildAwmsgDecisions
           | _ -> sprintf "unmatched type of funding decision %s" x.Outputclass.Value |> failwith
       static member fromfd (x:drugProvider.Section) =
         match x with
