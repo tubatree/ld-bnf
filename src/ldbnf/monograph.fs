@@ -394,6 +394,7 @@ module DrugParser =
           | Some("patientGroup adult male"),[| g; p |] ->
               {parentGroup = "adult" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some    
           | Some("patientGroup child"),[| g; p |] 
+          | Some("patientGroup child eastAsian"),[| g; p |]
           | Some("patientGroup child male"),[| g; p |]
           | Some("patientGroup child female"),[| g; p |] ->
               {parentGroup = "child" ;Group = g; Dosage = p.Value |? ""; dosageXml = p; Order = count.Value} |> Some         
