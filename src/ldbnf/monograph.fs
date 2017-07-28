@@ -140,11 +140,11 @@ module Drug =
     type IndicationsAndDose = | IndicationsAndDose  of TheraputicIndication seq * RouteOfAdministration seq * int
 
     type IndicationsAndDoseSection =
-      | Pharmacokinetics of Specificity option * drugProvider.Section
-      | DoseEquivalence of Specificity option * drugProvider.Section
-      | DoseAdjustments of Specificity option * drugProvider.Section
-      | ExtremesOfBodyWeight of Specificity option * drugProvider.Section
-      | Potency of Specificity option * drugProvider.Section
+      | Pharmacokinetics of drugProvider.Section
+      | DoseEquivalence of drugProvider.Section
+      | DoseAdjustments of drugProvider.Section
+      | ExtremesOfBodyWeight of drugProvider.Section
+      | Potency of drugProvider.Section
 
     type GeneralInformation = | GeneralInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
@@ -429,13 +429,12 @@ module DrugParser =
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
-        let specificity = x.Ps |> Array.map (Specificity.from >> Some) |> Array.head
         match x with
-          | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
-          | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence (specificity, x) |> Some
-          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments (specificity, x) |> Some
-          | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight (specificity, x) |> Some
-          | HasOutputClasso "potency" _ -> Potency (specificity, x) |> Some
+          | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics x |> Some
+          | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence x |> Some
+          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments x |> Some
+          | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight x |> Some
+          | HasOutputClasso "potency" _ -> Potency x |> Some
           | _ -> None
 
     type MonographSection with
