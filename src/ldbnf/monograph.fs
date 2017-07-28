@@ -429,7 +429,11 @@ module DrugParser =
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
-        let specificity = x.Ps |> Array.map (Specificity.from >> Some) |> Array.head
+        let specificities = x.Ps |> Array.map (Specificity.from >> Some)
+        let specificity =
+            if specificities |> Array.isEmpty then None
+            else specificities.[0]
+
         match x with
           | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
           | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence (specificity, x) |> Some
@@ -974,7 +978,7 @@ module Publication =
                            | [|d|] ->
                             let day = d.Datas |> number "publicationDay"
                             let month = d.Datas |> number "publicationMonth"
-                            let year = d.Datas |> number "publicationYear"
+                            let year = d.Datas |> number "publica.headtionYear"
                             match (day,month,year) with
                              | Some d, Some m, Some y ->
                                System.DateTime(y,m,d)
