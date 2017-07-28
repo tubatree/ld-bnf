@@ -978,7 +978,7 @@ module Publication =
                            | [|d|] ->
                             let day = d.Datas |> number "publicationDay"
                             let month = d.Datas |> number "publicationMonth"
-                            let year = d.Datas |> number "publica.headtionYear"
+                            let year = d.Datas |> number "publicationYear"
                             match (day,month,year) with
                              | Some d, Some m, Some y ->
                                System.DateTime(y,m,d)
