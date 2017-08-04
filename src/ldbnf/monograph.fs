@@ -429,10 +429,7 @@ module DrugParser =
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
-        let specificities = x.Ps |> Array.map (Specificity.from >> Some)
-        let specificity =
-            if specificities |> Array.isEmpty then None
-            else specificities.[0]
+        let specificity = x.Ps |> Array.choose (hasOutputclasso "specificity") |> Array.map Specificity.from |> Array.tryPick Some
 
         match x with
           | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
