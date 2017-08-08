@@ -564,7 +564,7 @@ module DrugParser =
         let xs = ref List.Empty
         let y = other @ last
         y |> List.iter(fun r -> match r with
-                                |  Classification(id,inherits,typ) -> if (Bnf.Utils.parseClassfications(id.ToString()).Length >= 1) then xs := List.append !xs [Classification(id,inherits,typ)] else xs := List.append !xs [] )
+                                |  Classification(id,inherits,typ) -> if (Bnf.Utils.parseClassfications(id.ToString()).Length > 1) then xs := List.append !xs [Classification(id,inherits,typ)] else xs := List.append !xs [] )
         xs.Value
     type TheraputicUse with
       static member from (x:drugProvider.Data) =
