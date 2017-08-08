@@ -223,20 +223,6 @@ module DrugRdf =
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
-
-    static member fromidgs (x:IndicationsAndDoseSection) =
-      let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
-      match x with
-       | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Pharmacokinetics")
-       | Pharmacokinetics (None, sec) -> sec |> dp "Pharmacokinetics"
-       | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "DoseEquivalence")
-       | DoseEquivalence (None, sec) -> sec |> dp "DoseEquivalence"
-       | DoseAdjustments (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "DoseAdjustments")
-       | DoseAdjustments (None, sec) -> sec |> dp "DoseAdjustments"
-       | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "ExtremesOfBodyWeight")
-       | ExtremesOfBodyWeight (None, sec) -> sec |> dp "ExtremesOfBodyWeight"
-       | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Potency")
-       | Potency (None, sec) -> sec |> dp "Potency" 
  
     static member frompca (p:PatientAndCarerAdvice) =
       let pca t = Graph.fromthree >> (subtype t)
@@ -303,6 +289,25 @@ module DrugRdf =
     static member fromambf (AdditionalMonitoringInBreastFeeding(t,sp,s)) = Graph.fromthree(t,sp,s)
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(t,sp,s)) = Graph.fromthree(t,sp,s)
     static member fromamri (AdditionalMonitoringInRenalImpairment (t,sp,s)) = Graph.fromthree(t,sp,s)
+    
+    
+    static member fromidgs (x:IndicationsAndDoseSection) =
+      let fromdas doseAdjustments = 
+        doseAdjustments
+        |> Seq.collect Graph.fromda
+        |> Seq.toList
+
+      let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
+      match x with
+       | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Pharmacokinetics")
+       | Pharmacokinetics (None, sec) -> sec |> dp "Pharmacokinetics"
+       | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "DoseEquivalence")
+       | DoseEquivalence (None, sec) -> sec |> dp "DoseEquivalence"
+       | DoseAdjustments doseAdjustments -> fromdas doseAdjustments        
+       | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "ExtremesOfBodyWeight")
+       | ExtremesOfBodyWeight (None, sec) -> sec |> dp "ExtremesOfBodyWeight"
+       | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Potency")
+       | Potency (None, sec) -> sec |> dp "Potency" 
 
     static member fromse (x:SideEffect) =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x)
