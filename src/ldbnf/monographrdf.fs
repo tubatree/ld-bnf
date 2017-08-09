@@ -303,7 +303,7 @@ module DrugRdf =
        | Pharmacokinetics (None, sec) -> sec |> dp "Pharmacokinetics"
        | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "DoseEquivalence")
        | DoseEquivalence (None, sec) -> sec |> dp "DoseEquivalence"
-       | DoseAdjustments doseAdjustments -> fromdas doseAdjustments        
+       | DoseAdjustments (doseAdjustments, sec) -> fromdas doseAdjustments @ dp "DoseAdjustments" sec       
        | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "ExtremesOfBodyWeight")
        | ExtremesOfBodyWeight (None, sec) -> sec |> dp "ExtremesOfBodyWeight"
        | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Potency")
