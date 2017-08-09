@@ -144,7 +144,7 @@ module Drug =
     type IndicationsAndDoseSection =
       | Pharmacokinetics of Specificity option * drugProvider.Section
       | DoseEquivalence of Specificity option * drugProvider.Section
-      | DoseAdjustments of DoseAdjustment seq * drugProvider.Section
+      | DoseAdjustments of DoseAdjustment seq
       | ExtremesOfBodyWeight of Specificity option * drugProvider.Section
       | Potency of Specificity option * drugProvider.Section
 
@@ -466,7 +466,7 @@ module DrugParser =
         match x with
           | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
           | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence (specificity, x) |> Some
-          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments (doseAdjustments, x) |> Some
+          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments (doseAdjustments) |> Some
           | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight (specificity, x) |> Some
           | HasOutputClasso "potency" _ -> Potency (specificity, x) |> Some
           | _ -> None

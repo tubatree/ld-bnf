@@ -292,22 +292,30 @@ module DrugRdf =
     
     
     static member fromidgs (x:IndicationsAndDoseSection) =
+      
+      let createTypeTriplesFromSec n s = (a !!("nicebnf:" + n)) :: (s |> dita)
+      let createTypeTriplesFromSecDiv n sd = (a !!("nicebnf:" + n)) :: (sd |> dita)
+
+      let createTriplesFromAdjustment (DoseAdjustment (t, s, secdiv)) =
+        let daTriples = DoseAdjustment (t, s, secdiv) |> Graph.fromda
+        let metaTriples = createTypeTriplesFromSecDiv "DoseAdjustments" secdiv
+        daTriples @ metaTriples
+
       let fromdas doseAdjustments = 
         doseAdjustments
-        |> Seq.collect Graph.fromda
+        |> Seq.collect createTriplesFromAdjustment
         |> Seq.toList
 
-      let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
       match x with
-       | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Pharmacokinetics")
-       | Pharmacokinetics (None, sec) -> sec |> dp "Pharmacokinetics"
-       | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "DoseEquivalence")
-       | DoseEquivalence (None, sec) -> sec |> dp "DoseEquivalence"
-       | DoseAdjustments (doseAdjustments, sec) -> fromdas doseAdjustments @ dp "DoseAdjustments" sec       
-       | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "ExtremesOfBodyWeight")
-       | ExtremesOfBodyWeight (None, sec) -> sec |> dp "ExtremesOfBodyWeight"
-       | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> dp "Potency")
-       | Potency (None, sec) -> sec |> dp "Potency" 
+       | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Pharmacokinetics")
+       | Pharmacokinetics (None, sec) -> sec |> createTypeTriplesFromSec "Pharmacokinetics"
+       | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "DoseEquivalence")
+       | DoseEquivalence (None, sec) -> sec |> createTypeTriplesFromSec "DoseEquivalence"
+       | DoseAdjustments (doseAdjustments) -> fromdas doseAdjustments     
+       | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight")
+       | ExtremesOfBodyWeight (None, sec) -> sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight"
+       | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Potency")
+       | Potency (None, sec) -> sec |> createTypeTriplesFromSec "Potency" 
 
     static member fromse (x:SideEffect) =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x)
