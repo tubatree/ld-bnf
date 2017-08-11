@@ -144,7 +144,7 @@ module Drug =
     type IndicationsAndDoseSection =
       | Pharmacokinetics of Specificity option * drugProvider.Section
       | DoseEquivalence of Specificity option * drugProvider.Section
-      | DoseAdjustments of DoseAdjustment seq
+      | DoseAdjustments of DoseAdjustment
       | ExtremesOfBodyWeight of Specificity option * drugProvider.Section
       | Potency of Specificity option * drugProvider.Section
 
@@ -453,23 +453,24 @@ module DrugParser =
     type DoseAdjustment with
       static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> DoseAdjustment)
       static member from (x:drugProvider.Section) =
-          x.Sectiondivs |> Array.map DoseAdjustment.from
-
-    let getDoseAdjustments (x:drugProvider.Section) = 
-        DoseAdjustment.from x
-        
+          x.Sectiondivs |> Array.map DoseAdjustment.from    
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
         let specificity = getSpecifictyFromSection x
-        let doseAdjustments = getDoseAdjustments x
         match x with
           | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
           | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence (specificity, x) |> Some
-          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments (doseAdjustments) |> Some
           | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight (specificity, x) |> Some
           | HasOutputClasso "potency" _ -> Potency (specificity, x) |> Some
           | _ -> None
+
+      static member fromSectiondiv (x:drugProvider.Section) =       
+         let getDoseAdjustmentsFromSectionDivs (x:drugProvider.Section) =
+            x |> DoseAdjustment.from |> Array.map DoseAdjustments    
+         match x with
+          | HasOutputClasso "doseAdjustments" _ -> getDoseAdjustmentsFromSectionDivs (x) 
+          | _ -> Array.empty
 
     type MonographSection with
       static member indicationsAndDoseGroup (x:drugProvider.Topic) =
@@ -478,7 +479,9 @@ module DrugParser =
              let count = ref 0
              let grps = b.Sections |> Array.choose (hasOutputclasso "indicationAndDoseGroup") |> Array.map (fun x -> IndicationsAndDose.from (x, (count)))
              let idgss = b.Sections |> Array.choose IndicationsAndDoseSection.from
-             Some(IndicationsAndDoseGroup(Id(x.Id),grps,idgss))
+             let da = b.Sections |>  Array.map IndicationsAndDoseSection.fromSectiondiv |> Array.concat
+             let id = List.append (Array.toList da) (Array.toList idgss)
+             Some(IndicationsAndDoseGroup(Id(x.Id),grps,id))
           | None -> None
 
     let statements (b:drugProvider.Body option) =

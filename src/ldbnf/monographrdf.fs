@@ -296,22 +296,12 @@ module DrugRdf =
       let createTypeTriplesFromSec n s = (a !!("nicebnf:" + n)) :: (s |> dita)
       let createTypeTriplesFromSecDiv n sd = (a !!("nicebnf:" + n)) :: (sd |> dita)
 
-      let createTriplesFromAdjustment (DoseAdjustment (t, s, secdiv)) =
-        let daTriples = DoseAdjustment (t, s, secdiv) |> Graph.fromda
-        let metaTriples = createTypeTriplesFromSecDiv "DoseAdjustments" secdiv
-        daTriples @ metaTriples
-
-      let fromdas doseAdjustments = 
-        doseAdjustments
-        |> Seq.collect createTriplesFromAdjustment
-        |> Seq.toList
-
       match x with
        | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Pharmacokinetics")
        | Pharmacokinetics (None, sec) -> sec |> createTypeTriplesFromSec "Pharmacokinetics"
        | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "DoseEquivalence")
        | DoseEquivalence (None, sec) -> sec |> createTypeTriplesFromSec "DoseEquivalence"
-       | DoseAdjustments (doseAdjustments) -> fromdas doseAdjustments     
+       | DoseAdjustments (DoseAdjustment(title, spec, secDiv)) -> Graph.fromda (DoseAdjustment (title, spec, secDiv)) @ (secDiv |> createTypeTriplesFromSecDiv "DoseAdjustments")
        | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight")
        | ExtremesOfBodyWeight (None, sec) -> sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight"
        | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Potency")
