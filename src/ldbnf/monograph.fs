@@ -139,16 +139,16 @@ module Drug =
 
     type IndicationsAndDose = | IndicationsAndDose  of TheraputicIndication seq * RouteOfAdministration seq * int
 
+    type DoseAdjustment = | DoseAdjustment of Title option * Specificity option * drugProvider.Sectiondiv
+
     type IndicationsAndDoseSection =
-      | Pharmacokinetics of drugProvider.Section
-      | DoseEquivalence of drugProvider.Section
-      | DoseAdjustments of drugProvider.Section
-      | ExtremesOfBodyWeight of drugProvider.Section
-      | Potency of drugProvider.Section
+      | Pharmacokinetics of Specificity option * drugProvider.Section
+      | DoseEquivalence of Specificity option * drugProvider.Section
+      | DoseAdjustments of DoseAdjustment
+      | ExtremesOfBodyWeight of Specificity option * drugProvider.Section
+      | Potency of Specificity option * drugProvider.Section
 
     type GeneralInformation = | GeneralInformation of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
-
-    type DoseAdjustment = | DoseAdjustment of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
 
     type AdditionalMonitoringInPregnancy =
       | AdditionalMonitoringInPregnancy of Option<Title> * Option<Specificity> * drugProvider.Sectiondiv
@@ -374,6 +374,12 @@ module DrugParser =
     let addSpecificity x =
       extractSpecificity x, x
 
+    let getSpecifictyFromSection (x:drugProvider.Section) = 
+        x.Ps 
+        |> Array.choose (hasOutputclasso "specificity") 
+        |> Array.map Specificity.from 
+        |> Array.tryPick Some
+
     type InteractionLink with
         static member from (x:drugProvider.Xref) = InteractionLink {Href = Href x.Href ; Title = x.Value |? ""}
 
@@ -426,16 +432,45 @@ module DrugParser =
             | _, _ ->Array.zip specificities groups |> Array.map RouteOfAdministration
          count := !count + 1
          IndicationsAndDose.IndicationsAndDose(theraputicIndications,routesOfAdministration,count.Value)
+        
+    type Title with
+      static member from (x:drugProvider.P) =
+        Title(Paragraph.from x) 
+
+    let extractTitle (x:drugProvider.Sectiondiv) =
+      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.map Title.from |> Array.tryPick Some
+
+    //need to be careful with this as its modifying the xml element that passes through it
+    let removeTitle (x:drugProvider.Sectiondiv) =
+      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.iter (fun p -> p.XElement.Remove())
+      x
+
+    let addTitle (sp,s) =
+      let t = extractTitle s
+      let x = removeTitle s
+      t,sp,x
+    
+    type DoseAdjustment with
+      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> DoseAdjustment)
+      static member from (x:drugProvider.Section) =
+          x.Sectiondivs |> Array.map DoseAdjustment.from    
 
     type IndicationsAndDoseSection with
       static member from (x:drugProvider.Section) =
+        let specificity = getSpecifictyFromSection x
         match x with
-          | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics x |> Some
-          | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence x |> Some
-          | HasOutputClasso "doseAdjustments" _ -> DoseAdjustments x |> Some
-          | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight x |> Some
-          | HasOutputClasso "potency" _ -> Potency x |> Some
+          | HasOutputClasso "pharmacokinetics" _ -> Pharmacokinetics (specificity, x) |> Some
+          | HasOutputClasso "doseEquivalence" _ -> DoseEquivalence (specificity, x) |> Some
+          | HasOutputClasso "extremesOfBodyWeight" _ -> ExtremesOfBodyWeight (specificity, x) |> Some
+          | HasOutputClasso "potency" _ -> Potency (specificity, x) |> Some
           | _ -> None
+
+      static member fromSectiondiv (x:drugProvider.Section) =       
+         let getDoseAdjustmentsFromSectionDivs (x:drugProvider.Section) =
+            x |> DoseAdjustment.from |> Array.map DoseAdjustments    
+         match x with
+          | HasOutputClasso "doseAdjustments" _ -> getDoseAdjustmentsFromSectionDivs (x) 
+          | _ -> Array.empty
 
     type MonographSection with
       static member indicationsAndDoseGroup (x:drugProvider.Topic) =
@@ -444,7 +479,9 @@ module DrugParser =
              let count = ref 0
              let grps = b.Sections |> Array.choose (hasOutputclasso "indicationAndDoseGroup") |> Array.map (fun x -> IndicationsAndDose.from (x, (count)))
              let idgss = b.Sections |> Array.choose IndicationsAndDoseSection.from
-             Some(IndicationsAndDoseGroup(Id(x.Id),grps,idgss))
+             let da = b.Sections |>  Array.map IndicationsAndDoseSection.fromSectiondiv |> Array.concat
+             let id = List.append (Array.toList da) (Array.toList idgss)
+             Some(IndicationsAndDoseGroup(Id(x.Id),grps,id))
           | None -> None
 
     let statements (b:drugProvider.Body option) =
@@ -462,32 +499,10 @@ module DrugParser =
       let links = x.Xrefs |> Array.map MedicinalForm.from
       MedicinalForms(Id(x.Id),lvs,avs,links)
 
-    type Title with
-      static member from (x:drugProvider.P) =
-        Title(Paragraph.from x) 
-
-    let extractTitle (x:drugProvider.Sectiondiv) =
-      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.map Title.from |> Array.tryPick Some
-
-    //need to be careful with this as its modifying the xml element that passes through it
-    let removeTitle (x:drugProvider.Sectiondiv) =
-      x.Ps |> Array.choose (hasOutputclasso "title") |> Array.iter (fun p -> p.XElement.Remove())
-      x
-
-    let addTitle (sp,s) =
-      let t = extractTitle s
-      let x = removeTitle s
-      t,sp,x
-
     type GeneralInformation with
       static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> GeneralInformation)
       static member from (x:drugProvider.Section) =
         x.Sectiondivs |> Array.map GeneralInformation.from
-
-    type DoseAdjustment with
-      static member from (x:drugProvider.Sectiondiv) = x |> (addSpecificity >> addTitle >> DoseAdjustment)
-      static member from (x:drugProvider.Section) =
-          x.Sectiondivs |> Array.map DoseAdjustment.from
 
     let subsections cl c s =
       s |> Array.choose (hasOutputclasso cl) |> Array.collect c

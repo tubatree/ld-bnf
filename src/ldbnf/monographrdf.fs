@@ -223,15 +223,6 @@ module DrugRdf =
     static member fromidg (IndicationsAndDose(tis,roas,count)) =
       (tis |> Seq.map Graph.from |> Seq.choose id |> Seq.toList)
               @ (roas |> Seq.collect Graph.from |> Seq.toList)
-
-    static member fromidgs (x:IndicationsAndDoseSection) =
-      let dp n s = (a !!("nicebnf:" + n)) :: (s |> dita)
-      match x with
-       | Pharmacokinetics s -> s |> dp "Pharmacokinetics"
-       | DoseEquivalence s -> s |> dp "DoseEquivalence"
-       | DoseAdjustments s -> s |> dp "DoseAdjustments"
-       | ExtremesOfBodyWeight s -> s |> dp "ExtremesOfBodyWeight"
-       | Potency s -> s |> dp "Potency" 
  
     static member frompca (p:PatientAndCarerAdvice) =
       let pca t = Graph.fromthree >> (subtype t)
@@ -298,6 +289,23 @@ module DrugRdf =
     static member fromambf (AdditionalMonitoringInBreastFeeding(t,sp,s)) = Graph.fromthree(t,sp,s)
     static member fromamhi (AdditionalMonitoringInHepaticImpairment(t,sp,s)) = Graph.fromthree(t,sp,s)
     static member fromamri (AdditionalMonitoringInRenalImpairment (t,sp,s)) = Graph.fromthree(t,sp,s)
+    
+    
+    static member fromidgs (x:IndicationsAndDoseSection) =
+      
+      let createTypeTriplesFromSec n s = (a !!("nicebnf:" + n)) :: (s |> dita)
+      let createTypeTriplesFromSecDiv n sd = (a !!("nicebnf:" + n)) :: (sd |> dita)
+
+      match x with
+       | Pharmacokinetics (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Pharmacokinetics")
+       | Pharmacokinetics (None, sec) -> sec |> createTypeTriplesFromSec "Pharmacokinetics"
+       | DoseEquivalence (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "DoseEquivalence")
+       | DoseEquivalence (None, sec) -> sec |> createTypeTriplesFromSec "DoseEquivalence"
+       | DoseAdjustments (DoseAdjustment(title, spec, secDiv)) -> Graph.fromda (DoseAdjustment (title, spec, secDiv)) @ (secDiv |> createTypeTriplesFromSecDiv "DoseAdjustments")
+       | ExtremesOfBodyWeight (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight")
+       | ExtremesOfBodyWeight (None, sec) -> sec |> createTypeTriplesFromSec "ExtremesOfBodyWeight"
+       | Potency (Some spec, sec) -> (Graph.fromsp spec) :: (sec |> createTypeTriplesFromSec "Potency")
+       | Potency (None, sec) -> sec |> createTypeTriplesFromSec "Potency" 
 
     static member fromse (x:SideEffect) =
       one !!"nicebnf:hasSideEffect" (Uri.fromse x)
