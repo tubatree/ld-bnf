@@ -786,7 +786,7 @@ module DrugParser =
               NiceTechnologyAppraisals (fi,t,sp,Some s)
             | _ -> NiceTechnologyAppraisals (fi,None,None,None)
 
-        let buildSmc (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> SmcDecisions)
+        let buildSmc (s1:drugProvider.Sectiondiv) = s1 |> (addSpecificity >> SmcDecisions)
 
         let buildAwmsgDecisions (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> AwmsgDecisions)
 
