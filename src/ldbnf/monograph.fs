@@ -374,6 +374,9 @@ module DrugParser =
     let addSpecificity x =
       extractSpecificity x, x
 
+    let addSpecifictityNF (x:drugProvider.Sectiondiv) =
+        extractSpecificity x.Sectiondivs.[0], x
+
     let getSpecifictyFromSection (x:drugProvider.Section) = 
         x.Ps 
         |> Array.choose (hasOutputclasso "specificity") 
@@ -801,9 +804,9 @@ module DrugParser =
               NiceTechnologyAppraisals (fi,t,sp,Some s)
             | _ -> NiceTechnologyAppraisals (fi,None,None,None)
 
-        let buildSmc (s1:drugProvider.Sectiondiv) = s1 |> (addSpecificity >> SmcDecisions)
+        let buildSmc (s1:drugProvider.Sectiondiv) = s1 |> (addSpecifictityNF >> SmcDecisions)
 
-        let buildAwmsgDecisions (s1:drugProvider.Sectiondiv) = s1.Sectiondivs.[0] |> (addSpecificity >> AwmsgDecisions)
+        let buildAwmsgDecisions (s1:drugProvider.Sectiondiv) = s1 |> (addSpecifictityNF >> AwmsgDecisions)
 
 
         match x with
