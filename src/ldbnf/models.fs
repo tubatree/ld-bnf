@@ -643,6 +643,7 @@ module Interaction =
      title:inProvider.Title;
      importance:Importance;
      message:inProvider.P;
+     messageString: string;
      interactswith:Link;}
 
   type InteractionList =
@@ -655,21 +656,13 @@ module InteracitonParser =
   type InteractsWith with
     static member from (x:inProvider.Topic) =
       let t = x.Title
-      let p,l = match x.Body.P with
-                | Some p ->
-                  let ds = p.Phs |> Array.choose (hasOutputclass "drug")
-                  let l = match ds with
-                          | [|_;too|] ->
-                             match too.Xref with
-                             | Some x -> {href= Href x.Href;label=x.Value}
-                             | None -> failwith "cant find the link"
-                          | _ -> failwith "cant find the link"
-                  p,l
+      let p = match x.Body.P with
+                | Some p -> p
                 | None -> failwith "cant find paragraph"
       let i = match x.Importance with
               | Some "high" -> High
               | _ -> NotSet
-      {id=Id(x.Id); title=t; importance = i;message = p; interactswith = l}
+      {id=Id(x.Id); title=t; importance = i;message = p; messageString = p.XElement.Value.ToString().Trim(); interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
