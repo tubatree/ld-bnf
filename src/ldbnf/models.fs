@@ -662,7 +662,9 @@ module InteracitonParser =
       let i = match x.Importance with
               | Some "high" -> High
               | _ -> NotSet
-      {id=Id(x.Id); title=t; importance = i;message = p; messageString = p.XElement.Value.ToString().Trim(); interactswith = {href = Href ""; label = ""}}
+
+      let messageString = p.XElement.Value.ToString()
+      {id=Id(x.Id); title=t; importance = i;message = p; messageString = messageString; interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
