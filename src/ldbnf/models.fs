@@ -308,7 +308,7 @@ open System.Xml.Linq
 open System.Xml.XPath
 
 module TreatmentSummary =
-  type tsProvider = XmlProvider<"./samples/supertreatmentsummary.xml", Global=true>
+  type tsProvider = XmlProvider<"../../samples/supertreatmentsummary.xml", Global=true>
 
   type Label = {
     number:string option
@@ -411,7 +411,7 @@ module TreatmentSummaryParser =
 
 
 module DrugClassification =
-  type dcProvider = XmlProvider<"./samples/drugClassifications.xml", Global=true>
+  type dcProvider = XmlProvider<"../../samples/drugClassifications.xml", Global=true>
 
   type Classification = {key:string; value:string}
 
@@ -432,7 +432,7 @@ module DrugClassificationParser =
 
 module BorderlineSubstance =
 
-  type bsProvider = XmlProvider<"./samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
+  type bsProvider = XmlProvider<"../../samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
 
   type Link = {Uri:string;Label:string;}
 
@@ -625,7 +625,7 @@ module BorderlineSubstanceParser =
        }
 
 module Interaction =
-  type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true, SampleIsList=true>
+  type inProvider = XmlProvider<"../../samples/superinteraction.xml", Global=true, SampleIsList=true>
 
   type Link = {href: Href; label: string;}
 
@@ -687,7 +687,7 @@ module InteracitonParser =
 
 module WoundManagement =
 
-  type wmProvider = XmlProvider<"./samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
+  type wmProvider = XmlProvider<"../../samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
 
   type TypeOfWound = | TypeOfWound of string
 
@@ -789,7 +789,7 @@ module WoundManagementParser =
 
 
 module Generic =
-  type genericProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
+  type genericProvider = XmlProvider<"../../samples/supercontent.xml", Global=true, SampleIsList=true>
 
   type TargetAudience = | TargetAudience of string
   type Content = | Content of genericProvider.Section * TargetAudience option
@@ -817,7 +817,7 @@ module GenericParser =
       {id=Id(x.Id); title = x.Title; content = c; links = ls}
 
 module Index =
-  type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>
+  type indexProvider = XmlProvider<"../../samples/medicalDevices.xml", Global=true>
 
   type Index = | Index of Id * Id list
 
@@ -830,7 +830,7 @@ module IndexParser =
 
 module PublicationInfo =
   open Shared
-  type publicationInfoProvider = XmlProvider<"./samples/PHP001.xml", Global=true>
+  type publicationInfoProvider = XmlProvider<"../../samples/PHP001.xml", Global=true>
   type PublicationInfo =
     | PublicationInfo of System.DateTime
 
@@ -909,7 +909,7 @@ module MedicalDeviceParser =
 
 module Sections =
 
-  type sectionProvider = XmlProvider<"./samples/others.xml", Global=true, SampleIsList=true>
+  type sectionProvider = XmlProvider<"../../samples/others.xml", Global=true, SampleIsList=true>
 
   type Title =
     //| TextTitle of string
