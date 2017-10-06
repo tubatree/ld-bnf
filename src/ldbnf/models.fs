@@ -643,7 +643,6 @@ module Interaction =
      title:inProvider.Title;
      importance:Importance;
      message:inProvider.P;
-     messageString: string;
      interactswith:Link;}
 
   type InteractionList =
@@ -668,7 +667,7 @@ module InteracitonParser =
 
       p.Phs |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
 
-      {id=Id(x.Id); title=t; importance = i;message = p; messageString = p.XElement.Value; interactswith = {href = Href ""; label = ""}}
+      {id=Id(x.Id); title=t; importance = i;message = p; interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =

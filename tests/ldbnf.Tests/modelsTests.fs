@@ -19,7 +19,7 @@ let ``Should build interaction message from topic with single ph`` () =
 </body>
 </topic>"""
     let interaction = parseInteractionFrom xml
-    Assert.AreEqual("Interaction", interaction.messageString)
+    Assert.AreEqual("Interaction", interaction.message.XElement.Value)
 
 [<Test>]
 let ``Should build interaction message from topic with muliple ph`` () =
@@ -31,7 +31,7 @@ let ``Should build interaction message from topic with muliple ph`` () =
 </body>
 </topic>"""
     let interaction = parseInteractionFrom xml
-    Assert.AreEqual("Interaction one Interaction two.", interaction.messageString)
+    Assert.AreEqual("Interaction one Interaction two.", interaction.message.XElement.Value)
 
 [<Test>]
 let ``Should build interaction message from topic and exclude severity`` () =
@@ -43,7 +43,7 @@ let ``Should build interaction message from topic and exclude severity`` () =
 </body>
 </topic>"""
     let interaction = parseInteractionFrom xml
-    Assert.AreEqual("Interaction one.", interaction.messageString)
+    Assert.AreEqual("Interaction one.", interaction.message.XElement.Value)
 
 [<Test>]
 let ``Should build interaction message from topic and exclude evidence`` () =
@@ -55,4 +55,4 @@ let ``Should build interaction message from topic and exclude evidence`` () =
 </body>
 </topic>"""
     let interaction = parseInteractionFrom xml
-    Assert.AreEqual("Interaction one.", interaction.messageString)
+    Assert.AreEqual("Interaction one.", interaction.message.XElement.Value)
