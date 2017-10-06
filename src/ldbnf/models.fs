@@ -663,8 +663,12 @@ module InteracitonParser =
               | Some "high" -> High
               | _ -> NotSet
 
-      let messageString = p.XElement.Value.ToString()
-      {id=Id(x.Id); title=t; importance = i;message = p; messageString = messageString; interactswith = {href = Href ""; label = ""}}
+      let removeNodeWhen conditionFun (phs:inProvider.Ph[]) = 
+          phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
+
+      p.Phs |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
+
+      {id=Id(x.Id); title=t; importance = i;message = p; messageString = p.XElement.Value; interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
