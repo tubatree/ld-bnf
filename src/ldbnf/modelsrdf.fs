@@ -143,14 +143,13 @@ module InteractionRdf =
   open Bnf.Interaction
   open Bnf.Order
   type Graph with
-    static member from (InteractionList(id,t,il,ids,n)) =
+    static member from (InteractionList(id,t,il)) =
       let note (Note(p,t)) = blank !!"nicebnf:hasNote"
                               ((t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")) :: (p |> dita))
       let s = optionlist{
                 yield a Uri.InteractionListEntity
                 yield t.XElement.Value |> label
-                yield t.XElement |> (string >> title)
-                yield n >>= (note >> Some)}
+                yield t.XElement |> (string >> title)}
 
       let iwuri = Uri.fromiw id
 
@@ -173,8 +172,7 @@ module InteractionRdf =
 
       let dr r = resource (Uri.fromil id) r
       [dr s
-       dr (il |> List.map interactionDetail)
-       dr (ids |> List.map link)]
+       dr (il |> List.map interactionDetail)]
        |> addOrder (Uri.fromil id)
        |> Assert.graph (empty())
 

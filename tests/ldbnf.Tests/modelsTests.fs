@@ -71,5 +71,8 @@ let ``Should build interaction importance from topic`` (severityClass, expectedI
 [<Test; ExpectedException(typeof<System.ArgumentNullException>)>]
 let ``When there is no severity in the feed, the build should fail`` () =
     let xml = """<topic><title>Carbamazepine</title><body><p></p></body></topic>"""
-    parseInteractionFrom xml  |> ignore
+    try
+        parseInteractionFrom xml |> ignore
+    with 
+    | e -> Assert.IsTrue(e.Message.Contains("No severity found for this interaction.")); raise e  
    

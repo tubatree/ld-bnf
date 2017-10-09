@@ -689,9 +689,7 @@ module InteracitonParser =
     static member parse (x:inProvider.Topic) =
 
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
-      let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      let n = x.Body.Note <!> note
-      InteractionList(Id(x.Id),x.Title,is,ids, n)
+      InteractionList(Id(x.Id),x.Title,is)
 
 
 module WoundManagement =
