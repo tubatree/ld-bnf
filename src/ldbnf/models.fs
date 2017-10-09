@@ -634,8 +634,10 @@ module Interaction =
   type Note = | Note of inProvider.P * NoteType
 
   type Importance =
-    | High
-    | NotSet
+    | Mild
+    | Moderate   
+    | Severe
+    | Unknown
     override __.ToString() = toString __
 
   type InteractsWith =
