@@ -648,7 +648,7 @@ module Interaction =
      interactswith:Link;}
 
   type InteractionList =
-    | InteractionList of Id * inProvider.Title * InteractsWith list * Id list * Note option
+    | InteractionList of Id * inProvider.Title * InteractsWith list 
 
 
 module InteracitonParser =
@@ -660,24 +660,33 @@ module InteracitonParser =
       let p = match x.Body.P with
                 | Some p -> p
                 | None -> failwith "cant find paragraph"
-      let i = match x.Importance with
-              | Some "high" -> High
-              | _ -> NotSet
+
+      let getClass (phs:inProvider.Ph[]) =
+            let severity = phs |> Seq.tryFind (fun x -> x.Outputclass = "int-severity") 
+            match severity with
+                | Some severity -> severity
+                | None -> raise (System.ArgumentNullException("No severity found for this interaction."))
+
+      let getImportance (ph:inProvider.Ph) = 
+            match ph.Class.Value with
+             | "mild" -> Mild
+             | "moderate" -> Moderate
+             | "severe" -> Severe
+             | _ -> Unknown
+
+      let importance =  p.Phs 
+                        |> getClass
+                        |> getImportance
 
       let removeNodeWhen conditionFun (phs:inProvider.Ph[]) = 
           phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
 
       p.Phs |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
 
-      {id=Id(x.Id); title=t; importance = i;message = p; interactswith = {href = Href ""; label = ""}}
+      {id=Id(x.Id); title=t; importance = importance;message = p; interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
-      let note (x:inProvider.Note) =
-        let t = match x.Type with
-                | "note" -> NoteType.Note
-                | _ -> failwith ("cant find note type" + x.Type)
-        Note(x.P,t)
 
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
       let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
