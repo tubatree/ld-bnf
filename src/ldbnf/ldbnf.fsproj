@@ -24,7 +24,7 @@
     <WarningLevel>3</WarningLevel>
     <OtherFlags>--warnon:1182</OtherFlags>
     <StartArguments>--xmldirectory process/xml --outputdirectory process/ttl</StartArguments>
-    <StartWorkingDirectory>C:\apps\ld-bnf\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\_src\ld-bnf\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>

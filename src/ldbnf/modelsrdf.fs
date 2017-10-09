@@ -144,8 +144,7 @@ module InteractionRdf =
   open Bnf.Order
   type Graph with
     static member from (InteractionList(id,t,il)) =
-      let note (Note(p,t)) = blank !!"nicebnf:hasNote"
-                              ((t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")) :: (p |> dita))
+
       let s = optionlist{
                 yield a Uri.InteractionListEntity
                 yield t.XElement.Value |> label
@@ -153,10 +152,7 @@ module InteractionRdf =
 
       let iwuri = Uri.fromiw id
 
-      let importance i =
-        match i.importance with
-          | High -> dataProperty !!"nicebnf:hasImportance" ("High"^^xsd.string)
-          | NotSet -> dataProperty !!"nicebnf:hasImportance" ("NotSet"^^xsd.string)
+      let importance i = dataProperty !!"nicebnf:hasImportance" (i.importance.ToString()^^xsd.string)
 
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
                                  (optionlist {
@@ -167,8 +163,6 @@ module InteractionRdf =
                                    yield i.message.XElement.Value |> (string >> label)
                                    yield dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)
                                   })
-
-      let link i = one !!"nicebnf:hasInteractionList" (Uri.fromil i) [objectProperty !!"nicebnf:isInteractionListOf" (Uri.fromil id)]
 
       let dr r = resource (Uri.fromil id) r
       [dr s

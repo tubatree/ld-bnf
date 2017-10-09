@@ -62,7 +62,6 @@ let ``Should build interaction message from topic and exclude evidence`` () =
 [<TestCase("mild","Mild")>]
 [<TestCase("severe","Severe")>]
 [<TestCase("unknown","Unknown")>]
-[<TestCase("test","Unknown")>]
 let ``Should build interaction importance from topic`` (severityClass, expectedImportance) =
     let xml = sprintf """<topic><title>Carbamazepine</title><body><p><ph class="%s" outputclass="int-severity">Not used</ph></p></body></topic>""" severityClass
     let interaction = parseInteractionFrom xml
