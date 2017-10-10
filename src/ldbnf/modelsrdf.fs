@@ -153,14 +153,15 @@ module InteractionRdf =
       let iwuri = Uri.fromiw id
 
       let importance i = dataProperty !!"nicebnf:hasImportance" (i.importance.ToString()^^xsd.string)
+      let title i = dataProperty !!"nicebnf:hasTitle" (i.title.ToString()^^xsd.string)
 
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
                                  (optionlist {
                                    yield a Uri.InteractionEntity
+                                   yield title i
                                    yield importance i
-                                   yield! i.message |> dita
+                                   yield! i.message |> dita                             
                                    yield i.message.XElement.Value |> (string >> label)
-                                   yield dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)
                                   })
 
       let dr r = resource (Uri.fromil id) r
