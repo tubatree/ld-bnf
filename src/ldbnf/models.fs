@@ -644,7 +644,7 @@ module Interaction =
     {id:Id;
      title:inProvider.Title;
      importance:Importance;
-     message:inProvider.P;
+     message:inProvider.Body;
      interactswith:Link;}
 
   type InteractionList =
@@ -657,33 +657,32 @@ module InteracitonParser =
   type InteractsWith with
     static member from (x:inProvider.Topic) =
       let t = x.Title
-      let p = match x.Body.P with
-                | Some p -> p
-                | None -> failwith "cant find paragraph"
+      if x.Body.Ps.Length = 0 then failwith "cant find paragraph"
 
-      let getClass (phs:inProvider.Ph[]) =
-            let severity = phs |> Seq.tryFind (fun x -> x.Outputclass = "int-severity") 
-            match severity with
-                | Some severity -> severity
-                | None -> raise (System.ArgumentNullException("No severity found for this interaction."))
+      let getSeverity (p:inProvider.P) =
+         p.Phs |> Seq.tryFind (fun x -> x.Outputclass = "int-severity") 
+ 
+      let getImportance (ph:inProvider.Ph option) = 
+        match ph with
+            | Some s when s.Class.Value = "mild" -> Mild
+            | Some s when s.Class.Value = "moderate" -> Moderate
+            | Some s when s.Class.Value = "severe" -> Severe
+            | _ -> Unknown
 
-      let getImportance (ph:inProvider.Ph) = 
-            match ph.Class.Value with
-             | "mild" -> Mild
-             | "moderate" -> Moderate
-             | "severe" -> Severe
-             | _ -> Unknown
+      let removeNodeWhen conditionFun (p:inProvider.P) = 
+        p.Phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
 
-      let importance =  p.Phs 
-                        |> getClass
-                        |> getImportance
+      let importance = 
+        x.Body.Ps
+        |> Seq.last            
+        |> getSeverity
+        |> getImportance
 
-      let removeNodeWhen conditionFun (phs:inProvider.Ph[]) = 
-          phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
+      x.Body.Ps
+      |> Seq.last
+      |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
 
-      p.Phs |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
-
-      {id=Id(x.Id); title=t; importance = importance;message = p; interactswith = {href = Href ""; label = ""}}
+      {id=Id(x.Id); title=t; importance = importance;message = x.Body; interactswith = {href = Href ""; label = ""}}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
