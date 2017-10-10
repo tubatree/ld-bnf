@@ -644,8 +644,7 @@ module Interaction =
     {id:Id;
      title:inProvider.Title;
      importance:Importance;
-     message:inProvider.Body;
-     interactswith:Link;}
+     message:inProvider.Body;}
 
   type InteractionList =
     | InteractionList of Id * inProvider.Title * InteractsWith list 
@@ -682,7 +681,7 @@ module InteracitonParser =
       |> Seq.last
       |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
 
-      {id=Id(x.Id); title=t; importance = importance;message = x.Body; interactswith = {href = Href ""; label = ""}}
+      {id=Id(x.Id); title=t; importance = importance;message = x.Body;}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =

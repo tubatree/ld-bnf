@@ -96,7 +96,6 @@ module RdfUris =
 
     static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interaction/" + (l.Href.ToId() |> string ))
     static member fromil id = !!(Uri.bnfsite + "interaction/" + string id)
-    static member fromiwl (iw:InteractsWith) = !!(Uri.bnfsite + "interaction/" + (iw.interactswith.href.ToId() |> string))
     static member fromiw id (iw:InteractsWith) = !!(Uri.bnfsite + "interaction/" +  string id + "#" + string iw.id)
 
     // Ontology Taxonomy individuals

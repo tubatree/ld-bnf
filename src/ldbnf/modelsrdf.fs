@@ -157,7 +157,6 @@ module InteractionRdf =
       let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
                                  (optionlist {
                                    yield a Uri.InteractionEntity
-                                   yield objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
                                    yield importance i
                                    yield! i.message |> dita
                                    yield i.message.XElement.Value |> (string >> label)
