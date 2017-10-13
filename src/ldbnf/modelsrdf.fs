@@ -158,9 +158,9 @@ module InteractionRdf =
                                  (optionlist {
                                    yield a Uri.InteractionEntity
                                    yield! i.title |> xtitle
-                                   yield importance i
-                                   yield! i.message |> dita                             
-                                   yield i.message.XElement.Value |> (string >> label)
+//                                   yield importance i
+//                                   yield! i.message |> dita                             
+//                                   yield i.message.XElement.Value |> (string >> label)
                                   })
 
       let dr r = resource (Uri.fromil id) r

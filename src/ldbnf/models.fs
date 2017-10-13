@@ -640,11 +640,12 @@ module Interaction =
     | Unknown
     override __.ToString() = toString __
 
+  type Message = {importance:Importance; pElem:inProvider.P}
+
   type InteractsWith =
     {id:Id;
      title:inProvider.Title;
-     importance:Importance;
-     message:inProvider.Body;}
+     messages: Message list}
 
   type InteractionList =
     | InteractionList of Id * inProvider.Title * InteractsWith list 
@@ -671,17 +672,17 @@ module InteracitonParser =
       let removeNodeWhen conditionFun (p:inProvider.P) = 
         p.Phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
 
-      let importance = 
-        x.Body.Ps
-        |> Seq.last            
-        |> getSeverity
-        |> getImportance
+      let createMessage (p:inProvider.P) =         
+        let importance = p |> getSeverity |> getImportance
+        removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence") p
+        {importance = importance; pElem = p} 
 
-      x.Body.Ps
-      |> Seq.last
-      |> removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence")
+      let messages = 
+        x.Body.Ps 
+        |> Array.map createMessage         
+        |> Array.toList
 
-      {id=Id(x.Id); title=t; importance = importance;message = x.Body;}
+      {id=Id(x.Id); title=t; messages = messages}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
