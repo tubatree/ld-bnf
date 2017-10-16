@@ -96,6 +96,7 @@ module RdfUris =
 
     static member from (InteractionLink (l)) = !!(Uri.bnfsite + "interaction/" + (l.Href.ToId() |> string ))
     static member fromil id = !!(Uri.bnfsite + "interaction/" + string id)
+    static member fromim id (iw:InteractsWith) num = !!(Uri.bnfsite + "interaction/" +  string id + "#" + string iw.id + "_message_" + string num)
     static member fromiw id (iw:InteractsWith) = !!(Uri.bnfsite + "interaction/" +  string id + "#" + string iw.id)
 
     // Ontology Taxonomy individuals
@@ -133,7 +134,8 @@ module RdfUris =
     static member MedicalDeviceEntity = !!(Uri.nicebnf + "MedicalDevice")
     static member ClinicalMedicalDeviceInformationGroupEntity = !!(Uri.nicebnf + "ClinicalMedicalDeviceInformationGroup")
     static member WoundManagementEntity = !!(Uri.nicebnf + "WoundManagement")
-    static member InteractionEntity = !!(Uri.nicebnf + "InteractionMessage")
+    static member InteractsWithEntity = !!(Uri.nicebnf + "InteractsWith")
+    static member InteractionMessageEntity = !!(Uri.nicebnf + "InteractionMessage")
     static member InteractionListEntity = !!(Uri.nicebnf + "InteractionList")
     static member DosageEntity = !!(Uri.nicebnf + "Dosage")
 

@@ -154,18 +154,33 @@ module InteractionRdf =
 
       let importance i = dataProperty !!"nicebnf:hasImportance" (i.importance.ToString()^^xsd.string)
 
-      let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
-                                 (optionlist {
-                                   yield a Uri.InteractionEntity
-                                   yield! i.title |> xtitle
-//                                   yield importance i
-//                                   yield! i.message |> dita                             
-//                                   yield i.message.XElement.Value |> (string >> label)
-                                  })
+      let buildInteractionMessage i index m = resource (Uri.fromim id i index)    
+                                                (optionlist {
+                                                    yield a Uri.InteractionMessageEntity
+                                                    yield importance m
+                                                    yield! m.pElem |> dita                             
+                                                    yield m.pElem.XElement.Value |> (string >> label)
+                                                    yield dataProperty !!"nicebnf:hasOrder" ((index + 1).ToString()^^xsd.string)
+                                                })
+      let buildInteractionMessages i = i.messages |> List.mapi (buildInteractionMessage i)
+
+      let addHasMessages i messages = messages 
+                                    |> List.mapi (fun index _ -> objectProperty !!"nicebnf:hasMessage" (Uri.fromim id i index)) 
+
+      let buildInteractionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
+                                         (optionlist {
+                                           yield a Uri.InteractsWithEntity
+                                           yield! i.title |> xtitle
+                                           yield! i.messages |> addHasMessages i
+                                          })
+
+      let messages = il 
+                    |> List.map buildInteractionMessages 
+                    |> List.collect (fun r -> r)
 
       let dr r = resource (Uri.fromil id) r
       [dr s
-       dr (il |> List.map interactionDetail)]
+       dr (il |> List.map buildInteractionDetail)] @ messages
        |> addOrder (Uri.fromil id)
        |> Assert.graph (empty())
 
