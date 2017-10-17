@@ -638,6 +638,7 @@ module Interaction =
     | Moderate   
     | Severe
     | Unknown
+    | NotSet
     override __.ToString() = toString __
 
   type Message = {importance:Importance; pElem:inProvider.P}
@@ -667,7 +668,8 @@ module InteracitonParser =
             | Some s when s.Class.Value = "mild" -> Mild
             | Some s when s.Class.Value = "moderate" -> Moderate
             | Some s when s.Class.Value = "severe" -> Severe
-            | _ -> Unknown
+            | Some s when s.Class.Value = "unknown" -> Unknown
+            | _ -> NotSet
 
       let removeNodeWhen conditionFun (p:inProvider.P) = 
         p.Phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
