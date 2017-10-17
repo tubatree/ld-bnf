@@ -68,11 +68,11 @@ let ``Should build interaction importance from topic`` (severityClass, expectedI
     Assert.AreEqual(expectedImportance, message.importance.ToString())
 
 [<Test>]
-let ``When there is no severity in the feed, severity should be unknown`` () =
+let ``When there is no severity in the feed, severity should be notset`` () =
     let xml = """<topic><title>Carbamazepine</title><body><p></p></body></topic>"""
     let interaction = parseInteractionFrom xml
     let message = interaction.messages |> Seq.head
-    Assert.AreEqual("Unknown", message.importance.ToString())
+    Assert.AreEqual("NotSet", message.importance.ToString())
 
 
 [<Test>]
