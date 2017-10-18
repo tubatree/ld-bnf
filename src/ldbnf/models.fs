@@ -641,7 +641,14 @@ module Interaction =
     | NotSet
     override __.ToString() = toString __
 
-  type Message = {importance:Importance; pElem:inProvider.P}
+  type Evidence =
+    | Anecdotal
+    | Study
+    | Theoretical
+    | NotSet
+    override __.ToString() = toString __
+
+  type Message = {importance:Importance; evidence:Evidence; pElem:inProvider.P}
 
   type InteractsWith =
     {id:Id;
@@ -651,40 +658,53 @@ module Interaction =
   type InteractionList =
     | InteractionList of Id * inProvider.Title * InteractsWith list 
 
+  let defaultValueKey = "__default"  
+    
+  let allowedImportanceValues =
+    ["mild", Mild
+     "moderate", Moderate
+     "severe", Severe
+     "unknown", Unknown
+     defaultValueKey, Importance.NotSet] |> Map.ofList 
+
+  let allowedEvidenceValues = 
+    ["anecdotal", Anecdotal
+     "study", Study
+     "theoretical", Theoretical
+     defaultValueKey, Evidence.NotSet] |> Map.ofList
 
 module InteracitonParser =
   open Interaction
 
+  let getClassValueAs<'T> (allowedValues:Map<string, 'T>) (ph:inProvider.Ph option) =
+    match ph with
+        | Some s when allowedValues.ContainsKey(s.Class.Value) -> allowedValues.Item(s.Class.Value)
+        | _ ->  allowedValues.Item(defaultValueKey)
+
   type InteractsWith with
     static member from (x:inProvider.Topic) =
-      let t = x.Title
       if x.Body.Ps.Length = 0 then failwith "cant find paragraph"
-
-      let getSeverity (p:inProvider.P) =
-         p.Phs |> Seq.tryFind (fun x -> x.Outputclass = "int-severity") 
- 
-      let getImportance (ph:inProvider.Ph option) = 
-        match ph with
-            | Some s when s.Class.Value = "mild" -> Mild
-            | Some s when s.Class.Value = "moderate" -> Moderate
-            | Some s when s.Class.Value = "severe" -> Severe
-            | Some s when s.Class.Value = "unknown" -> Unknown
-            | _ -> NotSet
+      
+      let getPh outputClass (p:inProvider.P) = 
+         p.Phs |> Seq.tryFind (fun x -> x.Outputclass = outputClass) 
 
       let removeNodeWhen conditionFun (p:inProvider.P) = 
         p.Phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
 
       let createMessage (p:inProvider.P) =         
-        let importance = p |> getSeverity |> getImportance
+        let importance = p |> getPh "int-severity" |> getClassValueAs<Importance> allowedImportanceValues
+        let evidence = p |> getPh "int-evidence" |> getClassValueAs<Evidence> allowedEvidenceValues
+
         removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence") p
-        {importance = importance; pElem = p} 
+
+        {importance = importance; evidence = evidence; pElem = p} 
 
       let messages = 
         x.Body.Ps 
         |> Array.map createMessage         
         |> Array.toList
 
-      {id=Id(x.Id); title=t; messages = messages}
+      {id=Id(x.Id); title=x.Title; messages = messages}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =

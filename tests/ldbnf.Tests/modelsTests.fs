@@ -50,7 +50,7 @@ let ``Should build interaction message from topic and exclude evidence`` () =
     let xml = """
 <topic>
 <title>Carbamazepine</title>
-<body><p><ph>Interaction one</ph>.<ph class="moderate" outputclass="int-severity">Moderate</ph><ph outputclass="int-evidence">Theoretical</ph></p></body>
+<body><p><ph>Interaction one</ph>.<ph class="moderate" outputclass="int-severity">Moderate</ph><ph class="theoretical" outputclass="int-evidence">Theoretical</ph></p></body>
 </topic>"""
     let interaction = parseInteractionFrom xml
     let message = interaction.messages |> Seq.head
@@ -66,6 +66,23 @@ let ``Should build interaction importance from topic`` (severityClass, expectedI
     let interaction = parseInteractionFrom xml
     let message = interaction.messages |> Seq.head
     Assert.AreEqual(expectedImportance, message.importance.ToString())
+
+
+[<TestCase("anecdotal","Anecdotal")>]
+[<TestCase("study","Study")>]
+[<TestCase("theoretical", "Theoretical")>]
+let ``Should build interaction evidence from topic`` (evidenceClass, expectedEvidence) =
+    let xml = sprintf """<topic><title>Carbamazepine</title><body><p><ph class="%s" outputclass="int-evidence">Not used</ph></p></body></topic>""" evidenceClass
+    let interaction = parseInteractionFrom xml
+    let message = interaction.messages |> Seq.head
+    Assert.AreEqual(expectedEvidence, message.evidence.ToString())
+
+[<Test>]
+let ``When there is no evidence in the feed, severity should be notset`` () =
+    let xml = """<topic><title>Carbamazepine</title><body><p></p></body></topic>"""
+    let interaction = parseInteractionFrom xml
+    let message = interaction.messages |> Seq.head
+    Assert.AreEqual("NotSet", message.evidence.ToString())
 
 [<Test>]
 let ``When there is no severity in the feed, severity should be notset`` () =
