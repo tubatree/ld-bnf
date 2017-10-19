@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
-<test-run id="2" testcasecount="2" result="Failed" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.7.0.0" clr-version="4.0.30319.42000" start-time="2017-10-19 15:18:49Z" end-time="2017-10-19 15:18:50Z" duration="1.045235">
-  <command-line><![CDATA["packages/NUnit.ConsoleRunner/tools/nunit3-console.exe" --labels=All --workers=1 --teamcity  C:\src\ld-bnf\tests\ldbnf.Tests\bin\Release\ldbnf.Tests.dll]]></command-line>
-  <test-suite type="Assembly" id="0-1003" name="ldbnf.Tests.dll" fullname="C:\src\ld-bnf\tests\ldbnf.Tests\bin\Release\ldbnf.Tests.dll" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:18:50Z" end-time="2017-10-19 15:18:50Z" duration="0.118120" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="2" result="Failed" total="2" passed="0" failed="2" inconclusive="0" skipped="0" asserts="0" engine-version="3.7.0.0" clr-version="4.0.30319.42000" start-time="2017-10-19 15:56:48Z" end-time="2017-10-19 15:56:49Z" duration="0.952756">
+  <command-line><![CDATA["packages/NUnit.ConsoleRunner/tools/nunit3-console.exe" --labels=All --workers=1 --teamcity C:\src\ld-bnf\tests\ldbnf.Tests\bin\Release\ldbnf.Tests.dll]]></command-line>
+  <test-suite type="Assembly" id="0-1003" name="ldbnf.Tests.dll" fullname="C:\src\ld-bnf\tests\ldbnf.Tests\bin\Release\ldbnf.Tests.dll" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:56:49Z" end-time="2017-10-19 15:56:49Z" duration="0.108010" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
     <environment framework-version="3.8.1.0" clr-version="4.0.30319.42000" os-version="Microsoft Windows NT 10.0.15063.0" platform="Win32NT" cwd="C:\src\ld-bnf" machine-name="IMT-07587" user="jkirk" user-domain="IMANDT" culture="en-GB" uiculture="en-GB" os-architecture="x64" />
     <settings>
       <setting name="DisposeRunners" value="True" />
@@ -13,27 +13,27 @@
       <setting name="ImageRequiresDefaultAppDomainAssemblyResolver" value="False" />
     </settings>
     <properties>
-      <property name="_PID" value="22076" />
+      <property name="_PID" value="22028" />
       <property name="_APPDOMAIN" value="domain-" />
     </properties>
     <failure>
       <message><![CDATA[One or more child tests had errors]]></message>
     </failure>
-    <test-suite type="TestSuite" id="0-1004" name="ldbnf" fullname="ldbnf" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:18:50Z" end-time="2017-10-19 15:18:50Z" duration="0.085449" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="TestSuite" id="0-1004" name="ldbnf" fullname="ldbnf" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:56:49Z" end-time="2017-10-19 15:56:49Z" duration="0.080651" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
       <failure>
         <message><![CDATA[One or more child tests had errors]]></message>
       </failure>
-      <test-suite type="TestFixture" id="0-1000" name="Tests" fullname="ldbnf.Tests" classname="ldbnf.Tests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:18:50Z" end-time="2017-10-19 15:18:50Z" duration="0.075658" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestFixture" id="0-1000" name="Tests" fullname="ldbnf.Tests" classname="ldbnf.Tests" runstate="Runnable" testcasecount="2" result="Failed" site="Child" start-time="2017-10-19 15:56:49Z" end-time="2017-10-19 15:56:49Z" duration="0.072903" total="2" passed="0" failed="2" warnings="0" inconclusive="0" skipped="0" asserts="0">
         <failure>
           <message><![CDATA[One or more child tests had errors]]></message>
         </failure>
-        <test-case id="0-1001" name="Ensure that addOrder creates an add order node for external resource" fullname="ldbnf.Tests.Ensure that addOrder creates an add order node for external resource" methodname="Ensure that addOrder creates an add order node for external resource" classname="ldbnf.Tests" runstate="Runnable" seed="1317317837" result="Failed" label="Error" start-time="2017-10-19 15:18:50Z" end-time="2017-10-19 15:18:50Z" duration="0.056830" asserts="0">
+        <test-case id="0-1001" name="Ensure that addOrder creates an add order node for external resource" fullname="ldbnf.Tests.Ensure that addOrder creates an add order node for external resource" methodname="Ensure that addOrder creates an add order node for external resource" classname="ldbnf.Tests" runstate="Runnable" seed="311225876" result="Failed" label="Error" start-time="2017-10-19 15:56:49Z" end-time="2017-10-19 15:56:49Z" duration="0.055780" asserts="0">
           <failure>
             <message><![CDATA[System.MissingMethodException : Method not found: 'Microsoft.FSharp.Collections.FSharpList`1<FSharp.RDF.Resource> Bnf.Order.addOrder(!!0, Microsoft.FSharp.Collections.FSharpList`1<FSharp.RDF.Resource>)'.]]></message>
             <stack-trace><![CDATA[   at ldbnf.Tests.Ensure that addOrder creates an add order node for external resource()]]></stack-trace>
           </failure>
         </test-case>
-        <test-case id="0-1002" name="Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" fullname="ldbnf.Tests.Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" methodname="Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" classname="ldbnf.Tests" runstate="Runnable" seed="708073199" result="Failed" label="Error" start-time="2017-10-19 15:18:50Z" end-time="2017-10-19 15:18:50Z" duration="0.001204" asserts="0">
+        <test-case id="0-1002" name="Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" fullname="ldbnf.Tests.Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" methodname="Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource" classname="ldbnf.Tests" runstate="Runnable" seed="2106954716" result="Failed" label="Error" start-time="2017-10-19 15:56:49Z" end-time="2017-10-19 15:56:49Z" duration="0.001265" asserts="0">
           <failure>
             <message><![CDATA[System.MissingMethodException : Method not found: 'Microsoft.FSharp.Collections.FSharpList`1<FSharp.RDF.Resource> Bnf.Order.addOrder(!!0, Microsoft.FSharp.Collections.FSharpList`1<FSharp.RDF.Resource>)'.]]></message>
             <stack-trace><![CDATA[   at ldbnf.Tests.Ensure that addOrder creates an hasOrder property within a resource with more than one internal resource()]]></stack-trace>

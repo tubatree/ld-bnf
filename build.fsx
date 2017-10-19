@@ -48,8 +48,7 @@ let tags = ""
 let solutionFile  = "ldbnf.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = !!"tests/**/bin/Release/*Tests*.dll" |> Seq.fold (fun acc i -> acc + " " + i) ""
-
+let testAssemblies = !!"tests/**/bin/Release/*Tests*.dll" |> String.concat " "
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
 let gitOwner = "nhsevidence" 
