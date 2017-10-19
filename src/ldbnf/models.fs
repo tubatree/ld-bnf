@@ -308,7 +308,7 @@ open System.Xml.Linq
 open System.Xml.XPath
 
 module TreatmentSummary =
-  type tsProvider = XmlProvider<"./samples/supertreatmentsummary.xml", Global=true>
+  type tsProvider = XmlProvider<"../../samples/supertreatmentsummary.xml", Global=true>
 
   type Label = {
     number:string option
@@ -411,7 +411,7 @@ module TreatmentSummaryParser =
 
 
 module DrugClassification =
-  type dcProvider = XmlProvider<"./samples/drugClassifications.xml", Global=true>
+  type dcProvider = XmlProvider<"../../samples/drugClassifications.xml", Global=true>
 
   type Classification = {key:string; value:string}
 
@@ -432,7 +432,7 @@ module DrugClassificationParser =
 
 module BorderlineSubstance =
 
-  type bsProvider = XmlProvider<"./samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
+  type bsProvider = XmlProvider<"../../samples/borderlinesubstances.xml", Global=true, SampleIsList=true>
 
   type Link = {Uri:string;Label:string;}
 
@@ -625,7 +625,7 @@ module BorderlineSubstanceParser =
        }
 
 module Interaction =
-  type inProvider = XmlProvider<"./samples/superinteraction.xml", Global=true, SampleIsList=true>
+  type inProvider = XmlProvider<"../../samples/superinteraction.xml", Global=true, SampleIsList=true>
 
   type Link = {href: Href; label: string;}
 
@@ -634,19 +634,22 @@ module Interaction =
   type Note = | Note of inProvider.P * NoteType
 
   type Importance =
-    | High
+    | Mild
+    | Moderate   
+    | Severe
+    | Unknown
     | NotSet
     override __.ToString() = toString __
+
+  type Message = {importance:Importance; pElem:inProvider.P}
 
   type InteractsWith =
     {id:Id;
      title:inProvider.Title;
-     importance:Importance;
-     message:inProvider.P;
-     interactswith:Link;}
+     messages: Message list}
 
   type InteractionList =
-    | InteractionList of Id * inProvider.Title * InteractsWith list * Id list * Note option
+    | InteractionList of Id * inProvider.Title * InteractsWith list 
 
 
 module InteracitonParser =
@@ -655,39 +658,44 @@ module InteracitonParser =
   type InteractsWith with
     static member from (x:inProvider.Topic) =
       let t = x.Title
-      let p,l = match x.Body.P with
-                | Some p ->
-                  let ds = p.Phs |> Array.choose (hasOutputclass "drug")
-                  let l = match ds with
-                          | [|_;too|] ->
-                             match too.Xref with
-                             | Some x -> {href= Href x.Href;label=x.Value}
-                             | None -> failwith "cant find the link"
-                          | _ -> failwith "cant find the link"
-                  p,l
-                | None -> failwith "cant find paragraph"
-      let i = match x.Importance with
-              | Some "high" -> High
-              | _ -> NotSet
-      {id=Id(x.Id); title=t; importance = i;message = p; interactswith = l}
+      if x.Body.Ps.Length = 0 then failwith "cant find paragraph"
+
+      let getSeverity (p:inProvider.P) =
+         p.Phs |> Seq.tryFind (fun x -> x.Outputclass = "int-severity") 
+ 
+      let getImportance (ph:inProvider.Ph option) = 
+        match ph with
+            | Some s when s.Class.Value = "mild" -> Mild
+            | Some s when s.Class.Value = "moderate" -> Moderate
+            | Some s when s.Class.Value = "severe" -> Severe
+            | Some s when s.Class.Value = "unknown" -> Unknown
+            | _ -> NotSet
+
+      let removeNodeWhen conditionFun (p:inProvider.P) = 
+        p.Phs |> Array.iter (fun ph -> if conditionFun ph then ph.XElement.Remove() else ())
+
+      let createMessage (p:inProvider.P) =         
+        let importance = p |> getSeverity |> getImportance
+        removeNodeWhen (fun ph -> ph.Outputclass = "int-severity" || ph.Outputclass = "int-evidence") p
+        {importance = importance; pElem = p} 
+
+      let messages = 
+        x.Body.Ps 
+        |> Array.map createMessage         
+        |> Array.toList
+
+      {id=Id(x.Id); title=t; messages = messages}
 
   type InteractionList with
     static member parse (x:inProvider.Topic) =
-      let note (x:inProvider.Note) =
-        let t = match x.Type with
-                | "note" -> NoteType.Note
-                | _ -> failwith ("cant find note type" + x.Type)
-        Note(x.P,t)
 
       let is = x.Topics |> Array.map InteractsWith.from |> Array.toList
-      let ids = x.Xrefs |> Array.map (fun x -> x.Href |> Id) |> Array.toList
-      let n = x.Body.Note <!> note
-      InteractionList(Id(x.Id),x.Title,is,ids, n)
+      InteractionList(Id(x.Id),x.Title,is)
 
 
 module WoundManagement =
 
-  type wmProvider = XmlProvider<"./samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
+  type wmProvider = XmlProvider<"../../samples/superwoundmanagment.xml", Global=true, SampleIsList=true>
 
   type TypeOfWound = | TypeOfWound of string
 
@@ -789,7 +797,7 @@ module WoundManagementParser =
 
 
 module Generic =
-  type genericProvider = XmlProvider<"./samples/supercontent.xml", Global=true, SampleIsList=true>
+  type genericProvider = XmlProvider<"../../samples/supercontent.xml", Global=true, SampleIsList=true>
 
   type TargetAudience = | TargetAudience of string
   type Content = | Content of genericProvider.Section * TargetAudience option
@@ -817,7 +825,7 @@ module GenericParser =
       {id=Id(x.Id); title = x.Title; content = c; links = ls}
 
 module Index =
-  type indexProvider = XmlProvider<"./samples/medicalDevices.xml", Global=true>
+  type indexProvider = XmlProvider<"../../samples/medicalDevices.xml", Global=true>
 
   type Index = | Index of Id * Id list
 
@@ -830,7 +838,7 @@ module IndexParser =
 
 module PublicationInfo =
   open Shared
-  type publicationInfoProvider = XmlProvider<"./samples/PHP001.xml", Global=true>
+  type publicationInfoProvider = XmlProvider<"../../samples/PHP001.xml", Global=true>
   type PublicationInfo =
     | PublicationInfo of System.DateTime
 
@@ -909,7 +917,7 @@ module MedicalDeviceParser =
 
 module Sections =
 
-  type sectionProvider = XmlProvider<"./samples/others.xml", Global=true, SampleIsList=true>
+  type sectionProvider = XmlProvider<"../../samples/others.xml", Global=true, SampleIsList=true>
 
   type Title =
     //| TextTitle of string

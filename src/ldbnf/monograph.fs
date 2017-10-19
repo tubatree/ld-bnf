@@ -53,7 +53,7 @@ module Shared =
     | _ -> ""
 
   //sensible compromise to reference the types provided to avoid replication
-  type drugProvider = XmlProvider<"./samples/SuperDrug.xml", Global=true, SampleIsList=true>
+  type drugProvider = XmlProvider<"../../samples/SuperDrug.xml", Global=true, SampleIsList=true>
 
   let sections (n:string) (x:drugProvider.Topic) =
     match x.Body with

@@ -143,38 +143,44 @@ module InteractionRdf =
   open Bnf.Interaction
   open Bnf.Order
   type Graph with
-    static member from (InteractionList(id,t,il,ids,n)) =
-      let note (Note(p,t)) = blank !!"nicebnf:hasNote"
-                              ((t |> (toString >> xsd.string >> dataProperty !!"nicebnf:hasNoteType")) :: (p |> dita))
+    static member from (InteractionList(id,t,il)) =
+
       let s = optionlist{
                 yield a Uri.InteractionListEntity
                 yield t.XElement.Value |> label
-                yield t.XElement |> (string >> title)
-                yield n >>= (note >> Some)}
+                yield t.XElement |> (string >> title)}
 
       let iwuri = Uri.fromiw id
 
-      let importance i =
-        match i.importance with
-          | High -> dataProperty !!"nicebnf:hasImportance" ("High"^^xsd.string)
-          | NotSet -> dataProperty !!"nicebnf:hasImportance" ("NotSet"^^xsd.string)
+      let importance i = dataProperty !!"nicebnf:hasImportance" (i.importance.ToString()^^xsd.string)
 
-      let interactionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
-                                 (optionlist {
-                                   yield a Uri.InteractionEntity
-                                   yield objectProperty !!"nicebnf:interactsWith" (Uri.fromiwl i)
-                                   yield importance i
-                                   yield! i.message |> dita
-                                   yield i.message.XElement.Value |> (string >> label)
-                                   yield dataProperty !!"nicebnf:hasImportance" ((string i.importance)^^xsd.string)
-                                  })
+      let buildInteractionMessage i index m = resource (Uri.fromim id i index)    
+                                                (optionlist {
+                                                    yield a Uri.InteractionMessageEntity
+                                                    yield importance m
+                                                    yield! m.pElem |> dita                             
+                                                    yield m.pElem.XElement.Value |> (string >> label)
+                                                    yield dataProperty !!"nicebnf:hasOrder" ((index + 1).ToString()^^xsd.string)
+                                                })
+      let buildInteractionMessages i = i.messages |> List.mapi (buildInteractionMessage i)
 
-      let link i = one !!"nicebnf:hasInteractionList" (Uri.fromil i) [objectProperty !!"nicebnf:isInteractionListOf" (Uri.fromil id)]
+      let addHasMessages i messages = messages 
+                                    |> List.mapi (fun index _ -> objectProperty !!"nicebnf:hasMessage" (Uri.fromim id i index)) 
+
+      let buildInteractionDetail i = one !!"nicebnf:hasInteraction" (iwuri i)
+                                         (optionlist {
+                                           yield a Uri.InteractsWithEntity
+                                           yield! i.title |> xtitle
+                                           yield! i.messages |> addHasMessages i
+                                          })
+
+      let messages = il 
+                    |> List.map buildInteractionMessages 
+                    |> List.collect (fun r -> r)
 
       let dr r = resource (Uri.fromil id) r
       [dr s
-       dr (il |> List.map interactionDetail)
-       dr (ids |> List.map link)]
+       dr (il |> List.map buildInteractionDetail)] @ messages
        |> addOrder (Uri.fromil id)
        |> Assert.graph (empty())
 

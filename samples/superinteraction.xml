@@ -1,0 +1,148 @@
+<samples>
+    <topic id="bnf_int_1095" outputclass="interaction">
+        <title>Abatacept</title>
+        <body />
+    </topic>
+    <topic id="bnf_int_1001" outputclass="interaction">
+        <title>Abacavir</title>
+        <body />
+        <topic id="bnf_i1504234414576">
+            <title>
+            Carbamazepine 
+			<sup>Dave</sup>
+            </title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="carbamazepine" outputclass="int-drug">Carbamazepine</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414577">
+            <title>Enzalutamide</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="enzalutamide" outputclass="int-drug">Enzalutamide</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414578">
+            <title>Fosphenytoin</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="fosphenytoin" outputclass="int-drug">Fosphenytoin</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414579">
+            <title>Phenobarbital</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="phenobarbital" outputclass="int-drug">Phenobarbital</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414580">
+            <title>Phenytoin</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="phenytoin" outputclass="int-drug">Phenytoin</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414581">
+            <title>Primidone</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="primidone" outputclass="int-drug">Primidone</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414582">
+            <title>Rifampicin</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Moderate" outputclass="int-message">
+                    <ph otherprops="rifampicin" outputclass="int-drug">Rifampicin</ph>
+                    <ph outputclass="int-effectQualifier">is predicted to</ph>
+                    <ph outputclass="int-effect">decrease</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph class="moderate" outputclass="int-severity">Moderate</ph>
+                    <ph class="theoretical" outputclass="int-evidence">Theoretical</ph>
+                </p>
+            </body>
+        </topic>
+        <topic id="bnf_i1504234414583">
+            <title>Tipranavir</title>
+            <body outputclass="int-list" xml:space="preserve">
+                <p otherprops="Severe" outputclass="int-message">
+                    <ph otherprops="tipranavir" outputclass="int-drug">Tipranavir</ph>
+                    <ph outputclass="int-magnitude">slightly</ph>
+                    <ph outputclass="int-effect">decreases</ph>
+                    <ph outputclass="int-parameter">the exposure to</ph>
+                    <ph otherprops="abacavir" outputclass="int-heading-drug">abacavir</ph>. 
+                    <ph outputclass="int-action">Manufacturer advises avoid</ph>. 
+                    <ph class="severe" outputclass="int-severity">Severe</ph>
+                    <ph class="study" outputclass="int-evidence">Study</ph>
+                </p>
+            </body>
+        </topic>
+		<topic id="bnf_i1504234522166" bnfid="bnf_i1504234522166" type="drugInterction" Slug="bnf_i1504234522166" href="drug-interction/bnf_i1504234522166.xml">
+			<title>Asenapine</title>
+			<body outputclass="int-list" xml:space="preserve">
+				<p otherprops="Normal" outputclass="int-message">Concurrent use of <ph otherprops="zuclopenthixol" outputclass="int-heading-drug">zuclopenthixol</ph> and <ph otherprops="asenapine" outputclass="int-drug">asenapine</ph> can increase the risk of hypotension.</p>
+				<p otherprops="Normal" outputclass="int-message">Concurrent use of <ph otherprops="zuclopenthixol" outputclass="int-heading-drug">zuclopenthixol</ph> and <ph otherprops="asenapine" outputclass="int-drug">asenapine</ph> can increase the risk of CNS depressant effects, which might affect the ability to perform skilled tasks (see 'Drugs and Driving' in <xref format="dita" href="guidance/guidance-on-prescribing.xml" type="interaction" rel="guidance" bnfid="PHP97234">Guidance on Prescribing</xref>).</p>
+			</body>
+		</topic>
+		<topic id="bnf_i1504234522159" bnfid="bnf_i1504234522159" type="drugInterction" Slug="bnf_i1504234522159" href="drug-interction/bnf_i1504234522159.xml">
+			<title>Apomorphine</title>
+			<body outputclass="int-list" xml:space="preserve">
+				<p otherprops="Normal" outputclass="int-message">Concurrent use of <ph otherprops="zuclopenthixol" outputclass="int-heading-drug">zuclopenthixol</ph> and <ph otherprops="apomorphine" outputclass="int-drug">apomorphine</ph> can increase the risk of hypotension.</p>
+				<p otherprops="Severe" outputclass="int-message">Both <ph otherprops="zuclopenthixol" outputclass="int-heading-drug">zuclopenthixol</ph> and <ph otherprops="apomorphine" outputclass="int-drug">apomorphine</ph> prolong the QT interval. Most manufacturers advise avoiding the use of two or more drugs that are associated with QT prolongation. Increasing age, female sex, cardiac disease, and some metabolic disturbances (notably hypokalaemia) predispose to QT prolongation.</p>
+				<p otherprops="Moderate" outputclass="int-message"><ph otherprops="zuclopenthixol" outputclass="int-heading-drug">Zuclopenthixol</ph> <ph outputclass="int-effectQualifier">is predicted to</ph> <ph outputclass="int-effect">decrease</ph> <ph outputclass="int-parameter">the effects of</ph> <ph otherprops="apomorphine" outputclass="int-drug">apomorphine</ph>. <ph outputclass="int-action">Manufacturer advises avoid</ph>. <ph class="moderate" outputclass="int-severity">Moderate</ph> <ph class="theoretical" outputclass="int-evidence">Theoretical</ph></p>
+			</body>
+		</topic>
+		<topic id="bnf_i1504234522151" bnfid="bnf_i1504234522151" type="drugInterction" Slug="bnf_i1504234522151" href="drug-interction/bnf_i1504234522151.xml">
+			<title>Amantadine</title>
+			<body outputclass="int-list" xml:space="preserve">
+				<p otherprops="Normal" outputclass="int-message">Concurrent use of <ph otherprops="zuclopenthixol" outputclass="int-heading-drug">zuclopenthixol</ph> and <ph otherprops="amantadine" outputclass="int-drug">amantadine</ph> can increase the risk of hypotension.</p>
+				<p otherprops="Moderate" outputclass="int-message"><ph otherprops="zuclopenthixol" outputclass="int-heading-drug">Zuclopenthixol</ph> <ph outputclass="int-effectQualifier">is predicted to</ph> <ph outputclass="int-effect">decrease</ph> <ph outputclass="int-parameter">the effects of</ph> <ph otherprops="amantadine" outputclass="int-drug">amantadine</ph>. <ph outputclass="int-action">Manufacturer advises avoid</ph>. <ph class="moderate" outputclass="int-severity">Moderate</ph> <ph class="theoretical" outputclass="int-evidence">Theoretical</ph></p>
+			</body>
+		</topic>
+    </topic>
+</samples>
