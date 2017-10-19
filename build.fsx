@@ -48,7 +48,7 @@ let tags = ""
 let solutionFile  = "ldbnf.sln"
 
 // Pattern specifying assemblies to be tested using NUnit
-let testAssemblies = "tests/**/bin/Release/*Tests*.dll"
+let testAssemblies = !!"tests/**/bin/Release/*Tests*.dll" |> Seq.fold (fun acc i -> acc + " " + i) ""
 
 // Git configuration (used for publishing documentation in gh-pages branch)
 // The profile where the project is posted
@@ -134,16 +134,26 @@ Target "Build" (fun _ ->
 
 // --------------------------------------------------------------------------------------
 // Run the unit tests using test runner
+let program = "packages/NUnit.ConsoleRunner/tools/nunit3-console.exe"
+let args = sprintf "--labels=All --workers=1 --teamcity %s" testAssemblies
 
+#if MONO
 Target "RunTests" (fun _ ->
-    !! testAssemblies
-    |> NUnit (fun p ->
-        { p with
-            DisableShadowCopy = true
-            TimeOut = TimeSpan.FromMinutes 20.
-            OutputFile = "TestResults.xml" })
+    let result =
+         ExecProcess (fun info ->  
+            info.FileName <- "mono"
+            info.Arguments <- sprintf "%s %s" program args) (TimeSpan.FromMinutes 15.0)
+    if result <> 0 then failwithf "NUnit failed"
 )
-
+#else
+Target "RunTests" (fun _ ->
+    let result =
+         ExecProcess (fun info ->  
+            info.FileName <- program
+            info.Arguments <- args) (TimeSpan.FromMinutes 15.0)
+    if result <> 0 then failwithf "NUnit failed"
+)
+#endif
 #if MONO
 #else
 // --------------------------------------------------------------------------------------
