@@ -153,11 +153,13 @@ module InteractionRdf =
       let iwuri = Uri.fromiw id
 
       let importance i = dataProperty !!"nicebnf:hasImportance" (i.importance.ToString()^^xsd.string)
+      let evidence i = dataProperty !!"nicebnf:hasEvidence" (i.evidence.ToString()^^xsd.string)
 
       let buildInteractionMessage i index m = resource (Uri.fromim id i index)    
                                                 (optionlist {
                                                     yield a Uri.InteractionMessageEntity
                                                     yield importance m
+                                                    yield evidence m
                                                     yield! m.pElem |> dita                             
                                                     yield m.pElem.XElement.Value |> (string >> label)
                                                     yield dataProperty !!"nicebnf:hasOrder" ((index + 1).ToString()^^xsd.string)
