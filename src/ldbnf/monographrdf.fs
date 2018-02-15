@@ -367,7 +367,7 @@ module DrugRdf =
         | NonNHS(sp,s) -> Graph.frompair (sp,s) |> subtype x
         | SmcDecisions(sp,s) -> Graph.frompair(sp,s) |> subtype x
         | AwmsgDecisions(sp,s) -> Graph.frompair(sp,s) |> subtype x
-        | NiceTechnologyAppraisals(fi,t,sp,s) ->
+        | NiceDecisions(fi,t,sp,s) ->
           optionlist {
             yield sp <!> Graph.fromsp
             yield! s <!> Graph.from |> unwrap

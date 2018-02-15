@@ -272,7 +272,7 @@ module Drug =
 
     type FundingDecision =
       | NonNHS of Specificity option * drugProvider.Sectiondiv
-      | NiceTechnologyAppraisals of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv option
+      | NiceDecisions of FundingIdentifier option * Title option * Specificity option * drugProvider.Sectiondiv option
       | SmcDecisions of Specificity option * drugProvider.Sectiondiv
       | AwmsgDecisions of Specificity option * drugProvider.Sectiondiv
 
@@ -793,7 +793,7 @@ module DrugParser =
 
     type FundingDecision with
       static member from (x:drugProvider.Sectiondiv) =
-        let buildTa (s1:drugProvider.Sectiondiv) =
+        let buildNiceDecisions (s1:drugProvider.Sectiondiv) =
           let fid = function
             | HasOutputClasso "fundingIdentifier" p -> p |> FundingIdentifier.from (Href s1.Xref.Value.Value.Value)
             | _ -> None
@@ -801,8 +801,8 @@ module DrugParser =
           match s1.Sectiondivs with
             | [|head|] ->
               let (t,sp,s) = head |> (addSpecificity >> addTitle)
-              NiceTechnologyAppraisals (fi,t,sp,Some s1)
-            | _ -> NiceTechnologyAppraisals (fi,None,None,None)
+              NiceDecisions (fi,t,sp,Some s1)
+            | _ -> NiceDecisions (fi,None,None,None)
 
         let buildSmc (s1:drugProvider.Sectiondiv) = s1 |> (addSpecifictityNF >> SmcDecisions)
 
@@ -810,8 +810,8 @@ module DrugParser =
 
 
         match x with
-          | HasOutputClasso "niceTechnologyAppraisals" _ ->
-             x.Sectiondivs |> Array.map buildTa
+          | HasOutputClasso "niceDecisions" _ ->
+             x.Sectiondivs |> Array.map buildNiceDecisions
           | HasOutputClasso "smcDecisions" _ ->
              x.Sectiondivs |> Array.map buildSmc
           | HasOutputClasso "awmsgDecisions" _ ->
