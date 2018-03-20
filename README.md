@@ -4,8 +4,19 @@
  
 <details>
 <summary><strong>Table of contents</strong></summary>
-<!-- START doctoc -->
-<!-- END doctoc -->
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+
+
+- [What is it?](#what-is-it)
+- [Stack](#stack)
+  - [Splitter](#splitter)
+  - [LDBNF](#ldbnf)
+- [Set up](#set-up)
+  - [Gotchas](#gotchas)
+- [How to use](#how-to-use)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
 </details>
   
 ## What is it?
