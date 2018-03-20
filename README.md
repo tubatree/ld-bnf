@@ -21,8 +21,6 @@
   
 ## What is it?
 This is a package used by BNF-vNext for the first stage of the BNF conversion process.  
-
-
   
 ## Stack
 The system contains two console applications which are the Splitter and LDBNF. This service is a dependency of the BNF-vNext. 
@@ -57,5 +55,5 @@ The two final files are the prelude that contains some extensions to the base li
 - Run the LDBNF application (To convert the xml to ttl)
  
  ## Good to know
- The repository has a teamcity build which builds and publishes the package using paket. 
+ The repository has a teamcity build which builds and publishes the package. 
  http://teamcity.nice.org.uk/viewType.html?buildTypeId=LdBnf_RunDockerBuild
