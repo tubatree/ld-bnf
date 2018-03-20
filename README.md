@@ -49,7 +49,7 @@ The two final files are the prelude that contains some extensions to the base li
 - Your xml and ttl outputs are located in ld-bnf/process.
 
 ### Gotchas
- - If you're not sure where to get an xml feed from you can use the live feed https://api.medicinescomplete.io/v1/[PUBLICATION(bnf or bnfc)]/publication?format=dita&user_key=[APIKEY]
+ - If you're not sure where to get an xml feed from you can use the live feed https://api.medicinescomplete.io/v1/bnf/publication?format=dita&user_key=[APIKEY]
  - Or you can use the smaller feed stored in BNF-vNext https://github.com/nhsevidence/BNF-vNext/blob/master/tools/smaller_feed.xml.
   
 ## How to use
