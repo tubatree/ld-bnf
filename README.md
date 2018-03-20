@@ -56,3 +56,6 @@ The two final files are the prelude that contains some extensions to the base li
 - Run the Splitter application first (to split the xml feed)
 - Run the LDBNF application (To convert the xml to ttl)
  
+ ## Good to know
+ The repository has a teamcity build which builds and publishes the package using paket. 
+ http://teamcity.nice.org.uk/viewType.html?buildTypeId=LdBnf_RunDockerBuild
