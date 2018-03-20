@@ -20,14 +20,12 @@
 </details>
   
 ## What is it?
-Overview
-- This is a package used by BNF-vNext for the first stage of the BNF conversion process.  
+This is a package used by BNF-vNext for the first stage of the BNF conversion process.  
 
 
   
 ## Stack
-- The system contains two console applications which are the Splitter and LDBNF.
-- This service is a dependency of the BNF-vNext. 
+The system contains two console applications which are the Splitter and LDBNF. This service is a dependency of the BNF-vNext. 
 
 ### Splitter 
 This is a single file console app written in csharp that uses recursion to split out all of the nodes that have an id and a type that match a predefined list. Each node is written out to a separate xml file in a directory corresponding to the type. The links between the files are all self consistent. Some small changes are made to the content e.g. changing some of the data elements into href’s.
@@ -49,9 +47,10 @@ The two final files are the prelude that contains some extensions to the base li
 - Once the splitter has ran, go to the ldbnf properties. Go to the debug tab and make sure the command line arguments are "--xmldirectory process/xml --outputdirectory process/ttl" and that the working directory is the path to your ld-bnf project. 
 - Run ldbnf.
 - Your xml and ttl outputs are located in ld-bnf/process.
--  
+
 ### Gotchas
-    - If you're not sure where to get an xml feed from you can use the live feed from the api or you can use the smaller feed stored in BNF-vNext https://github.com/nhsevidence/BNF-vNext/blob/master/tools/smaller_feed.xml.
+ If you're not sure where to get an xml feed from you can use the live feed https://api.medicinescomplete.io/v1/[PUBLICATION(bnf or bnfc)]/publication?format=dita&user_key=[APIKEY]
+ Or you can use the smaller feed stored in BNF-vNext https://github.com/nhsevidence/BNF-vNext/blob/master/tools/smaller_feed.xml.
   
 ## How to use
 - Run the Splitter application first (to split the xml feed)
