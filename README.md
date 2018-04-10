@@ -1,47 +1,59 @@
-# Transform the BNF DITA feed into triples
+# LD-BNF
+  
+ > This application transforms the BNF/c DITA feed into triples.
+ 
+<details>
+<summary><strong>Table of contents</strong></summary>
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
-The new versions of the BNF/BNFc feeds are self referential so can be processed independently. Previously the BNF/BNFc feeds had to be processed at as a single item to resolve references. Any references to “the feed” should be taken to mean either the BNF or BNFc DITA feed.
 
-## Getting Started
+- [What is it?](#what-is-it)
+- [Stack](#stack)
+  - [Splitter](#splitter)
+  - [LDBNF](#ldbnf)
+- [Set up](#set-up)
+  - [Gotchas](#gotchas)
+- [How to use](#how-to-use)
 
-This runs best in a unix environment with mono installed. It is currently building against mono:4.2.1.102 in docker on team city.
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+</details>
+  
+## What is it?
+This is a package used by BNF-vNext for the first stage of the BNF conversion process.  
+  
+## Stack
+The system contains two console applications which are the Splitter and LDBNF. This service is a dependency of the BNF-vNext. 
 
-* Shove a copy of the feed xml into the process directory, if it doesn’t exist create one (ld-bnf/process)
-* <code>./build.sh</code>
-* <code>mono splitter/bin/Release/splitter.exe process/feed.xml process/xml</code> should create some files in process/xml
-* <code>./run.sh</code>
-
-There will be some information about any ignored files and some .ttl files should have appeared in the process/ttl dir
-
-## Process
-
-There are two main parts to the process with the second being the most complex. Firstly the feed is split from one large file and written out as a set of individual files by splitter. Once the feed is in manageable chunks of xml it is transformed by ldbnf into turtle (.ttl) files.
-
-### Splitter
-
-This is a relatively simple single file console app written in csharp that uses recursion to split out all of the nodes that have an id and a type that match a predefined list.
-
-Each node is written out to a separate xml file in a directory corresponding to the type.
-
-The links between the files are all self consistent. Some small changes are made to the content e.g. changing some of the <code>data</code> elements into <code>href</code>’s.
-
-Splatter makes as few changes as possible to the feed.
+### Splitter 
+This is a single file console app written in csharp that uses recursion to split out all of the nodes that have an id and a type that match a predefined list. Each node is written out to a separate xml file in a directory corresponding to the type. The links between the files are all self consistent. Some small changes are made to the content e.g. changing some of the data elements into href’s.
 
 ### LDBNF
-
 This fsharp console application parses the xml into an internal model of the feed. That model is then used to create triples to represent the feed. The internal model and the serialisation are completely separate, it would be totally reasonable to use the same model to output another file format.
 
 Type providers are used for the parsing of the xml, the samples are in the directory of the same name. If the feed xml changes the samples need to be updated or there will be runtime errors.
 
 There are four main files in the project. Two relate to the Monograph content (monograph.fs and monographrdf.fs). There is some shared functionality that could potentially be extracted to another file. The rest of the model can be found in models.fs and modelsrdf.fs.
 
-I was learning fsharp as I went in this project. The code style at the end of models.fs is cleaner than the code in Monograph.fs.
-
-Ideally the code reading in the xml should be similar in appearance to the xml and the code writing triples should be similar in shape to the triples.
-
 The two final files are the prelude that contains some extensions to the base libraries and some helper functions and xml2rdf that performs all of the file management.
+  
+## Set up
+- Clone the git repository 
+- Shove a copy of the feed xml into the process directory, if it doesn’t exist create one (ld-bnf/process)
+- Open in Visual Studio (VS2015 and Up) 
+- Go into Splitter properties, on the debug tab add "../../../process/feed.xml ../../../process/xml" to the command line arguments. 
+- Once the splitter has ran, go to the ldbnf properties. Go to the debug tab and make sure the command line arguments are "--xmldirectory process/xml --outputdirectory process/ttl" and that the working directory is the path to your ld-bnf project. 
+- Run ldbnf.
+- Your xml and ttl outputs are located in ld-bnf/process.
 
-To run from 'Start' in visual studio add the following in the project properties, debug tab, command line arguments
-
---xmldirectory c:/_src/ld-bnf/process/xml --outputdirectory c:/_src/ld-bnf/process/ttl
-
+### Gotchas
+ - If you're not sure where to get an xml feed from you can use the live feed https://api.medicinescomplete.io/v1/bnf/publication?format=dita&user_key=[APIKEY]
+ - Or you can use the smaller feed stored in BNF-vNext https://github.com/nhsevidence/BNF-vNext/blob/master/tools/smaller_feed.xml.
+  
+## How to use
+- Run the Splitter application first (to split the xml feed)
+- Run the LDBNF application (To convert the xml to ttl)
+ 
+ ## Good to know
+ The repository has a teamcity build which builds and publishes the package. 
+ http://teamcity.nice.org.uk/viewType.html?buildTypeId=LdBnf_RunDockerBuild
