@@ -3,3 +3,4 @@ NUnit.Runners
 FsPickler.Json
 FSharp.RDF
 FSharp.Data
+FSharp.Core

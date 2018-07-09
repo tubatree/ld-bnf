@@ -6,3 +6,4 @@ Argu
 FSharp.Control.AsyncSeq
 FSharpx.Async
 FSharp.Collections.ParallelSeq
+FSharp.Core
