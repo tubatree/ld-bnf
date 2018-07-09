@@ -2,4 +2,4 @@ NUnit
 NUnit.Runners
 FsPickler.Json
 FSharp.RDF
-FSharp.Data.Whitespace
+FSharp.Data
