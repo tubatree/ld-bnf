@@ -1,4 +1,4 @@
-FSharp.Data.Whitespace
+FSharp.Data
 Arachne.Uri
 FsPickler.Json
 FSharp.RDF
@@ -6,3 +6,4 @@ Argu
 FSharp.Control.AsyncSeq
 FSharpx.Async
 FSharp.Collections.ParallelSeq
+FSharp.Core
